@@ -9,16 +9,45 @@
 
 ## ⚠️ Pending Nicole Confirmation (BLOCKS BUILD)
 
-These must be resolved before the build phase starts. Eliahs to confirm with Nicole.
+Eliahs is gathering answers in `Answers.md` (source of truth). Items below marked ✅ are resolved; ⏳ are still open.
 
-1. **Offer ladder discrepancy.** Project marketing doc lists Garage 1:1 ($135–165/session) and Total Body Transformation ($5,500) as core offers. The live site shows only Clinical Longevity Evaluation ($255), Strategy Session ($88), and Vibrant40 Jumpstart ($88). Eliahs's note: the CLE *is essentially* the front door to the Garage 1:1 work, but the explicit $5,500 transformation tier isn't surfaced on the current site.
-   - **Decision needed:** New site mirrors current offer ladder, or surfaces Garage 1:1 + Total Body Transformation as additional tiers?
-2. **Vibrant40 delivery platform.** Currently delivered through Squarespace's member area. Cannot be ported as-is to Next.js. Need to choose a replacement (Kajabi, Thinkific, Memberstack-on-Next, custom auth) — or keep Vibrant40 on Squarespace and link out from the new site.
-3. **Video testimonial source files.** The 4 client testimonial videos (Bianca / San Diego, John M. / La Jolla, Greg R. / Carlsbad, Vanessa / Atlanta) and the "Meet Nicole" video on the About page are embedded in a way that doesn't expose source URLs in HTML. Need raw video files or platform URLs from Nicole / Squarespace admin.
-4. **Geography copy.** Project doc says Encinitas; site footer says Carlsbad, CA. Pick one for the rebuild.
-5. **`/start-here` page intent.** Listed in nav but returns 404 on the live site. Either build the page from scratch or remove from nav.
-6. **Contact email.** `nicole@nicolehansultcoaching.com` is used in Privacy/Terms. Confirm this stays the destination for form submissions on the new site.
-7. **Free guide PDF.** `/look-and-feel-good-naked` collects email to deliver a guide. Need the actual PDF file from Nicole to host in `/public/downloads/` of the new site.
+1. ✅ **Offer ladder — RESOLVED.** Per Nicole (2026-05-25): the rebuild surfaces a **5-tier offer ladder**, not 3. The live site is missing the two highest-touch offers and has stale pricing on the Clinical Evaluation.
+
+   | # | Offer | Price | Format | Notes |
+   |---|---|---|---|---|
+   | 1 | Clinical Longevity Evaluation (Seca scanner) | **$299.99** | In person | Live site says $255 — UPDATE during rebuild |
+   | 2 | Vibrant40 Jumpstart | $88 | Online (self-paced) | **8-days** |
+   | 3 | 45-min Strategy Session | $88 | Zoom | $88 credits toward the 3-month program if booked after |
+   | 4 | 3-Month Coaching Program | **$5,500** | In person | Currently not surfaced on live site — ADD during rebuild. Strategy Session fee credits toward this. |
+   | 5 | Everyday Training (hourly) | **$165/hr** | In person | Currently not surfaced on live site — ADD during rebuild |
+
+   **Action items flowing from this:**
+   - Update CLE price `$255 → $299.99` everywhere in copy below
+   - Update Vibrant40 duration `8 days → 8 weeks` everywhere
+   - Add a 3-Month Coaching tier to Services page and home "Choose Your Best Starting Point" section
+   - Add Everyday Training ($165/hr) as a tier
+   - Wire the $88 → $5,500 credit logic into Strategy Session copy + booking flow
+
+2. ✅ **Vibrant40 delivery platform — RESOLVED.** Decision (2026-05-25): **self-host on the new Next.js site.** Squarespace subscription gets cancelled after rebuild completes. Final stack:
+   - **Auth + DB:** Supabase (Postgres + Auth)
+   - **Payments:** Stripe — one-time $88 charge; Stripe webhook → Supabase row marks account as Vibrant40 member
+   - **Video hosting:** **Mux** (better player, cost is trivial at this scale)
+   - **Auth UI:** **custom** (built to match the rebuild's design, ~2–3 hrs vs Supabase's prebuilt)
+   - **Release model:** **all-unlocked on day 1** (no drip — full course visible immediately after purchase)
+   - **Gated routes:** `/vibrant40/*` protected by Supabase session middleware in Next.js
+   - **Member migration:** Eliahs to pull CSV export from Squarespace admin → one-time "set your password" email via Resend, sent once the new site is live
+
+3. ⏳ **Video testimonial source files.** Files/URLs still needed from Nicole / Squarespace admin:
+   - 4 client testimonial videos: Bianca (San Diego), John M. (La Jolla), Greg R. (Carlsbad), Vanessa (Atlanta)
+   - "Meet Nicole" video on the About page
+   - Action: Eliahs to pull from Squarespace admin (Pages → Testimonials / About → click each video block → check source) or ask Nicole for the originals.
+4. ✅ **Geography — RESOLVED.** Canonical city for the rebuild is **Carlsbad, CA**. Matches current footer, most image alt-tags, and the CLE "in-person only in Carlsbad, CA" line. Action during rebuild: scrub the Encinitas references out of testimonial copy (`Encinitas` appears in client labels and a few opening paragraphs) and standardize on Carlsbad. "North County San Diego" stays as the regional framing where it appears.
+5. ✅ **`/start-here` — RESOLVED.** Remove from nav. Drop it from both the primary nav dropdown (Services → Start Here, CLE, Vibrant40) and the footer nav. `/services` already serves the "where do I start" job via the "Not Sure Where to Start?" section.
+6. ✅ **Contact email — RESOLVED.** Keep `nicole@nicolehansultcoaching.com` as the destination for both the contact form and lead-magnet form. Implement via Resend API route in Next.js — Resend sends the form payload as an email to that address; Privacy + Terms copy stays as-is.
+7. ⏳ **Free guide PDF.** `/look-and-feel-good-naked` collects email to deliver a guide. Need the actual PDF file from Nicole to host in `/public/downloads/` of the new site.
+8. ⏳ **Vibrant40 active member count.** Needed to size the migration email blast and confirm whether free-tier Supabase + low-tier Mux are enough. Eliahs to pull from Squarespace admin (Members → Vibrant40 area).
+
+> Open items now (3, 7, 8) are all info/file gathering, not decisions. They can be collected in parallel with the build kickoff.
 
 ---
 
@@ -59,36 +88,46 @@ nicolehansultcoaching.com
 
 ---
 
-## Pricing Summary (as shown on live site)
+## Pricing Summary
 
-| Service | Price | Duration | Format |
-|---|---|---|---|
-| Clinical Longevity Evaluation | $255 | 75 min | In-person, Carlsbad CA only |
-| Strategy Session | $88 | 45 min | Virtual or in-person |
-| Vibrant40 Jumpstart | $88 | 8 days | Self-paced online program |
-| Ongoing Coaching (1 / 3 / 6 month) | Varies | Varies | In-person or virtual |
-| Free Guide (Look & Feel Good Naked Over 40) | Free | — | Digital download |
+**Two columns: what's on the live site vs. the source-of-truth pricing for the rebuild (per Nicole, `Answers.md`).**
+
+| Service | Live site | Rebuild (source of truth) | Duration | Format |
+|---|---|---|---|---|
+| Clinical Longevity Evaluation | $255 | **$299.99** | 75 min | In-person, Carlsbad CA only |
+| Strategy Session | $88 | $88 (credits to 3-mo program) | 45 min | Zoom |
+| Vibrant40 Jumpstart | $88 | $88 | **8 weeks** (live site says 8 days) | Self-paced online — stays on Squarespace |
+| 3-Month Coaching Program | not listed | **$5,500** | 3 months | In person |
+| Everyday Training | not listed | **$165/hr** | Hourly | In person |
+| Free Guide (Look & Feel Good Naked Over 40) | Free | Free | — | Digital download |
 
 ---
 
 ## Site-Wide Navigation
 
-**Primary nav:**
+> The rebuild drops `/start-here` from both the primary nav dropdown and the footer (resolved 2026-05-25). Also: footer credit line "Strategic Copywriting & Website Development by JBits Connects" is replaced — Eliahs/Handled is building the rebuild.
+
+**Primary nav (rebuild):**
 - Home
-- Services (dropdown → Start Here, Clinical Longevity Evaluation, Vibrant40 Jumpstart)
+- Services (dropdown → Clinical Longevity Evaluation, Vibrant40 Jumpstart)
 - About
 - Testimonials
 - Insights
 - Contact
-- Login
+- Login (only for Vibrant40 members)
 
-**Footer nav:**
+**Footer nav (rebuild):**
 - Home / About / Testimonials / Insights / Contact
-- Services / Start Here / Clinical Longevity Evaluation / Vibrant40 Jumpstart
+- Services / Clinical Longevity Evaluation / Vibrant40 Jumpstart
 - Download Guide / Book a Session
 - Privacy Policy / Terms & Conditions
 
-**Footer text:** © Nicole Hansult Coaching 2026 · Carlsbad, CA · Strategic Copywriting & Website Development by JBits Connects
+**Footer text (rebuild):** © Nicole Hansult Coaching 2026 · Carlsbad, CA · [Handled credit TBD]
+
+---
+
+**Primary nav (current live site, for reference only):**
+- Home / Services (dropdown → Start Here, CLE, Vibrant40) / About / Testimonials / Insights / Contact / Login
 
 ---
 
