@@ -3,34 +3,34 @@
 # Exits 1 (FAIL) if any 'squarespace-cdn' or 'static1.squarespace' references
 # remain in shipped app code.
 #
+# Uses POSIX `grep -rE` so this script works in any CI / pnpm-spawned shell
+# (does NOT depend on ripgrep being installed).
+#
 # Excludes:
 #   - lib/images/map.json + migration-report.json (intentional — the migration map records source URLs)
 #   - scripts/verify-no-squarespace.sh (this script literally greps for the string)
 #   - scripts/migrate-images.ts (the migration tool's regex must reference the CDN domain)
 #   - docs/** (content-audit + planning docs are not app source)
 #   - node_modules + .next build artifacts
-set -e
+set -euo pipefail
 PATTERN='squarespace-cdn|static1\.squarespace'
 
-if rg -q \
-     --glob '!lib/images/map.json' \
-     --glob '!lib/images/migration-report.json' \
-     --glob '!scripts/verify-no-squarespace.sh' \
-     --glob '!scripts/migrate-images.ts' \
-     --glob '!docs/**' \
-     --glob '!node_modules/**' \
-     --glob '!.next/**' \
-     "$PATTERN" .; then
+# Build the matches list using grep -rE with exclude flags, swallowing rc=1 (no matches)
+# so `set -e` doesn't kill us on the happy path.
+MATCHES=$(grep -rE \
+  --exclude-dir=node_modules \
+  --exclude-dir=.next \
+  --exclude-dir=.git \
+  --exclude-dir=docs \
+  --exclude='map.json' \
+  --exclude='migration-report.json' \
+  --exclude='verify-no-squarespace.sh' \
+  --exclude='migrate-images.ts' \
+  "$PATTERN" . 2>/dev/null || true)
+
+if [ -n "$MATCHES" ]; then
   echo "FAIL: Squarespace CDN references found in app source. Run pnpm migrate:images then re-check."
-  rg \
-    --glob '!lib/images/map.json' \
-    --glob '!lib/images/migration-report.json' \
-    --glob '!scripts/verify-no-squarespace.sh' \
-    --glob '!scripts/migrate-images.ts' \
-    --glob '!docs/**' \
-    --glob '!node_modules/**' \
-    --glob '!.next/**' \
-    "$PATTERN" . || true
+  echo "$MATCHES"
   exit 1
 fi
 echo "PASS: zero Squarespace CDN references in app source."
