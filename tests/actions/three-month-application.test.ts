@@ -8,8 +8,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ─── Mocks ──────────────────────────────────────────────────────────────────
-const sendMock = vi.fn();
-const insertMock = vi.fn();
+// `vi.mock` factories run BEFORE module body, so any referenced names must be
+// hoisted via `vi.hoisted` to be available at mock-init time.
+const { sendMock, insertMock } = vi.hoisted(() => ({
+  sendMock: vi.fn(),
+  insertMock: vi.fn(),
+}));
 
 vi.mock('next/headers', () => ({
   headers: async () => new Map([['x-forwarded-for', '203.0.113.42']]),
