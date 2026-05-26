@@ -32,7 +32,7 @@ export function RequestResetForm() {
       <div className="space-y-3 text-center">
         <p className="text-[var(--color-text)]">
           If an account exists for{' '}
-          <strong>{getValues('email')}</strong>, you'll receive a reset link
+          <strong>{getValues('email')}</strong>, you&apos;ll receive a reset link
           shortly.
         </p>
         <a

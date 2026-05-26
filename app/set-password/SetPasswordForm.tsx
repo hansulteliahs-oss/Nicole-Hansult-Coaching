@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function SetPasswordForm({ token }: Props) {
+  const router = useRouter();
   const [showPwd, setShowPwd] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [pwdValue, setPwdValue] = useState('');
@@ -39,7 +41,7 @@ export function SetPasswordForm({ token }: Props) {
         result.code === 'used' ||
         result.code === 'not_found'
       ) {
-        window.location.href = '/set-password/expired';
+        router.push('/set-password/expired');
         return;
       }
       setServerError(result.error);
