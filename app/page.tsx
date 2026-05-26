@@ -1,17 +1,46 @@
+/**
+ * Home page — Mist composition per design-2.md §4.
+ *
+ * Server component. Composes Nav + 9 home sections + Footer.
+ * Phase 1 ships with placeholder copy; Phase 2 swaps verbatim audit copy
+ * on top of this composition without changing layout.
+ */
+import type { Metadata } from 'next';
+
+import { Nav } from '@/components/layout/Nav';
+import { Footer } from '@/components/layout/Footer';
+import { Hero } from '@/components/home/Hero';
+import { Mantra } from '@/components/home/Mantra';
+import { About } from '@/components/home/About';
+import { Services } from '@/components/home/Services';
+import { Approach } from '@/components/home/Approach';
+import { Pricing } from '@/components/home/Pricing';
+import { Testimonial } from '@/components/home/Testimonial';
+import { Journal } from '@/components/home/Journal';
+import { DarkCta } from '@/components/home/DarkCta';
+
+export const metadata: Metadata = {
+  title: 'Nicole Hansult Coaching',
+  description:
+    'Functional longevity coaching in Carlsbad, CA. Train for the decades ahead.',
+};
+
 export default function HomePage() {
   return (
-    <main className="bg-bg min-h-screen px-8 py-24">
-      <section className="mx-auto max-w-3xl space-y-6">
-        <p className="text-grayDeep text-xs font-medium uppercase tracking-[0.18em]">
-          Phase 1 placeholder
-        </p>
-        <h1 className="text-ink text-5xl font-light leading-[1.05]">
-          Nicole Hansult <span className="font-serif italic">Coaching</span>
-        </h1>
-        <p className="text-inkSoft text-lg">
-          Mist design system online. Home composition lands in Plan 04.
-        </p>
-      </section>
-    </main>
+    <>
+      <Nav />
+      <main className="bg-bg">
+        <Hero />
+        <Mantra />
+        <About />
+        <Services />
+        <Approach />
+        <Pricing />
+        <Testimonial />
+        <Journal />
+        <DarkCta />
+      </main>
+      <Footer />
+    </>
   );
 }
