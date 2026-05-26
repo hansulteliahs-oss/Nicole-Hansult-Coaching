@@ -3,6 +3,7 @@ import { Nav } from '@/components/layout/Nav';
 import { Footer } from '@/components/layout/Footer';
 import { PricingCard } from '@/components/ui/PricingCard';
 import { offers } from '@/lib/content/offers';
+import { site } from '@/lib/content/site';
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nicole-hansult-coaching.vercel.app';
@@ -52,6 +53,102 @@ const featuresByOfferId: Record<string, string[]> = {
   ],
 };
 
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@graph': offers.map((offer) => ({
+    '@type': 'Service',
+    name: offer.name,
+    provider: {
+      '@type': 'LocalBusiness',
+      name: site.nap.name,
+    },
+    offers: {
+      '@type': 'Offer',
+      price: offer.price,
+      priceCurrency: 'USD',
+    },
+  })),
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: "What if the results show something isn't ideal?",
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: "That's exactly why we do the evaluation. Most people already sense that something in their body feels different — they just don't have clear information about what's actually happening. The purpose of the scan and assessment is not to judge or criticize. It's to give us insight so we can build a practical plan that improves how your body functions over time. Many clients actually feel relieved once they understand what their body needs and realize there are clear steps they can take to improve it.",
+      },
+    },
+    {
+      '@type': 'Question',
+      name: "What if I haven't exercised in years?",
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: "You're in the right place. Many of my clients are returning to movement after long breaks. The goal is not intensity — it's building a foundation.",
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Do I need to be fit to start?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Absolutely not. This evaluation is designed for people who feel unsure where to begin. We start exactly where you are.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'I have an old injury. Is this safe?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. My background is in physiotherapy-based movement training, and the assessment is designed to be safe and appropriate for your current condition.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: "I'm currently doing physical therapy or following a program. Should I wait until I'm done?",
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: "No—this is actually one of the best times to do the evaluation. We can capture a clear baseline of how your body is functioning right now and identify any underlying imbalances that may still be present. It also gives you a way to measure real progress over time—not just how you feel, but what's actually changing in your body.",
+      },
+    },
+    {
+      '@type': 'Question',
+      name: "I'm taking a GLP-1 medication and have lost weight. How do I maintain it without losing strength?",
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: "This is exactly where a more precise approach becomes important. While weight loss can happen quickly with medication, it often includes loss of muscle along with fat. The evaluation allows us to see your current muscle balance, metabolism, and overall body composition so we can focus on maintaining strength, supporting your metabolism, and protecting your long-term health.",
+      },
+    },
+    {
+      '@type': 'Question',
+      name: "I'm currently dieting or trying to lose weight. Should I wait?",
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: "You don't need to wait. The evaluation helps us understand how your body is responding right now—so we can support your efforts more effectively. Instead of guessing, we can see what's actually happening beneath the surface and adjust your approach in a way that supports long-term results.",
+      },
+    },
+    {
+      '@type': 'Question',
+      name: "I want to lose some weight before coming in. Should I wait until I'm closer to my goal?",
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: "There's no need to wait. In fact, starting now gives us a clear understanding of your current baseline so we can guide your progress more effectively. Your body doesn't need to be at a certain point to begin—this is where we create a plan that helps you move forward with clarity and confidence.",
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What should I wear?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Something comfortable that allows you to move easily. Gym clothes are not required.',
+      },
+    },
+  ],
+};
+
 function modalityLabel(m: string): string {
   if (m === 'in-person') return 'In-person · Carlsbad, CA';
   if (m === 'online-self-paced') return 'Online · Self-paced';
@@ -62,6 +159,14 @@ function modalityLabel(m: string): string {
 export default function ServicesPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <Nav />
       <main className="bg-bg">
         <section className="mx-auto max-w-3xl px-6 pt-24 pb-12">
