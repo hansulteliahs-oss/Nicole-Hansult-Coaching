@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 
 import { LoginForm } from './LoginForm';
+import { ResetSuccessBanner } from './ResetSuccessBanner';
 
 export const metadata = {
   title: 'Log in | Nicole Hansult Coaching',
@@ -17,6 +18,9 @@ export default function LoginPage() {
         <h1 className="text-2xl font-semibold text-ink mb-6 text-center">
           Welcome back
         </h1>
+        <Suspense>
+          <ResetSuccessBanner />
+        </Suspense>
         <Suspense>
           <LoginForm />
         </Suspense>
