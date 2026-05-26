@@ -56,7 +56,7 @@ const OFFER_BADGE: Record<string, string> = {
 
 const OFFER_MODALITY_LABEL: Record<string, string> = {
   cle: 'In person · Carlsbad',
-  vibrant40: '8-week self-paced online',
+  vibrant40: '8-day self-paced online',
   strategy: '45-min Zoom',
   'three-month': 'In person · Carlsbad',
   'everyday-training': 'In person · Carlsbad',

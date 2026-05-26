@@ -28,7 +28,7 @@ const featuresByOfferId: Record<string, string[]> = {
     'Personalized Longevity Roadmap with clear next steps',
   ],
   vibrant40: [
-    'Eight weeks of self-paced online content',
+    'Eight days of self-paced online content',
     'Guided movement programming',
     'Nutrition and lifestyle foundations',
     'Accessible for adults 40+ starting from any fitness level',

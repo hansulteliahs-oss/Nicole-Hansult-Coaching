@@ -36,7 +36,7 @@ export const offers: ReadonlyArray<Offer> = [
     priceLabel: '$88',
     modality: 'online-self-paced',
     kind: 'product',
-    blurb: 'Eight-week self-paced foundation for functional longevity over 40.',
+    blurb: 'Eight-day self-paced foundation for functional longevity over 40.',
     ctaLabel: 'Start Vibrant40',
     ctaHref: '/services/vibrant40-jumpstart',
   },

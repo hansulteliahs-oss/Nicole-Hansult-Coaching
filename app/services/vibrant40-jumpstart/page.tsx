@@ -9,12 +9,12 @@ const BASE_URL =
 
 export const metadata: Metadata = {
   title: 'Vibrant40 Jumpstart',
-  description: 'Eight-week self-paced functional longevity program for adults 40+. $88 one-time.',
+  description: 'Eight-day self-paced functional longevity program for adults 40+. $88 one-time.',
   alternates: { canonical: `${BASE_URL}/services/vibrant40-jumpstart` },
   openGraph: {
     title: 'Vibrant40 Jumpstart — Nicole Hansult Coaching',
     description:
-      'Eight-week self-paced functional longevity program for adults 40+. $88 one-time.',
+      'Eight-day self-paced functional longevity program for adults 40+. $88 one-time.',
   },
 };
 
@@ -29,7 +29,7 @@ export default function Vibrant40JumpstartPage() {
           {/* Hero */}
           <h1 className="text-4xl font-light mb-3">{vibrant40.name}</h1>
           <p className="text-sm uppercase tracking-[0.14em] text-grayDeep mb-10">
-            {vibrant40.priceLabel} &middot; Online &middot; Self-paced &middot; 8 weeks
+            {vibrant40.priceLabel} &middot; Online &middot; Self-paced &middot; 8 days
           </p>
 
           {/* Body — audit copy from CONTENT-AUDIT.md §Vibrant40 Jumpstart */}
@@ -51,7 +51,7 @@ export default function Vibrant40JumpstartPage() {
 
             <p className="font-medium text-ink">What&apos;s included:</p>
             <ul className="space-y-2 text-inkSoft">
-              <li className="flex gap-2"><span>&bull;</span><span>Eight weeks of self-paced online content</span></li>
+              <li className="flex gap-2"><span>&bull;</span><span>Eight days of self-paced online content</span></li>
               <li className="flex gap-2"><span>&bull;</span><span>Guided movement programming</span></li>
               <li className="flex gap-2"><span>&bull;</span><span>Nutrition and lifestyle foundations</span></li>
               <li className="flex gap-2"><span>&bull;</span><span>Accessible for adults 40+ starting from any fitness level</span></li>
