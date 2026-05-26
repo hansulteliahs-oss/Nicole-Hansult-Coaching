@@ -2,8 +2,7 @@
  * Home page — Mist composition per design-2.md §4.
  *
  * Server component. Composes Nav + 9 home sections + Footer.
- * Phase 1 ships with placeholder copy; Phase 2 swaps verbatim audit copy
- * on top of this composition without changing layout.
+ * Phase 2 copy port — all verbatim audit copy in section components.
  */
 import type { Metadata } from 'next';
 
@@ -22,7 +21,16 @@ import { DarkCta } from '@/components/home/DarkCta';
 export const metadata: Metadata = {
   title: 'Nicole Hansult Coaching',
   description:
-    'Functional longevity coaching in Carlsbad, CA. Train for the decades ahead.',
+    'Functional longevity coaching in Carlsbad, CA. Stop guessing what your body needs — get a personalized plan.',
+  alternates: {
+    canonical:
+      process.env.NEXT_PUBLIC_SITE_URL ??
+      'https://nicole-hansult-coaching.vercel.app',
+  },
+  openGraph: {
+    title: 'Nicole Hansult Coaching',
+    description: 'Functional longevity coaching in Carlsbad, CA.',
+  },
 };
 
 export default function HomePage() {

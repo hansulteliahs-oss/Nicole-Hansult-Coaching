@@ -1,12 +1,13 @@
 /**
- * Hero — design-2.md §4 home composition, section 1.
+ * Hero — home page section 1.
  *
- * Full-viewport hero. Left column: eyebrow Label + headline (with italic-serif
- * emphasis on "decades") + paragraph + dual Pill CTA (dark primary + ghost
- * secondary). Right column: FloatingCard with hero portrait via image() resolver.
+ * Full-viewport hero. Left column: eyebrow Label + H1 (verbatim audit copy) +
+ * supporting paragraph + single primary Pill CTA (dark) + secondary ghost Pill.
+ * Right column: FloatingCard with hero portrait via image() resolver.
  * Decorative Orb glow sits absolutely behind, top-right.
  *
- * All copy is PLACEHOLDER for Phase 1. Phase 2 swaps in audit copy.
+ * Copy: verbatim from CONTENT-AUDIT.md §Home Page.
+ * Prices: none in this section — Pricing section is the sole price surface.
  */
 import { Label } from '@/components/ui/Label';
 import { Pill } from '@/components/ui/Pill';
@@ -23,27 +24,25 @@ export function Hero() {
         <div className="space-y-6">
           <Label>Functional longevity · Carlsbad, CA</Label>
           <h1 className="text-ink text-5xl md:text-6xl font-light leading-[1.05]">
-            Train for the{' '}
-            <span className="font-serif italic">decades</span> ahead, not the
-            next six weeks.
+            Stop Guessing What Your Body Needs After 40
           </h1>
           <p className="text-inkSoft text-lg max-w-md">
-            Phase 1 placeholder copy — Phase 2 ports the verbatim audit
-            headline and supporting paragraph.
+            Feel strong, mobile, and confident again with a plan designed for
+            your body.
           </p>
           <div className="flex gap-3 flex-wrap">
             <Pill href="/booking-appointment" variant="dark" size="lg">
-              Book a Strategy Session
+              Start with a Clinical Longevity Evaluation
             </Pill>
             <Pill href="/services" variant="ghost" size="lg">
-              See all services
+              Explore all services
             </Pill>
           </div>
         </div>
         <div className="h-[560px]">
           <FloatingCard
             imageSrc={image(IMG_HERO_PORTRAIT)}
-            alt="Nicole Hansult, coach"
+            alt="Nicole Hansult, functional longevity coach"
           />
         </div>
       </div>
