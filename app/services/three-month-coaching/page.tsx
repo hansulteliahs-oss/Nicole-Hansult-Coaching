@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import { Nav } from '@/components/layout/Nav';
 import { Footer } from '@/components/layout/Footer';
-import { Pill } from '@/components/ui/Pill';
 import { offers } from '@/lib/content/offers';
-import { site } from '@/lib/content/site';
+import { ThreeMonthApplicationForm } from './ThreeMonthApplicationForm';
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nicole-hansult-coaching.vercel.app';
@@ -89,22 +88,17 @@ export default function ThreeMonthCoachingPage() {
 
           </div>
 
-          {/* Phase 2 CTA — application form wired in Phase 5 */}
-          <div className="mt-10 flex flex-col items-start gap-4" id="apply">
-            <Pill href="#apply" variant="dark" size="md">
+          {/* Phase 5 — FORM-03 inline application form */}
+          <section id="apply" className="mt-12">
+            <h2 className="text-2xl font-light text-ink mb-2">
               Apply for the 3-Month Program
-            </Pill>
-            <p className="text-sm text-inkSoft leading-relaxed max-w-prose">
-              The application form will be available here shortly. In the meantime, email{' '}
-              <a
-                href={`mailto:${site.contactEmail}`}
-                className="underline underline-offset-2 hover:text-ink transition-colors"
-              >
-                {site.contactEmail}
-              </a>{' '}
-              to express interest.
+            </h2>
+            <p className="text-sm text-inkSoft mb-8">
+              Tell Nicole a bit about yourself and what you&apos;d like to work
+              on. She reviews each application personally.
             </p>
-          </div>
+            <ThreeMonthApplicationForm />
+          </section>
         </section>
       </main>
       <Footer />
