@@ -6,7 +6,6 @@
  * Social proof badges rendered as text chips — no external image URLs.
  */
 import type { Metadata } from 'next';
-import Link from 'next/link';
 
 import { Nav } from '@/components/layout/Nav';
 import { Footer } from '@/components/layout/Footer';

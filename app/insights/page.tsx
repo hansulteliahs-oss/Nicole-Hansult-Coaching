@@ -11,7 +11,6 @@ import { Nav } from '@/components/layout/Nav';
 import { Footer } from '@/components/layout/Footer';
 import { Chip } from '@/components/ui/Chip';
 import { Pill } from '@/components/ui/Pill';
-import { site } from '@/lib/content/site';
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nicole-hansult-coaching.vercel.app';
