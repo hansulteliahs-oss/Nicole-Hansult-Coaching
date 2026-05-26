@@ -150,14 +150,31 @@ export function Pricing() {
                   </ul>
                 </div>
 
-                <Pill
-                  href={offer.ctaHref}
-                  variant={isHighlighted ? 'sky' : 'dark'}
-                  size="md"
-                  className="self-start mt-auto"
-                >
-                  {offer.ctaLabel}
-                </Pill>
+                {offer.id === 'vibrant40' ? (
+                  // Phase 5 Plan 02: Vibrant40 CTA POSTs to /api/checkout (Stripe Checkout).
+                  <form
+                    action="/api/checkout"
+                    method="POST"
+                    className="self-start mt-auto"
+                  >
+                    <Pill
+                      variant={isHighlighted ? 'sky' : 'dark'}
+                      size="md"
+                      type="submit"
+                    >
+                      Buy Vibrant40 — $88
+                    </Pill>
+                  </form>
+                ) : (
+                  <Pill
+                    href={offer.ctaHref}
+                    variant={isHighlighted ? 'sky' : 'dark'}
+                    size="md"
+                    className="self-start mt-auto"
+                  >
+                    {offer.ctaLabel}
+                  </Pill>
+                )}
               </article>
             );
           })}

@@ -60,13 +60,15 @@ export default function Vibrant40JumpstartPage() {
             <p className="text-xl font-light text-ink">Investment: {vibrant40.priceLabel}</p>
           </div>
 
-          {/* Phase 2 CTA — placeholder until Phase 5 wires Stripe checkout */}
+          {/* Phase 5 Plan 02 CTA — form POST to /api/checkout creates Stripe Checkout Session */}
           <div className="mt-10 flex flex-col items-start gap-3">
-            <Pill href="/booking-appointment" variant="dark" size="md">
-              Join the Vibrant40 Waitlist
-            </Pill>
+            <form action="/api/checkout" method="POST">
+              <Pill variant="dark" size="md" type="submit">
+                Buy Vibrant40 — $88
+              </Pill>
+            </form>
             <p className="text-sm text-grayDeep">
-              Enrollment opens soon — book a Strategy Session to be first to know.
+              Secure checkout via Stripe. You&apos;ll set your password after payment.
             </p>
           </div>
         </section>

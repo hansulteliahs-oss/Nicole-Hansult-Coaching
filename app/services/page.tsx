@@ -180,19 +180,24 @@ export default function ServicesPage() {
           </p>
         </section>
         <section className="mx-auto max-w-3xl space-y-8 px-6 pb-24">
-          {offers.map((offer) => (
-            <PricingCard
-              key={offer.id}
-              name={offer.name}
-              priceLabel={offer.priceLabel}
-              modality={modalityLabel(offer.modality)}
-              blurb={offer.blurb}
-              features={featuresByOfferId[offer.id] ?? []}
-              ctaLabel={offer.ctaLabel}
-              ctaHref={offer.ctaHref}
-              highlighted={offer.id === 'three-month'}
-            />
-          ))}
+          {offers.map((offer) => {
+            // Phase 5 Plan 02: Vibrant40 CTA POSTs to /api/checkout (Stripe Checkout Session).
+            const isVibrant40 = offer.id === 'vibrant40';
+            return (
+              <PricingCard
+                key={offer.id}
+                name={offer.name}
+                priceLabel={offer.priceLabel}
+                modality={modalityLabel(offer.modality)}
+                blurb={offer.blurb}
+                features={featuresByOfferId[offer.id] ?? []}
+                ctaLabel={isVibrant40 ? 'Buy Vibrant40 — $88' : offer.ctaLabel}
+                ctaHref={offer.ctaHref}
+                ctaFormAction={isVibrant40 ? '/api/checkout' : undefined}
+                highlighted={offer.id === 'three-month'}
+              />
+            );
+          })}
         </section>
       </main>
       <Footer />

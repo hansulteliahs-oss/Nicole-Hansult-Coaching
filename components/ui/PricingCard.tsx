@@ -20,6 +20,7 @@ export function PricingCard({
   features,
   ctaLabel,
   ctaHref,
+  ctaFormAction,
   highlighted = false,
   className,
 }: {
@@ -30,6 +31,12 @@ export function PricingCard({
   features: string[];
   ctaLabel: string;
   ctaHref: string;
+  /**
+   * Phase 5: if provided, the CTA renders as `<form action={ctaFormAction} method="POST">`
+   * wrapping a `<button>`-style Pill, instead of an `<a href={ctaHref}>` Pill.
+   * Used by the Vibrant40 card to POST to /api/checkout (Stripe Checkout).
+   */
+  ctaFormAction?: string;
   highlighted?: boolean;
   className?: string;
 }) {
@@ -83,14 +90,26 @@ export function PricingCard({
           </li>
         ))}
       </ul>
-      <Pill
-        href={ctaHref}
-        variant={highlighted ? 'sky' : 'dark'}
-        size="md"
-        className="self-start"
-      >
-        {ctaLabel}
-      </Pill>
+      {ctaFormAction ? (
+        <form action={ctaFormAction} method="POST" className="self-start">
+          <Pill
+            variant={highlighted ? 'sky' : 'dark'}
+            size="md"
+            type="submit"
+          >
+            {ctaLabel}
+          </Pill>
+        </form>
+      ) : (
+        <Pill
+          href={ctaHref}
+          variant={highlighted ? 'sky' : 'dark'}
+          size="md"
+          className="self-start"
+        >
+          {ctaLabel}
+        </Pill>
+      )}
     </article>
   );
 }
