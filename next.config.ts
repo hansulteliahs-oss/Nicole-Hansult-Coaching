@@ -12,11 +12,12 @@ const nextConfig: NextConfig = {
       { source: '/services/clinical-longevity-evaluation',     destination: '/services',                    permanent: true },
       // Additional old Squarespace paths discovered via crawl
       { source: '/cart',                                        destination: '/',                            permanent: true },
-      { source: '/contact',                                     destination: '/',                            permanent: true },
     ];
   },
   images: {
     // Phase 1 serves migrated images from /public/images/ — local, no remotePatterns needed yet.
+    // Components pass quality={85}; Next 16 requires explicit allowlist.
+    qualities: [75, 85],
   },
 };
 
