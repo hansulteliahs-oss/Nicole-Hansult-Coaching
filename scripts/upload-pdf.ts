@@ -4,16 +4,26 @@
 import { put } from '@vercel/blob';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { config } from 'dotenv';
 
-const pdfPath = join(process.cwd(), 'docs', 'placeholder.pdf');
-const fileBuffer = readFileSync(pdfPath);
+config({ path: '.env.local' });
 
-const blob = await put('guides/look-and-feel-good-naked.pdf', fileBuffer, {
-  access: 'public',
-  addRandomSuffix: true,
-  contentType: 'application/pdf',
+async function main() {
+  const pdfPath = join(process.cwd(), 'docs', 'placeholder.pdf');
+  const fileBuffer = readFileSync(pdfPath);
+
+  const blob = await put('guides/look-and-feel-good-naked.pdf', fileBuffer, {
+    access: 'public',
+    addRandomSuffix: true,
+    contentType: 'application/pdf',
+  });
+
+  console.log('\nBlob uploaded successfully.');
+  console.log('BLOB_PDF_URL =', blob.url);
+  console.log('\nAdd this to .env.local and Vercel Environment Variables.\n');
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
 });
-
-console.log('\nBlob uploaded successfully.');
-console.log('BLOB_PDF_URL =', blob.url);
-console.log('\nAdd this to .env.local and Vercel Environment Variables.\n');
