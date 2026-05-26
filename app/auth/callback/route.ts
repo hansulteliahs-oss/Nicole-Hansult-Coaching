@@ -31,7 +31,14 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
     if (!error) {
-      return NextResponse.redirect(redirectTo);
+      // Signup confirmations (type === 'email') land on /account with the
+      // welcome=new banner. Other flows (recovery → /reset-password/confirm,
+      // magic link, etc.) honor the same-origin ?next= they passed in.
+      const destination =
+        type === 'email'
+          ? new URL('/account?welcome=new', origin)
+          : redirectTo;
+      return NextResponse.redirect(destination);
     }
   }
 
