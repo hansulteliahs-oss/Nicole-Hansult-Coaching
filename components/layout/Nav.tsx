@@ -1,0 +1,111 @@
+/**
+ * Nav — design-2.md §3.11 + §6
+ *
+ * Single client component (locked decision: see CONTEXT.md — do NOT split
+ * into a server wrapper + client menu).
+ *
+ *   Desktop (≥768): floating pill chrome over hero, links + "Book a call" Pill.
+ *   Mobile  (<768): top bar with logo + Menu button → full-screen pill menu.
+ *
+ * Mobile menu open/close is state in this component (useState). No framer-motion
+ * — CSS transitions only per design-2.md §7.
+ */
+'use client';
+
+import { useState } from 'react';
+
+import { cn } from '@/lib/cn';
+import { Pill } from '@/components/ui/Pill';
+
+const LINKS = [
+  { label: 'About', href: '/about' },
+  { label: 'Services', href: '/services' },
+  { label: 'Testimonials', href: '/testimonials' },
+  { label: 'Insights', href: '/insights' },
+  { label: 'Contact', href: '/contact' },
+];
+
+export function Nav({ className }: { className?: string }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      {/* Desktop — floating pill */}
+      <nav
+        className={cn(
+          'hidden md:flex fixed top-6 left-1/2 -translate-x-1/2 z-40',
+          'items-center gap-1 rounded-pill bg-card/85 backdrop-blur px-2 py-2 shadow-card border border-inkFaint',
+          className,
+        )}
+        aria-label="Primary"
+      >
+        <a
+          href="/"
+          className="px-4 py-2 text-ink text-sm font-semibold"
+        >
+          Nicole Hansult
+        </a>
+        <ul className="flex items-center">
+          {LINKS.map((l) => (
+            <li key={l.href}>
+              <a
+                href={l.href}
+                className="px-4 py-2 text-ink text-sm hover:text-skyDeep transition-colors"
+              >
+                {l.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <Pill
+          href="/booking-appointment"
+          variant="dark"
+          size="sm"
+          className="ml-2"
+        >
+          Book a call
+        </Pill>
+      </nav>
+
+      {/* Mobile — top bar */}
+      <div className="md:hidden fixed top-0 inset-x-0 z-40 flex items-center justify-between px-5 py-4 bg-bg/85 backdrop-blur">
+        <a href="/" className="text-ink text-sm font-semibold">
+          Nicole Hansult
+        </a>
+        <button
+          type="button"
+          aria-label={open ? 'Close menu' : 'Open menu'}
+          aria-expanded={open}
+          onClick={() => setOpen(!open)}
+          className="rounded-pill border border-ink px-4 py-2 text-ink text-xs font-semibold"
+        >
+          {open ? 'Close' : 'Menu'}
+        </button>
+      </div>
+
+      {/* Mobile — full-screen menu */}
+      {open && (
+        <div className="md:hidden fixed inset-0 z-30 bg-bg pt-20 px-6 flex flex-col gap-2">
+          {LINKS.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              onClick={() => setOpen(false)}
+              className="rounded-pill border border-inkFaint px-6 py-4 text-ink text-base font-medium"
+            >
+              {l.label}
+            </a>
+          ))}
+          <Pill
+            href="/booking-appointment"
+            variant="dark"
+            size="lg"
+            className="mt-2"
+          >
+            Book a call
+          </Pill>
+        </div>
+      )}
+    </>
+  );
+}
