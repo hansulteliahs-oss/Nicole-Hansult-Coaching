@@ -1,11 +1,12 @@
 /**
- * About — design-2.md §4 home composition, section 3.
+ * About — home page section 3: "A Personalized Approach to Longevity".
  *
  * Two-column on desktop, stacked on mobile.
  *   Left:  portrait (4:5 aspect, rounded card, cardSoft fallback bg)
- *   Right: eyebrow Label + heading (italic-serif on "middle") + two bio paragraphs + ghost Pill
+ *   Right: eyebrow Label + heading + credential bullets + closer copy + ghost Pill
  *
- * Bio paragraphs are PLACEHOLDER — Phase 2 ports verbatim audit copy.
+ * Copy: verbatim from CONTENT-AUDIT.md §Home Page §A Personalized Approach to Longevity.
+ * Geography: Carlsbad only — scrub any old city references per audit resolution.
  */
 import Image from 'next/image';
 
@@ -21,7 +22,7 @@ export function About() {
         <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-cardSoft">
           <Image
             src={image(IMG_ABOUT_PORTRAIT)}
-            alt="Nicole Hansult portrait"
+            alt="Nicole Hansult, functional longevity coach in Carlsbad, CA"
             fill
             quality={85}
             sizes="(max-width: 768px) 100vw, 50vw"
@@ -31,17 +32,27 @@ export function About() {
         <div className="space-y-6">
           <Label>Meet Nicole</Label>
           <h2 className="text-ink text-4xl md:text-5xl font-light leading-tight">
-            A coach for the{' '}
-            <span className="font-serif italic">middle</span> of life.
+            A Personalized Approach to Longevity
           </h2>
-          <p className="text-inkSoft text-base">
-            Phase 1 placeholder bio paragraph one. Phase 2 ports the verbatim
-            audit copy from the About page.
-          </p>
-          <p className="text-inkSoft text-base">
-            Phase 1 placeholder bio paragraph two. Continued context about
-            Nicole&apos;s approach, certifications, and practice in Carlsbad.
-          </p>
+          <ul className="space-y-3 text-inkSoft text-base">
+            <li className="flex gap-2">
+              <span className="text-grayDeep">•</span>
+              <span>25+ years helping adults move, feel, and age better</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-grayDeep">•</span>
+              <span>Clinical-grade body composition analysis</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-grayDeep">•</span>
+              <span>Personalized recommendations for adults 40+</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-grayDeep">•</span>
+              <span>Focused on sustainable strength, mobility, and longevity</span>
+            </li>
+          </ul>
+          <p className="text-inkSoft text-base">Everyone starts at a different point.</p>
           <Pill href="/about" variant="ghost" size="md">
             Read more about Nicole
           </Pill>
