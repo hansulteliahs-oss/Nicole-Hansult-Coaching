@@ -35,9 +35,9 @@ export const metadata: Metadata = {
     type: 'website',
     siteName: 'Nicole Hansult Coaching',
     locale: 'en_US',
-    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Nicole Hansult Coaching' }],
+    images: ['/og.png'],
   },
-  twitter: { card: 'summary_large_image' },
+  twitter: { card: 'summary_large_image', images: ['/og.png'] },
 };
 
 const localBusinessSchema = {

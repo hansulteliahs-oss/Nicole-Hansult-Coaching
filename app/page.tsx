@@ -30,6 +30,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Nicole Hansult Coaching',
     description: 'Functional longevity coaching in Carlsbad, CA.',
+    images: ['/og.png'],
   },
 };
 
