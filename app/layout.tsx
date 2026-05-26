@@ -3,6 +3,7 @@ import { Manrope, Instrument_Serif } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { DisclaimerBand } from '@/components/layout/DisclaimerBand';
+import { site } from '@/lib/content/site';
 import './globals.css';
 
 const manrope = Manrope({
@@ -39,12 +40,40 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image' },
 };
 
+const localBusinessSchema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'LocalBusiness',
+      name: site.nap.name,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: site.nap.city,
+        addressRegion: site.nap.region,
+        addressCountry: site.nap.country,
+      },
+      email: site.contactEmail,
+      url: BASE_URL,
+    },
+    {
+      '@type': 'Person',
+      name: 'Nicole Hansult',
+      jobTitle: 'Functional Longevity Coach',
+      worksFor: { '@type': 'LocalBusiness', name: site.nap.name },
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${manrope.variable} ${instrumentSerif.variable}`}>
       <body className="bg-bg text-ink font-sans antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+        />
         {children}
         <DisclaimerBand />
         <Analytics />
