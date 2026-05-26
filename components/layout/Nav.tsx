@@ -24,6 +24,7 @@ const LINKS = [
   { label: 'Testimonials', href: '/testimonials' },
   { label: 'Insights', href: '/insights' },
   { label: 'Contact', href: '/contact' },
+  { label: 'Login', href: '/login' },
 ];
 
 export function Nav({ className }: { className?: string }) {
