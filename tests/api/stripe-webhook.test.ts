@@ -20,9 +20,9 @@ vi.mock('@/lib/stripe', () => ({
 
 const sendMock = vi.fn().mockResolvedValue({ data: { id: 'email_123' }, error: null });
 vi.mock('resend', () => ({
-  Resend: vi.fn().mockImplementation(() => ({
-    emails: { send: sendMock },
-  })),
+  Resend: vi.fn().mockImplementation(function () {
+    return { emails: { send: sendMock } };
+  }),
 }));
 
 // Chainable Supabase builder factory — every test gets a fresh tracker.
@@ -128,7 +128,7 @@ describe('POST /api/webhooks/stripe', () => {
     supabaseState.ops = [];
     supabaseState.insertErrors = {};
     constructEventMock.mockReset();
-    sendMock.mockClear();
+    sendMock.mockReset();
     sendMock.mockResolvedValue({ data: { id: 'email_123' }, error: null });
     process.env.STRIPE_WEBHOOK_SECRET_TEST = 'whsec_test_dummy';
     process.env.STRIPE_WEBHOOK_SECRET_LIVE = 'whsec_live_dummy';
