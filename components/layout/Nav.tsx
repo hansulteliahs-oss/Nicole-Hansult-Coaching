@@ -12,6 +12,7 @@
  */
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 
 import { cn } from '@/lib/cn';
@@ -39,21 +40,21 @@ export function Nav({ className }: { className?: string }) {
         )}
         aria-label="Primary"
       >
-        <a
+        <Link
           href="/"
           className="px-4 py-2 text-ink text-sm font-semibold"
         >
           Nicole Hansult
-        </a>
+        </Link>
         <ul className="flex items-center">
           {LINKS.map((l) => (
             <li key={l.href}>
-              <a
+              <Link
                 href={l.href}
                 className="px-4 py-2 text-ink text-sm hover:text-skyDeep transition-colors"
               >
                 {l.label}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
@@ -69,9 +70,9 @@ export function Nav({ className }: { className?: string }) {
 
       {/* Mobile — top bar */}
       <div className="md:hidden fixed top-0 inset-x-0 z-40 flex items-center justify-between px-5 py-4 bg-bg/85 backdrop-blur">
-        <a href="/" className="text-ink text-sm font-semibold">
+        <Link href="/" className="text-ink text-sm font-semibold">
           Nicole Hansult
-        </a>
+        </Link>
         <button
           type="button"
           aria-label={open ? 'Close menu' : 'Open menu'}
@@ -87,14 +88,14 @@ export function Nav({ className }: { className?: string }) {
       {open && (
         <div className="md:hidden fixed inset-0 z-30 bg-bg pt-20 px-6 flex flex-col gap-2">
           {LINKS.map((l) => (
-            <a
+            <Link
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
               className="rounded-pill border border-inkFaint px-6 py-4 text-ink text-base font-medium"
             >
               {l.label}
-            </a>
+            </Link>
           ))}
           <Pill
             href="/booking-appointment"
