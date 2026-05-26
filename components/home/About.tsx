@@ -12,6 +12,7 @@ import Image from 'next/image';
 import { Label } from '@/components/ui/Label';
 import { Pill } from '@/components/ui/Pill';
 import { image } from '@/lib/images';
+import { IMG_ABOUT_PORTRAIT } from '@/lib/images/keys';
 
 export function About() {
   return (
@@ -19,9 +20,7 @@ export function About() {
       <div className="mx-auto max-w-6xl grid md:grid-cols-2 gap-12 items-center">
         <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-cardSoft">
           <Image
-            src={image(
-              'https://images.squarespace-cdn.com/content/v1/5b83975d45776e48dcfe0f15/2a3795b1-b0cb-4def-b530-f842bbe048b2/BrandPortraits%40MarcyBrowePhoto-256.jpg',
-            )}
+            src={image(IMG_ABOUT_PORTRAIT)}
             alt="Nicole Hansult portrait"
             fill
             quality={85}
