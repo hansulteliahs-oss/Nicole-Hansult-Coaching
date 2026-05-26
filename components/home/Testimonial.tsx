@@ -9,6 +9,7 @@ import { FloatingCard } from '@/components/ui/FloatingCard';
 import { Label } from '@/components/ui/Label';
 import { Pill } from '@/components/ui/Pill';
 import { image } from '@/lib/images';
+import { IMG_TESTIMONIAL } from '@/lib/images/keys';
 
 export function Testimonial() {
   return (
@@ -17,9 +18,7 @@ export function Testimonial() {
         <Label>What clients say</Label>
         <div className="h-[420px]">
           <FloatingCard
-            imageSrc={image(
-              'https://images.squarespace-cdn.com/content/v1/5b83975d45776e48dcfe0f15/fae3d33a-daa5-4bcc-bf3c-5b4bec2bc31c/Nicole+yellow+top+DSC04555.jpg',
-            )}
+            imageSrc={image(IMG_TESTIMONIAL)}
             alt="Client and Nicole"
           >
             <blockquote className="text-bg text-2xl font-serif italic max-w-xl">

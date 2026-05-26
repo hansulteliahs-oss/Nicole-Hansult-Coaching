@@ -13,7 +13,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "migrate:images": "tsx scripts/migrate-images.ts",
-    "verify:no-squarespace": "bash scripts/verify-no-squarespace.sh"
+    "verify:no-squarespace": "bash scripts/verify-no-squarespace.sh",
+    "verify:phase-1": "bash scripts/verify-phase-1.sh"
   },
   "dependencies": {
     "@vercel/analytics": "^1.4.1",

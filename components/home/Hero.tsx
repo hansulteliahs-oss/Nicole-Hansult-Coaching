@@ -13,6 +13,7 @@ import { Pill } from '@/components/ui/Pill';
 import { FloatingCard } from '@/components/ui/FloatingCard';
 import { Orb } from '@/components/ui/Orb';
 import { image } from '@/lib/images';
+import { IMG_HERO_PORTRAIT } from '@/lib/images/keys';
 
 export function Hero() {
   return (
@@ -41,9 +42,7 @@ export function Hero() {
         </div>
         <div className="h-[560px]">
           <FloatingCard
-            imageSrc={image(
-              'https://images.squarespace-cdn.com/content/v1/5b83975d45776e48dcfe0f15/e7b62c0b-0ac8-4840-bd03-154389d6b4ac/BrandPortraits%40MarcyBrowePhoto-165.jpg',
-            )}
+            imageSrc={image(IMG_HERO_PORTRAIT)}
             alt="Nicole Hansult, coach"
           />
         </div>

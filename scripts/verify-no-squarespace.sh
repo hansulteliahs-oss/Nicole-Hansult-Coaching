@@ -8,6 +8,7 @@
 #
 # Excludes:
 #   - lib/images/map.json + migration-report.json (intentional — the migration map records source URLs)
+#   - lib/images/keys.ts (intentional — single source of truth for raw URLs that components reference)
 #   - scripts/verify-no-squarespace.sh (this script literally greps for the string)
 #   - scripts/migrate-images.ts (the migration tool's regex must reference the CDN domain)
 #   - docs/** (content-audit + planning docs are not app source)
@@ -24,6 +25,7 @@ MATCHES=$(grep -rE \
   --exclude-dir=docs \
   --exclude='map.json' \
   --exclude='migration-report.json' \
+  --exclude='keys.ts' \
   --exclude='verify-no-squarespace.sh' \
   --exclude='migrate-images.ts' \
   "$PATTERN" . 2>/dev/null || true)
