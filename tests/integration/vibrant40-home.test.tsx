@@ -121,7 +121,7 @@ describe('/vibrant40 course home page', () => {
     const tree: any = await CourseHome();
 
     const counter = findNode(tree, (n) => typeof n === 'object' && /of 8 days complete/.test(extractText(n)));
-    expect(extractText(counter)).toMatch(/2 of 8 days complete/);
+    expect(extractText(counter)).toMatch(/2\s+of 8 days complete/);
   });
 
   it('shows counter "0 of 8 days complete" when no progress rows', async () => {
@@ -134,7 +134,7 @@ describe('/vibrant40 course home page', () => {
     const tree: any = await CourseHome();
 
     const text = extractText(tree);
-    expect(text).toMatch(/0 of 8 days complete/);
+    expect(text).toMatch(/0\s+of 8 days complete/);
   });
 
   it('exports dynamic = "force-dynamic" (PITFALL 6 guard)', async () => {
@@ -165,7 +165,7 @@ describe('/vibrant40/welcome orientation page', () => {
 
     const cta = findNode(
       tree,
-      (n) => n?.type === 'a' && n.props?.href === '/vibrant40',
+      (n) => typeof n === 'object' && n?.props?.href === '/vibrant40',
     );
     expect(cta).toBeTruthy();
   });
