@@ -29,8 +29,7 @@ export const IMG_ABOUT_PORTRAIT =
 export const IMG_TESTIMONIAL =
   'https://images.squarespace-cdn.com/content/v1/5b83975d45776e48dcfe0f15/fae3d33a-daa5-4bcc-bf3c-5b4bec2bc31c/Nicole+yellow+top+DSC04555.jpg';
 
-export const IMG_SECA_SCANNER =
-  'https://images.squarespace-cdn.com/content/v1/5b83975d45776e48dcfe0f15/4b8c7201-90b3-4702-aee0-cf8bbf0781d2/seca-body-composition-analysis-carlsbad-ca.jpg';
+export const IMG_SECA_SCANNER = '/images/seca-scan-session-carlsbad.jpg';
 
 export const IMG_JOURNAL_MOVEMENT =
   'https://images.squarespace-cdn.com/content/v1/5b83975d45776e48dcfe0f15/ec2f222a-d8a4-45a8-94d7-09a0f3c1bc5f/functional-movement-coaching-over-40-carlsbad.jpg';
