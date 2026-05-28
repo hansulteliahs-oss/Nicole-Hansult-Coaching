@@ -18,11 +18,13 @@ export function FloatingCard({
   alt = '',
   className,
   children,
+  objectFit = 'cover',
 }: {
   imageSrc?: string;
   alt?: string;
   className?: string;
   children?: ReactNode;
+  objectFit?: 'cover' | 'contain';
 }) {
   return (
     <div
@@ -38,7 +40,7 @@ export function FloatingCard({
           fill
           quality={85}
           sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover"
+          className={objectFit === 'contain' ? 'object-contain' : 'object-cover'}
         />
       ) : (
         <div className="placeholder-stripes h-full w-full" />

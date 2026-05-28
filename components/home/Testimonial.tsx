@@ -47,8 +47,8 @@ export function Testimonial() {
           </blockquote>
         </div>
 
-        {/* Review platforms */}
-        <div className="flex flex-wrap gap-4 items-center">
+        {/* Review platforms + award badges on the same row */}
+        <div className="flex flex-wrap gap-6 items-center">
           <a
             href="https://share.google/dOvMvZt8LZxZg7qBw"
             target="_blank"
@@ -65,10 +65,6 @@ export function Testimonial() {
           >
             Yelp Reviews ★★★★★
           </a>
-        </div>
-
-        {/* Award badges */}
-        <div className="flex flex-wrap gap-6 items-center">
           <Image
             src="/images/best-personal-trainer-north-county-2024-nicole-hansult.png"
             alt="Best Personal Trainer North County 2024"
@@ -86,10 +82,11 @@ export function Testimonial() {
         </div>
 
         {/* Video testimonial preview card */}
-        <div className="h-[360px]">
+        <div className="h-[640px]">
           <FloatingCard
             imageSrc="/images/nicole-portrait-marcy-browe.jpg"
             alt="Nicole Hansult, functional longevity coach in Carlsbad CA"
+            objectFit="contain"
           />
         </div>
 

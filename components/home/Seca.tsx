@@ -18,14 +18,14 @@ export function Seca() {
   return (
     <section className="bg-bg px-6 py-24">
       <div className="mx-auto max-w-6xl grid md:grid-cols-2 gap-12 items-center">
-        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-cardSoft">
+        <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-cardSoft">
           <Image
             src={image(IMG_SECA_SCANNER)}
             alt="SECA medical-grade body composition analysis in Carlsbad, CA"
             fill
             quality={85}
             sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover"
+            className="object-contain"
           />
         </div>
         <div className="space-y-6">
