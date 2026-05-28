@@ -25,7 +25,7 @@ export default function BookingAppointmentPage() {
     <>
       <Nav />
       <main className="bg-bg">
-        <section className="mx-auto max-w-3xl px-6 pt-24 pb-12">
+        <section className="mx-auto max-w-3xl px-6 pt-32 md:pt-40 pb-12">
           <h1 className="text-4xl font-light mb-4">Book a Session</h1>
           <p className="text-inkSoft text-lg leading-relaxed">
             Ready to take the next step? Use the scheduler below to book your Clinical Longevity

@@ -19,8 +19,8 @@ export const offers: ReadonlyArray<Offer> = [
     id: 'cle',
     slug: 'clinical-longevity-evaluation',
     name: 'Clinical Longevity Evaluation',
-    price: 299.99,
-    priceLabel: '$299.99',
+    price: 295,
+    priceLabel: '$295',
     modality: 'in-person',
     kind: 'product',
     blurb:

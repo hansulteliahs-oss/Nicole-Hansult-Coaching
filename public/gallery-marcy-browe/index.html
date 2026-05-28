@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Marcy Browe Gallery — pick images</title>
+<style>
+  body{font-family:system-ui,sans-serif;background:#EBE6DE;color:#26232C;padding:24px;margin:0}
+  h1{font-weight:300;margin:0 0 8px}
+  p{margin:0 0 24px;color:#5F5C66}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+  figure{margin:0;background:#FBF8F2;border:1px solid rgba(38,35,44,0.12);border-radius:16px;overflow:hidden}
+  img{width:100%;height:280px;object-fit:cover;display:block;background:#D6D2CB}
+  figcaption{padding:10px 12px;font-size:14px;color:#5F5C66;display:flex;justify-content:space-between;align-items:center}
+  figcaption code{font-family:ui-monospace,monospace;font-size:12px;color:#26232C;background:#F4EFE6;padding:2px 6px;border-radius:4px}
+</style>
+</head>
+<body>
+<h1>Marcy Browe — Nicole gallery</h1>
+<p>32 images downloaded from <a href="https://marcybrowephotography.pixieset.com/nicole/" target="_blank">pixieset.com/nicole</a> at 1600px. Click any to view full size. Tell me which number(s) to use for hero, FloatingCard portrait, About bio break, etc.</p>
+<div class="grid" id="g"></div>
+<script>
+  const g = document.getElementById('g');
+  for (let i = 1; i <= 32; i++) {
+    const n = String(i).padStart(2,'0');
+    const src = 'marcy-' + n + '.jpg';
+    g.insertAdjacentHTML('beforeend',
+      '<figure><a href="'+src+'" target="_blank"><img src="'+src+'" loading="lazy"></a>' +
+      '<figcaption>#'+i+' <code>'+src+'</code></figcaption></figure>');
+  }
+</script>
+</body>
+</html>

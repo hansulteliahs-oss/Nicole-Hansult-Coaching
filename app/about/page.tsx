@@ -68,37 +68,30 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* 2. Meet Nicole video block */}
+        {/* 2. Meet Nicole video block — vertical video left, copy right (flipped from hero) */}
         <section className="bg-bg px-6 py-20">
-          <div className="mx-auto max-w-4xl space-y-8">
-            <div className="space-y-4">
+          <div className="mx-auto max-w-6xl grid md:grid-cols-2 gap-12 items-center">
+            <div className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-cardSoft mx-auto w-full max-w-xs sm:max-w-sm">
+              <video
+                src="/videos/nicole-about.mp4"
+                controls
+                playsInline
+                preload="metadata"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            </div>
+            <div className="space-y-6">
               <Label>In her own words</Label>
-              <h2 className="text-ink text-3xl md:text-4xl font-light leading-tight">
+              <h2 className="text-ink text-4xl md:text-5xl font-light leading-tight">
                 Meet Nicole
               </h2>
-              <p className="text-inkSoft text-base max-w-xl">
+              <p className="text-inkSoft text-base">
                 I know how overwhelming it can feel when your body starts
-                changing and what used to work no longer does. In this short
-                video, I share more about my story, philosophy, and approach to
-                longevity.
+                changing and what used to work no longer does.
               </p>
-            </div>
-
-            {/* Video embed placeholder — swap youtubeId once Nicole delivers the Meet Nicole video */}
-            <div className="bg-inkFaint rounded-2xl aspect-video flex items-center justify-center">
-              {/* TODO: swap youtubeId once Nicole delivers the Meet Nicole video */}
-              {/* <iframe
-                width="100%"
-                height="100%"
-                src="https://www.youtube.com/embed/{youtubeId}"
-                title="Meet Nicole Hansult"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="rounded-2xl"
-              /> */}
-              <p className="text-grayDeep text-sm">
-                Meet Nicole video — coming soon
+              <p className="text-inkSoft text-base">
+                In this short video, I share more about my story, philosophy,
+                and approach to longevity — and why I work the way I do.
               </p>
             </div>
           </div>
@@ -168,6 +161,18 @@ export default function AboutPage() {
                 But it&apos;s also practical. Because your plan has to fit your real
                 life, not the other way around.
               </p>
+            </div>
+
+            {/* Bio break image — interrupts the wall of text */}
+            <div className="relative aspect-[16/9] rounded-2xl overflow-hidden bg-cardSoft">
+              <Image
+                src="/images/nicole-about-break-marcy-browe.jpg"
+                alt="Nicole Hansult coaching a client in Carlsbad CA"
+                fill
+                quality={85}
+                sizes="(max-width: 768px) 100vw, 896px"
+                className="object-cover"
+              />
             </div>
 
             {/* Who I Work With */}
@@ -379,7 +384,7 @@ export default function AboutPage() {
               Book a Clinical Longevity Evaluation — the clearest way to begin.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Pill href="/booking-appointment" variant="dark" size="lg">
+              <Pill href="/booking-appointment" variant="orchid" size="lg">
                 Book a Clinical Longevity Evaluation
               </Pill>
               <Pill href="/services" variant="ghost" size="lg">

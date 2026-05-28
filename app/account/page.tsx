@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { offers } from '@/lib/content/offers';
@@ -49,6 +50,13 @@ export default async function AccountPage({ searchParams }: Props) {
           <p className="font-semibold">Welcome — your account is ready.</p>
         </div>
       )}
+
+      <Link
+        href="/"
+        className="inline-block text-sm text-inkSoft hover:text-ink mb-4"
+      >
+        ← Back to home
+      </Link>
 
       <h1 className="text-3xl font-semibold text-ink mb-8">My account</h1>
 

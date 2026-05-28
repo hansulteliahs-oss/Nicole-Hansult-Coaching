@@ -12,6 +12,7 @@ import { Hero } from '@/components/home/Hero';
 import { Mantra } from '@/components/home/Mantra';
 import { About } from '@/components/home/About';
 import { Services } from '@/components/home/Services';
+import { Seca } from '@/components/home/Seca';
 import { Approach } from '@/components/home/Approach';
 import { Pricing } from '@/components/home/Pricing';
 import { Testimonial } from '@/components/home/Testimonial';
@@ -43,6 +44,7 @@ export default function HomePage() {
         <Mantra />
         <About />
         <Services />
+        <Seca />
         <Approach />
         <Pricing />
         <Testimonial />

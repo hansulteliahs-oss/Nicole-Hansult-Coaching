@@ -158,7 +158,7 @@ export function Pricing() {
                     className="self-start mt-auto"
                   >
                     <Pill
-                      variant={isHighlighted ? 'sky' : 'dark'}
+                      variant={isHighlighted ? 'sky' : 'orchid'}
                       size="md"
                       type="submit"
                     >
@@ -168,7 +168,7 @@ export function Pricing() {
                 ) : (
                   <Pill
                     href={offer.ctaHref}
-                    variant={isHighlighted ? 'sky' : 'dark'}
+                    variant={isHighlighted ? 'sky' : 'orchid'}
                     size="md"
                     className="self-start mt-auto"
                   >
@@ -190,7 +190,7 @@ export function Pricing() {
               Download the free guide: How to Look and Feel Good Naked Over 40.
             </p>
           </div>
-          <Pill href="/look-and-feel-good-naked" variant="ghost" size="md">
+          <Pill href="/look-and-feel-good-naked" variant="orchid" size="md">
             Download Free Guide
           </Pill>
         </div>

@@ -134,7 +134,7 @@ export default async function ComponentStyleguide({
                 'Movement screen',
                 'Plan you walk out with',
               ]}
-              priceLabel="$299.99"
+              priceLabel="$295"
               ctaLabel="Book the CLE"
               ctaHref="#"
               tint="sky"

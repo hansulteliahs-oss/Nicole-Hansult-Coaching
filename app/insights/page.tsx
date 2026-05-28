@@ -91,7 +91,7 @@ export default function InsightsPage() {
       <Nav />
       <main className="bg-bg">
         {/* Header */}
-        <section className="mx-auto max-w-5xl px-6 pt-24 pb-12">
+        <section className="mx-auto max-w-5xl px-6 pt-32 md:pt-40 pb-12">
           <h1 className="font-serif text-4xl text-ink md:text-5xl">Insights</h1>
           <p className="mt-4 text-inkSoft text-lg">
             Articles on movement, nutrition, lifestyle, and longevity for adults 40+.

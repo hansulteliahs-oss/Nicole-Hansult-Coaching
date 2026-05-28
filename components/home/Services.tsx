@@ -14,7 +14,7 @@ import { Pill } from '@/components/ui/Pill';
 
 export function Services() {
   return (
-    <section className="bg-bgAlt px-6 py-24">
+    <section id="services" className="bg-bgAlt px-6 py-24 scroll-mt-32">
       <div className="mx-auto max-w-4xl space-y-8">
         <Label>The starting point</Label>
         <h2 className="text-ink text-4xl md:text-5xl font-light leading-tight">
@@ -55,7 +55,7 @@ export function Services() {
           You will leave with clear next steps and a better understanding of
           how to support your body moving forward.
         </p>
-        <Pill href="/booking-appointment" variant="dark" size="lg">
+        <Pill href="/booking-appointment" variant="orchid" size="lg">
           Book a Clinical Longevity Evaluation
         </Pill>
       </div>

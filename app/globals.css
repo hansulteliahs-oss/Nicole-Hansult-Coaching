@@ -75,6 +75,11 @@
   }
 }
 
+/* Base font size — bumped for 40+ readability (16px → 18px). */
+html {
+  font-size: 112.5%;
+}
+
 /* Body defaults */
 body {
   font-family: var(--font-sans);

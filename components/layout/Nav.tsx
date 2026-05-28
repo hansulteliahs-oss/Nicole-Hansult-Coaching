@@ -13,6 +13,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
 import { cn } from '@/lib/cn';
@@ -20,15 +21,21 @@ import { Pill } from '@/components/ui/Pill';
 
 const LINKS = [
   { label: 'About', href: '/about' },
-  { label: 'Services', href: '/services' },
+  { label: 'Services', href: '/#services' },
   { label: 'Testimonials', href: '/testimonials' },
   { label: 'Insights', href: '/insights' },
   { label: 'Contact', href: '/contact' },
   { label: 'Login', href: '/login' },
 ];
 
+function isActive(pathname: string, href: string): boolean {
+  if (href === '/#services') return false;
+  return pathname === href;
+}
+
 export function Nav({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <>
@@ -43,7 +50,7 @@ export function Nav({ className }: { className?: string }) {
       >
         <Link
           href="/"
-          className="px-4 py-2 text-ink text-sm font-semibold"
+          className="px-3 py-2 text-ink text-sm font-semibold whitespace-nowrap"
         >
           Nicole Hansult
         </Link>
@@ -52,7 +59,10 @@ export function Nav({ className }: { className?: string }) {
             <li key={l.href}>
               <Link
                 href={l.href}
-                className="px-4 py-2 text-ink text-sm hover:text-skyDeep transition-colors"
+                className={cn(
+                  'px-3 py-2 text-ink text-sm hover:text-skyDeep transition-colors whitespace-nowrap',
+                  isActive(pathname, l.href) ? 'font-semibold' : 'font-normal',
+                )}
               >
                 {l.label}
               </Link>
@@ -61,7 +71,7 @@ export function Nav({ className }: { className?: string }) {
         </ul>
         <Pill
           href="/booking-appointment"
-          variant="dark"
+          variant="orchid"
           size="sm"
           className="ml-2"
         >
@@ -71,7 +81,7 @@ export function Nav({ className }: { className?: string }) {
 
       {/* Mobile — top bar */}
       <div className="md:hidden fixed top-0 inset-x-0 z-40 flex items-center justify-between px-5 py-4 bg-bg/85 backdrop-blur">
-        <Link href="/" className="text-ink text-sm font-semibold">
+        <Link href="/" className="text-ink text-sm font-semibold whitespace-nowrap">
           Nicole Hansult
         </Link>
         <button
@@ -93,14 +103,17 @@ export function Nav({ className }: { className?: string }) {
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              className="rounded-pill border border-inkFaint px-6 py-4 text-ink text-base font-medium"
+              className={cn(
+                'rounded-pill border border-inkFaint px-6 py-4 text-ink text-base',
+                isActive(pathname, l.href) ? 'font-semibold' : 'font-medium',
+              )}
             >
               {l.label}
             </Link>
           ))}
           <Pill
             href="/booking-appointment"
-            variant="dark"
+            variant="orchid"
             size="lg"
             className="mt-2"
           >

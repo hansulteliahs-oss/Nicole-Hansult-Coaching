@@ -56,7 +56,7 @@ type PillAsLink = PillBaseProps & {
 export function Pill(props: PillAsButton | PillAsLink) {
   const { variant = 'dark', size = 'md', className, children, ...rest } = props;
   const classes = cn(
-    'inline-flex items-center justify-center gap-3 rounded-pill font-semibold tracking-[0.01em]',
+    'inline-flex items-center justify-center gap-3 rounded-pill font-semibold tracking-[0.01em] whitespace-nowrap',
     'transition-colors duration-180 ease-out',
     'focus-visible:outline-2 focus-visible:outline-skyDeep focus-visible:outline-offset-2',
     VARIANT_CLASSES[variant],

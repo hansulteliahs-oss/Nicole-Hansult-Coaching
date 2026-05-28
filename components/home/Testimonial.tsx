@@ -7,14 +7,14 @@
  * Copy: verbatim from CONTENT-AUDIT.md §Testimonials Page §Real Recovery Stories
  * and §Strength, Confidence & Energy sections.
  *
- * Images: IMG_TESTIMONIAL from keys.ts for the background card.
+ * Images: /images/nicole-portrait-marcy-browe.jpg for the FloatingCard portrait.
  * Full video testimonials live on /testimonials — not repeated here.
  */
+import Image from 'next/image';
+
 import { FloatingCard } from '@/components/ui/FloatingCard';
 import { Label } from '@/components/ui/Label';
 import { Pill } from '@/components/ui/Pill';
-import { image } from '@/lib/images';
-import { IMG_TESTIMONIAL } from '@/lib/images/keys';
 
 export function Testimonial() {
   return (
@@ -47,27 +47,49 @@ export function Testimonial() {
           </blockquote>
         </div>
 
-        {/* Social proof badges */}
+        {/* Review platforms */}
         <div className="flex flex-wrap gap-4 items-center">
-          <span className="rounded-full bg-cardSoft border border-inkFaint px-4 py-2 text-sm text-ink">
+          <a
+            href="https://share.google/dOvMvZt8LZxZg7qBw"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full bg-cardSoft border border-inkFaint px-4 py-2 text-sm text-ink hover:bg-card hover:border-orchid/40 transition-colors"
+          >
             Google Reviews ★★★★★
-          </span>
-          <span className="rounded-full bg-cardSoft border border-inkFaint px-4 py-2 text-sm text-ink">
+          </a>
+          <a
+            href="https://www.yelp.com/biz/nicole-hansult-coaching-encinitas"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full bg-cardSoft border border-inkFaint px-4 py-2 text-sm text-ink hover:bg-card hover:border-orchid/40 transition-colors"
+          >
             Yelp Reviews ★★★★★
-          </span>
-          <span className="rounded-full bg-cardSoft border border-inkFaint px-4 py-2 text-sm text-ink">
-            Best Personal Trainer North County 2024
-          </span>
-          <span className="rounded-full bg-cardSoft border border-inkFaint px-4 py-2 text-sm text-ink">
-            Best Local Fitness Influencer 2024
-          </span>
+          </a>
+        </div>
+
+        {/* Award badges */}
+        <div className="flex flex-wrap gap-6 items-center">
+          <Image
+            src="/images/best-personal-trainer-north-county-2024-nicole-hansult.png"
+            alt="Best Personal Trainer North County 2024"
+            width={120}
+            height={120}
+            className="h-28 w-28 md:h-32 md:w-32 object-contain"
+          />
+          <Image
+            src="/images/best-local-fitness-influencer-2024-nicole-hansult.png"
+            alt="Best Local Fitness Influencer 2024"
+            width={120}
+            height={120}
+            className="h-28 w-28 md:h-32 md:w-32 object-contain"
+          />
         </div>
 
         {/* Video testimonial preview card */}
         <div className="h-[360px]">
           <FloatingCard
-            imageSrc={image(IMG_TESTIMONIAL)}
-            alt="Nicole Hansult coaching session"
+            imageSrc="/images/nicole-portrait-marcy-browe.jpg"
+            alt="Nicole Hansult, functional longevity coach in Carlsbad CA"
           />
         </div>
 

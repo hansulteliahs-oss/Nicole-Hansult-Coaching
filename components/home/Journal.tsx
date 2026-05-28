@@ -10,6 +10,12 @@
 import { Label } from '@/components/ui/Label';
 import { JournalCard } from '@/components/ui/JournalCard';
 import { Pill } from '@/components/ui/Pill';
+import { image } from '@/lib/images';
+import {
+  IMG_JOURNAL_BODY_COMP,
+  IMG_JOURNAL_MOVEMENT,
+  IMG_JOURNAL_WELLNESS,
+} from '@/lib/images/keys';
 
 const POSTS = [
   {
@@ -18,18 +24,21 @@ const POSTS = [
     category: 'Functional Longevity',
     date: 'Apr 2026',
     href: '/insights',
+    imageSrc: image(IMG_JOURNAL_MOVEMENT),
   },
   {
     title: 'Why the Scale Isn\'t Telling the Whole Story About Your Body After 40',
     category: 'Body Composition',
     date: 'Jan 2026',
     href: '/insights',
+    imageSrc: image(IMG_JOURNAL_BODY_COMP),
   },
   {
     title: 'Your Body Is Talking. Are You Listening?',
     category: 'Mobility',
     date: 'Feb 2026',
     href: '/insights',
+    imageSrc: image(IMG_JOURNAL_WELLNESS),
   },
 ];
 

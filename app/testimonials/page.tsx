@@ -35,7 +35,7 @@ export default function TestimonialsPage() {
       <Nav />
       <main className="bg-bg">
         {/* Hero heading */}
-        <section className="mx-auto max-w-5xl px-6 pt-24 pb-12 text-center">
+        <section className="mx-auto max-w-5xl px-6 pt-32 md:pt-40 pb-12 text-center">
           <h1 className="font-serif text-4xl text-ink md:text-5xl">
             Real People. Real Results.
           </h1>

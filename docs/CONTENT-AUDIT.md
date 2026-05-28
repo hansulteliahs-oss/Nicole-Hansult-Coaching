@@ -15,14 +15,14 @@ Eliahs is gathering answers in `Answers.md` (source of truth). Items below marke
 
    | # | Offer | Price | Format | Notes |
    |---|---|---|---|---|
-   | 1 | Clinical Longevity Evaluation (Seca scanner) | **$299.99** | In person | Live site says $255 — UPDATE during rebuild |
+   | 1 | Clinical Longevity Evaluation (Seca scanner) | **$295** | In person | Live site says $255 — UPDATE during rebuild |
    | 2 | Vibrant40 Jumpstart | $88 | Online (self-paced) | **8-days** |
    | 3 | 45-min Strategy Session | $88 | Zoom | $88 credits toward the 3-month program if booked after |
    | 4 | 3-Month Coaching Program | **$5,500** | In person | Currently not surfaced on live site — ADD during rebuild. Strategy Session fee credits toward this. |
    | 5 | Everyday Training (hourly) | **$165/hr** | In person | Currently not surfaced on live site — ADD during rebuild |
 
    **Action items flowing from this:**
-   - Update CLE price `$255 → $299.99` everywhere in copy below
+   - Update CLE price `$255 → $295` everywhere in copy below
    - Update Vibrant40 duration `8 days → 8 weeks` everywhere
    - Add a 3-Month Coaching tier to Services page and home "Choose Your Best Starting Point" section
    - Add Everyday Training ($165/hr) as a tier
@@ -37,10 +37,12 @@ Eliahs is gathering answers in `Answers.md` (source of truth). Items below marke
    - **Gated routes:** `/vibrant40/*` protected by Supabase session middleware in Next.js
    - **Member migration:** Eliahs to pull CSV export from Squarespace admin → one-time "set your password" email via Resend, sent once the new site is live
 
-3. ⏳ **Video testimonial source files.** Files/URLs still needed from Nicole / Squarespace admin:
-   - 4 client testimonial videos: Bianca (San Diego), John M. (La Jolla), Greg R. (Carlsbad), Vanessa (Atlanta)
-   - "Meet Nicole" video on the About page
-   - Action: Eliahs to pull from Squarespace admin (Pages → Testimonials / About → click each video block → check source) or ask Nicole for the originals.
+3. 🟡 **Video testimonial source files — PARTIALLY RESOLVED.** Scraped from live `/testimonials` page; structured data lives in [`lib/content/testimonials.ts`](../lib/content/testimonials.ts).
+   - ✅ Bianca (San Diego) — YouTube `8dLnl5LIm1I`
+   - ✅ John McClure (La Jolla) — YouTube `BlQt9NWM8iE`
+   - ✅ Greg R. (Carlsbad) — Squarespace-hosted MP4 (not YouTube). System data ID `60837fe5-7452-4446-8760-e907e548d313`, library `5b83975d45776e48dcfe0f15`. 1080p + 360p variants on `video.squarespace-cdn.com`. Action: re-host (YouTube unlisted or Mux/Vercel Blob) before the Squarespace site is taken down, or the link dies.
+   - ✅ Vanessa (Atlanta) — YouTube `z4_kqU5vRho`
+   - ⏳ "Meet Nicole" video on the About page — video-block exists on `/about` but is uninitialized/empty on the live site. Need original from Nicole.
 4. ✅ **Geography — RESOLVED.** Canonical city for the rebuild is **Carlsbad, CA**. Matches current footer, most image alt-tags, and the CLE "in-person only in Carlsbad, CA" line. Action during rebuild: scrub the Encinitas references out of testimonial copy (`Encinitas` appears in client labels and a few opening paragraphs) and standardize on Carlsbad. "North County San Diego" stays as the regional framing where it appears.
 5. ✅ **`/start-here` — RESOLVED.** Remove from nav. Drop it from both the primary nav dropdown (Services → Start Here, CLE, Vibrant40) and the footer nav. `/services` already serves the "where do I start" job via the "Not Sure Where to Start?" section.
 6. ✅ **Contact email — RESOLVED.** Keep `nicole@nicolehansultcoaching.com` as the destination for both the contact form and lead-magnet form. Implement via Resend API route in Next.js — Resend sends the form payload as an email to that address; Privacy + Terms copy stays as-is.
@@ -94,7 +96,7 @@ nicolehansultcoaching.com
 
 | Service | Live site | Rebuild (source of truth) | Duration | Format |
 |---|---|---|---|---|
-| Clinical Longevity Evaluation | $255 | **$299.99** | 75 min | In-person, Carlsbad CA only |
+| Clinical Longevity Evaluation | $255 | **$295** | 75 min | In-person, Carlsbad CA only |
 | Strategy Session | $88 | $88 (credits to 3-mo program) | 45 min | Zoom |
 | Vibrant40 Jumpstart | $88 | $88 | **8 weeks** (live site says 8 days) | Self-paced online — stays on Squarespace |
 | 3-Month Coaching Program | not listed | **$5,500** | 3 months | In person |

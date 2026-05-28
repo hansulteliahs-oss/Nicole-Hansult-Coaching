@@ -13,6 +13,7 @@ export interface SiteConfig {
   socials: {
     instagram?: string;
     facebook?: string;
+    linkedin?: string;
   };
 }
 
@@ -28,5 +29,9 @@ export const site: SiteConfig = {
   acuity: {
     ownerId: '16610306',
   },
-  socials: {},
+  socials: {
+    instagram: 'https://www.instagram.com/nicole_hansultcoaching/',
+    facebook: 'https://www.facebook.com/nicolehansultcoaching/',
+    linkedin: 'https://www.linkedin.com/in/nicole-hansult-coaching/',
+  },
 };
