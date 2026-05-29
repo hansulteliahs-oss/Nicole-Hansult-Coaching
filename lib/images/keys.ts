@@ -23,8 +23,7 @@ export const IMG_HERO_PORTRAIT =
 export const IMG_HERO_BACKGROUND =
   'https://images.squarespace-cdn.com/content/v1/5b83975d45776e48dcfe0f15/a924483d-49f2-4b9c-9603-384ef117b53e/clinical-longevity-evaluation-over-40-encinitas.jpg';
 
-export const IMG_ABOUT_PORTRAIT =
-  'https://images.squarespace-cdn.com/content/v1/5b83975d45776e48dcfe0f15/2a3795b1-b0cb-4def-b530-f842bbe048b2/BrandPortraits%40MarcyBrowePhoto-256.jpg';
+export const IMG_ABOUT_PORTRAIT = '/images/nicole-meet-marcy-browe.jpg';
 
 export const IMG_TESTIMONIAL =
   'https://images.squarespace-cdn.com/content/v1/5b83975d45776e48dcfe0f15/fae3d33a-daa5-4bcc-bf3c-5b4bec2bc31c/Nicole+yellow+top+DSC04555.jpg';

@@ -16,7 +16,7 @@ import { Pill } from '@/components/ui/Pill';
 
 export function Hero() {
   return (
-    <section className="relative bg-bg px-6 pt-32 pb-24 md:pt-40 md:pb-32 overflow-hidden min-h-[80vh] flex items-center">
+    <section className="relative bg-bg px-6 pt-32 pb-24 md:pt-40 md:pb-32 overflow-hidden min-h-[95vh] flex items-center">
       {/* Image + overlay are wrapped so the image starts BELOW the fixed nav,
           leaving a strip of page bg as visual buffer between nav and image. */}
       <div className="absolute inset-x-0 bottom-0 top-24 md:top-28">
@@ -35,7 +35,11 @@ export function Hero() {
         <div className="max-w-xl space-y-6 text-white">
           <Label className="text-white/90">Functional longevity · Carlsbad, CA</Label>
           <h1 className="text-5xl md:text-6xl font-light leading-[1.05]">
-            Stop Guessing What Your Body Needs After 40
+            Stop Guessing
+            <br />
+            What Your Body
+            <br />
+            Needs After 40
           </h1>
           <p className="text-white/90 text-lg max-w-md">
             Feel strong, mobile, and confident again with a plan designed for

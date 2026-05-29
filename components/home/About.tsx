@@ -26,7 +26,8 @@ export function About() {
             fill
             quality={85}
             sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover"
+            className="object-cover scale-[1.35]"
+            style={{ objectPosition: '47% 38%' }}
           />
         </div>
         <div className="space-y-6">
