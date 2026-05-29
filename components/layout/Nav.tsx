@@ -15,9 +15,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { cn } from '@/lib/cn';
+import { createClient } from '@/lib/supabase/client';
 
 const LOGO_SRC = '/images/nicolehansult-logo-edit.png';
 const LOGO_ALT = 'Nicole Hansult';
@@ -38,6 +39,29 @@ function isActive(pathname: string, href: string): boolean {
 export function Nav({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+
+  // Auth-aware login control: while a session exists, the button reads
+  // "Account" → /account and stays that way (onAuthStateChange keeps it in
+  // sync across login/logout and reloads). UI-only — real gating is the
+  // server proxy. getSession (cookie read) is sufficient here.
+  const [loggedIn, setLoggedIn] = useState(false);
+  useEffect(() => {
+    const supabase = createClient();
+    let active = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (active) setLoggedIn(!!data.session);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setLoggedIn(!!session);
+    });
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  const accountHref = loggedIn ? '/account' : '/login';
+  const accountLabel = loggedIn ? 'Account' : 'Login';
 
   return (
     <>
@@ -83,12 +107,12 @@ export function Nav({ className }: { className?: string }) {
         />
       </Link>
 
-      {/* Desktop — floating Login top-right */}
+      {/* Desktop — floating Login/Account top-right */}
       <Link
-        href="/login"
+        href={accountHref}
         className="hidden md:inline-flex fixed top-6 right-6 z-40 items-center rounded-pill bg-card/85 backdrop-blur border border-inkFaint shadow-card px-4 py-2 text-ink text-sm hover:text-skyDeep transition-colors"
       >
-        Login
+        {accountLabel}
       </Link>
 
       {/* Mobile — top bar */}
@@ -131,14 +155,14 @@ export function Nav({ className }: { className?: string }) {
             </Link>
           ))}
           <Link
-            href="/login"
+            href={accountHref}
             onClick={() => setOpen(false)}
             className={cn(
               'rounded-pill border border-inkFaint px-6 py-4 text-ink text-base',
-              isActive(pathname, '/login') ? 'font-semibold' : 'font-medium',
+              isActive(pathname, accountHref) ? 'font-semibold' : 'font-medium',
             )}
           >
-            Login
+            {accountLabel}
           </Link>
         </div>
       )}
