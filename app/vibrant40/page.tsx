@@ -1,8 +1,9 @@
 /**
- * Phase 5 Plan 05 Task 2 — /vibrant40 course home (PAY-10).
+ * /vibrant40 course home (PAY-10).
  *
- * Lists 8 day cards in order, with a "N of 8 days complete" counter at top.
- * Cards reflect completion state from the per-user `lesson_progress` table.
+ * Mirrors the live course: 8 modules ("Days"), 23 lessons. Each module is a
+ * section with its lessons nested as cards. Completion reflects the per-user
+ * `lesson_progress` table (keyed by lesson slug).
  *
  * Auth pattern (Phase 4 plan 04-05 verbatim):
  *   createClient → getClaims → null-check → redirect → render
@@ -12,8 +13,8 @@
  */
 import { redirect } from 'next/navigation';
 
-import { DayCard } from '@/components/vibrant40/DayCard';
-import { DAYS } from '@/lib/content/vibrant40/days';
+import { LessonCard } from '@/components/vibrant40/LessonCard';
+import { MODULES, TOTAL_LESSONS } from '@/lib/content/vibrant40/lessons';
 import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -38,19 +39,34 @@ export default async function CourseHome() {
         <p className="text-xs uppercase tracking-[0.14em] text-grayDeep mb-2">
           Your program
         </p>
-        <h1 className="font-serif text-4xl text-ink mb-3">Vibrant40 — 8-day program</h1>
+        <h1 className="font-serif text-4xl text-ink mb-3">Vibrant40 Jumpstart</h1>
         <p className="text-sm text-inkSoft">
-          {completed.size} of 8 days complete
+          {completed.size} of {TOTAL_LESSONS} lessons complete
         </p>
       </header>
 
-      <ul className="grid gap-4">
-        {DAYS.map((day) => (
-          <li key={day.slug}>
-            <DayCard day={day} completed={completed.has(day.slug)} />
-          </li>
-        ))}
-      </ul>
+      <div className="space-y-10">
+        {MODULES.map((mod) => {
+          const done = mod.lessons.filter((l) => completed.has(l.slug)).length;
+          return (
+            <section key={mod.number}>
+              <header className="mb-3">
+                <h2 className="font-serif text-2xl text-ink">{mod.title}</h2>
+                <p className="text-xs uppercase tracking-[0.12em] text-grayDeep mt-1">
+                  {done} of {mod.lessons.length} complete
+                </p>
+              </header>
+              <ul className="grid gap-3">
+                {mod.lessons.map((lesson) => (
+                  <li key={lesson.slug}>
+                    <LessonCard lesson={lesson} completed={completed.has(lesson.slug)} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })}
+      </div>
     </article>
   );
 }
