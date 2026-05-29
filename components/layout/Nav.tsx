@@ -12,12 +12,15 @@
  */
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
 import { cn } from '@/lib/cn';
-import { Pill } from '@/components/ui/Pill';
+
+const LOGO_SRC = '/images/nicolehansult-logo-edit.png';
+const LOGO_ALT = 'Nicole Hansult';
 
 const LINKS = [
   { label: 'About', href: '/about' },
@@ -25,7 +28,6 @@ const LINKS = [
   { label: 'Testimonials', href: '/testimonials' },
   { label: 'Insights', href: '/insights' },
   { label: 'Contact', href: '/contact' },
-  { label: 'Login', href: '/login' },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -48,12 +50,6 @@ export function Nav({ className }: { className?: string }) {
         )}
         aria-label="Primary"
       >
-        <Link
-          href="/"
-          className="px-3 py-2 text-ink text-sm font-semibold whitespace-nowrap"
-        >
-          Nicole Hansult
-        </Link>
         <ul className="flex items-center">
           {LINKS.map((l) => (
             <li key={l.href}>
@@ -69,20 +65,43 @@ export function Nav({ className }: { className?: string }) {
             </li>
           ))}
         </ul>
-        <Pill
-          href="/booking-appointment"
-          variant="orchid"
-          size="sm"
-          className="ml-2"
-        >
-          Book a call
-        </Pill>
       </nav>
+
+      {/* Desktop — floating Logo top-left */}
+      <Link
+        href="/"
+        className="hidden md:flex fixed top-4 left-6 z-40 items-center rounded-pill bg-card/85 backdrop-blur border border-inkFaint shadow-card px-4 py-2"
+        aria-label={LOGO_ALT}
+      >
+        <Image
+          src={LOGO_SRC}
+          alt={LOGO_ALT}
+          width={1107}
+          height={863}
+          priority
+          className="h-16 w-auto"
+        />
+      </Link>
+
+      {/* Desktop — floating Login top-right */}
+      <Link
+        href="/login"
+        className="hidden md:inline-flex fixed top-6 right-6 z-40 items-center rounded-pill bg-card/85 backdrop-blur border border-inkFaint shadow-card px-4 py-2 text-ink text-sm hover:text-skyDeep transition-colors"
+      >
+        Login
+      </Link>
 
       {/* Mobile — top bar */}
       <div className="md:hidden fixed top-0 inset-x-0 z-40 flex items-center justify-between px-5 py-4 bg-bg/85 backdrop-blur">
-        <Link href="/" className="text-ink text-sm font-semibold whitespace-nowrap">
-          Nicole Hansult
+        <Link href="/" className="flex items-center" aria-label={LOGO_ALT}>
+          <Image
+            src={LOGO_SRC}
+            alt={LOGO_ALT}
+            width={1107}
+            height={863}
+            priority
+            className="h-12 w-auto"
+          />
         </Link>
         <button
           type="button"
@@ -111,14 +130,16 @@ export function Nav({ className }: { className?: string }) {
               {l.label}
             </Link>
           ))}
-          <Pill
-            href="/booking-appointment"
-            variant="orchid"
-            size="lg"
-            className="mt-2"
+          <Link
+            href="/login"
+            onClick={() => setOpen(false)}
+            className={cn(
+              'rounded-pill border border-inkFaint px-6 py-4 text-ink text-base',
+              isActive(pathname, '/login') ? 'font-semibold' : 'font-medium',
+            )}
           >
-            Book a call
-          </Pill>
+            Login
+          </Link>
         </div>
       )}
     </>
