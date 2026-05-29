@@ -1,5 +1,5 @@
 // Run once: npx tsx scripts/upload-pdf.ts
-// Uploads placeholder PDF to Vercel Blob (public, opaque URL)
+// Uploads the lead-magnet PDF to Vercel Blob (public, opaque URL)
 // Copy the printed URL → set as BLOB_PDF_URL in .env.local + Vercel
 import { put } from '@vercel/blob';
 import { readFileSync } from 'fs';
@@ -9,7 +9,7 @@ import { config } from 'dotenv';
 config({ path: '.env.local' });
 
 async function main() {
-  const pdfPath = join(process.cwd(), 'docs', 'placeholder.pdf');
+  const pdfPath = join(process.cwd(), 'docs', 'look-and-feel-good-naked.pdf');
   const fileBuffer = readFileSync(pdfPath);
 
   const blob = await put('guides/look-and-feel-good-naked.pdf', fileBuffer, {
