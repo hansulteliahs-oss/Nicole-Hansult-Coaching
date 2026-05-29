@@ -26,6 +26,15 @@ export default async function AccountPage({ searchParams }: Props) {
 
   if (!claims) redirect('/login');
 
+  // Real membership read — mirrors the /vibrant40 proxy gate (lib/supabase/proxy.ts).
+  // Keyed by user_id (claims.sub); RLS policy "members read own row" scopes it to self.
+  const { data: member } = await supabase
+    .from('vibrant40_members')
+    .select('status')
+    .eq('user_id', claims.sub)
+    .maybeSingle();
+  const isVibrant40Member = member?.status === 'active';
+
   const { welcome } = await searchParams;
   const vibrant40 = offers.find((o) => o.id === 'vibrant40')!;
 
@@ -68,18 +77,32 @@ export default async function AccountPage({ searchParams }: Props) {
         <p className="text-ink font-medium">{claims.email as string}</p>
       </section>
 
-      {/* Vibrant40 status — Phase 4 placeholder. Phase 5 replaces with real DB read. */}
+      {/* Vibrant40 status — real DB read keyed by user_id (see proxy gate). */}
       <section className="bg-bgAlt rounded-xl p-6 mb-8">
         <p className="text-xs text-inkSoft uppercase tracking-wide mb-1">
           Vibrant40 membership
         </p>
-        <p className="text-ink mb-3">Not a Vibrant40 member yet.</p>
-        <a
-          href={vibrant40.ctaHref}
-          className="inline-block bg-orchidDeep text-white rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition"
-        >
-          {vibrant40.ctaLabel} — {vibrant40.priceLabel}
-        </a>
+        {isVibrant40Member ? (
+          <>
+            <p className="text-ink mb-3">Active member ✓</p>
+            <a
+              href="/vibrant40"
+              className="inline-block bg-orchidDeep text-white rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition"
+            >
+              Open Vibrant40
+            </a>
+          </>
+        ) : (
+          <>
+            <p className="text-ink mb-3">Not a Vibrant40 member yet.</p>
+            <a
+              href={vibrant40.ctaHref}
+              className="inline-block bg-orchidDeep text-white rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition"
+            >
+              {vibrant40.ctaLabel} — {vibrant40.priceLabel}
+            </a>
+          </>
+        )}
       </section>
 
       {/* Logout */}
