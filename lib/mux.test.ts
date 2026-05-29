@@ -54,22 +54,35 @@ describe('lib/mux — mintPlaybackTokens', () => {
   });
 });
 
-describe('lib/content/vibrant40/days', () => {
-  it('exports DAYS with 8 entries, slugs day-1 through day-8', async () => {
-    const { DAYS, getDay } = await import('./content/vibrant40/days');
-    expect(DAYS).toHaveLength(8);
-    const slugs = DAYS.map((d) => d.slug);
-    expect(slugs).toEqual([
-      'day-1', 'day-2', 'day-3', 'day-4',
-      'day-5', 'day-6', 'day-7', 'day-8',
-    ]);
-    for (const d of DAYS) {
-      expect(d).toHaveProperty('title');
-      expect(d).toHaveProperty('description');
-      expect(d).toHaveProperty('muxPlaybackId');
-      expect(d).toHaveProperty('order');
+describe('lib/content/vibrant40/lessons', () => {
+  it('exports 23 lessons in 8 modules, ordered 1..23', async () => {
+    const { LESSONS, MODULES, TOTAL_LESSONS, getLesson, getAdjacent } =
+      await import('./content/vibrant40/lessons');
+
+    expect(TOTAL_LESSONS).toBe(23);
+    expect(LESSONS).toHaveLength(23);
+    expect(LESSONS.map((l) => l.order)).toEqual(
+      Array.from({ length: 23 }, (_, i) => i + 1),
+    );
+    expect(MODULES).toHaveLength(8);
+    expect(MODULES.map((m) => m.number)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+
+    for (const l of LESSONS) {
+      expect(l).toHaveProperty('title');
+      expect(l).toHaveProperty('slug');
+      expect(l).toHaveProperty('module');
+      expect(l).toHaveProperty('moduleTitle');
     }
-    expect(getDay('day-3')?.order).toBe(3);
-    expect(getDay('nonexistent')).toBeUndefined();
+
+    // 11 video lessons carry a signed playback ID; the rest are text (null).
+    const videos = LESSONS.filter((l) => l.muxPlaybackId !== null);
+    expect(videos).toHaveLength(11);
+
+    expect(getLesson('welcome-to-vibrant40-jumpstart')?.order).toBe(1);
+    expect(getLesson('nonexistent')).toBeUndefined();
+
+    expect(getAdjacent(1).prev).toBeNull();
+    expect(getAdjacent(1).next?.order).toBe(2);
+    expect(getAdjacent(23).next).toBeNull();
   });
 });
