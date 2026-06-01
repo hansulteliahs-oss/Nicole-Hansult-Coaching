@@ -1,8 +1,14 @@
 import type { Metadata } from 'next';
 import { Nav } from '@/components/layout/Nav';
 import { Footer } from '@/components/layout/Footer';
-import { PricingCard } from '@/components/ui/PricingCard';
+import { OfferLadderCard } from '@/components/offers/OfferLadderCard';
+import { Pill } from '@/components/ui/Pill';
 import { offers } from '@/lib/content/offers';
+import {
+  HERO_ID,
+  CONTINUE_IDS,
+  GENTLE_IDS,
+} from '@/lib/content/offerDetails';
 import { site } from '@/lib/content/site';
 
 const BASE_URL =
@@ -18,39 +24,6 @@ export const metadata: Metadata = {
     description:
       'Five ways to work with Nicole Hansult — from a single clinical evaluation to 12 weeks of in-person coaching in Carlsbad, CA.',
   },
-};
-
-const featuresByOfferId: Record<string, string[]> = {
-  cle: [
-    'Medical-grade body composition analysis (Seca mBCA)',
-    'Mobility and movement assessment',
-    'Review of key health and recovery indicators',
-    'Personalized Longevity Roadmap with clear next steps',
-  ],
-  vibrant40: [
-    'Eight days of self-paced online content',
-    'Guided movement programming',
-    'Nutrition and lifestyle foundations',
-    'Accessible for adults 40+ starting from any fitness level',
-  ],
-  strategy: [
-    'Focused 45-minute planning call via Zoom',
-    'Personalized strategy for your goals and schedule',
-    'Accountability and direction',
-    '$88 credits toward the 3-Month Program if booked after',
-  ],
-  'three-month': [
-    'Twelve weeks of in-person coaching in Carlsbad, CA',
-    'Weekly sessions tailored to your Longevity Roadmap',
-    'Nutrition, movement, lifestyle, and mindset support',
-    'Application only — not a cart checkout',
-  ],
-  'everyday-training': [
-    'Drop-in hourly in-person training sessions',
-    'Structured for existing clients with a plan',
-    'In-person in Carlsbad, CA',
-    'No long-term commitment required',
-  ],
 };
 
 const serviceSchema = {
@@ -149,13 +122,6 @@ const faqSchema = {
   ],
 };
 
-function modalityLabel(m: string): string {
-  if (m === 'in-person') return 'In-person · Carlsbad, CA';
-  if (m === 'online-self-paced') return 'Online · Self-paced';
-  if (m === 'zoom') return 'Zoom · 45 minutes';
-  return m;
-}
-
 export default function ServicesPage() {
   return (
     <>
@@ -179,25 +145,45 @@ export default function ServicesPage() {
             accountability, or prefer to start more gradually, there is a clear path forward.
           </p>
         </section>
-        <section className="mx-auto max-w-3xl space-y-8 px-6 pb-24">
-          {offers.map((offer) => {
-            // Phase 5 Plan 02: Vibrant40 CTA POSTs to /api/checkout (Stripe Checkout Session).
-            const isVibrant40 = offer.id === 'vibrant40';
-            return (
-              <PricingCard
-                key={offer.id}
-                name={offer.name}
-                priceLabel={offer.priceLabel}
-                modality={modalityLabel(offer.modality)}
-                blurb={offer.blurb}
-                features={featuresByOfferId[offer.id] ?? []}
-                ctaLabel={isVibrant40 ? 'Buy Vibrant40 — $88' : offer.ctaLabel}
-                ctaHref={offer.ctaHref}
-                ctaFormAction={isVibrant40 ? '/api/checkout' : undefined}
-                highlighted={offer.id === 'three-month'}
-              />
-            );
-          })}
+
+        <section className="mx-auto max-w-6xl space-y-12 px-6 pb-24">
+          {/* Hero — the Clinical Longevity Evaluation, the recommended first step */}
+          <OfferLadderCard id={HERO_ID} />
+
+          {/* Tier 2 — where the CLE leads: ongoing in-person coaching */}
+          <div className="space-y-12">
+            <h2 className="text-grayDeep text-sm uppercase tracking-[0.14em]">
+              Coaching that continues
+            </h2>
+            {CONTINUE_IDS.map((id) => (
+              <OfferLadderCard key={id} id={id} />
+            ))}
+          </div>
+
+          {/* Tier 3 — lower-commitment entry points */}
+          <div className="space-y-12">
+            <h2 className="text-grayDeep text-sm uppercase tracking-[0.14em]">
+              Prefer to start gently?
+            </h2>
+            {GENTLE_IDS.map((id) => (
+              <OfferLadderCard key={id} id={id} />
+            ))}
+          </div>
+
+          {/* Free Guide secondary CTA — not a tier */}
+          <div className="rounded-2xl bg-cardSoft border border-inkFaint p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <p className="text-ink text-lg font-light">
+                Not ready to book? Start with a free guide.
+              </p>
+              <p className="text-inkSoft text-sm">
+                Download the free guide: How to Look and Feel Good Naked Over 40.
+              </p>
+            </div>
+            <Pill href="/look-and-feel-good-naked" variant="orchid" size="md">
+              Download Free Guide
+            </Pill>
+          </div>
         </section>
       </main>
       <Footer />

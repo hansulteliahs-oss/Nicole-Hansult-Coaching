@@ -25,6 +25,10 @@ export const IMG_HERO_BACKGROUND =
 
 export const IMG_ABOUT_PORTRAIT = '/images/nicole-meet-marcy-browe.jpg';
 
+/** About page hero portrait (distinct from the home About section image). */
+export const IMG_ABOUT_HERO_PORTRAIT =
+  '/images/nicole-hansult-about-portrait-carlsbad.jpg';
+
 export const IMG_TESTIMONIAL =
   'https://images.squarespace-cdn.com/content/v1/5b83975d45776e48dcfe0f15/fae3d33a-daa5-4bcc-bf3c-5b4bec2bc31c/Nicole+yellow+top+DSC04555.jpg';
 

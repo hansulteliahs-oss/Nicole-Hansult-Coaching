@@ -18,7 +18,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Label } from '@/components/ui/Label';
 import { Pill } from '@/components/ui/Pill';
 import { image } from '@/lib/images';
-import { IMG_ABOUT_PORTRAIT } from '@/lib/images/keys';
+import { IMG_ABOUT_HERO_PORTRAIT } from '@/lib/images/keys';
 
 export const metadata: Metadata = {
   title: 'About Nicole Hansult',
@@ -56,7 +56,7 @@ export default function AboutPage() {
             </div>
             <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-cardSoft">
               <Image
-                src={image(IMG_ABOUT_PORTRAIT)}
+                src={image(IMG_ABOUT_HERO_PORTRAIT)}
                 alt="Nicole Hansult, functional longevity coach in Carlsbad, CA"
                 fill
                 quality={85}
@@ -166,8 +166,8 @@ export default function AboutPage() {
             {/* Bio break image — interrupts the wall of text */}
             <div className="relative aspect-[16/9] rounded-2xl overflow-hidden bg-cardSoft">
               <Image
-                src="/images/nicole-about-break-marcy-browe.jpg"
-                alt="Nicole Hansult coaching a client in Carlsbad CA"
+                src="/images/nicole-about-break-coaching-carlsbad.jpg"
+                alt="Nicole Hansult coaching a client through a guided ride in Carlsbad CA"
                 fill
                 quality={85}
                 sizes="(max-width: 768px) 100vw, 896px"
