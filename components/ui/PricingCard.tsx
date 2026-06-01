@@ -10,6 +10,7 @@
  */
 import { cn } from '@/lib/cn';
 
+import { Chip } from './Chip';
 import { Pill } from './Pill';
 
 export function PricingCard({
@@ -18,6 +19,7 @@ export function PricingCard({
   modality,
   blurb,
   features,
+  badge,
   ctaLabel,
   ctaHref,
   ctaFormAction,
@@ -25,10 +27,13 @@ export function PricingCard({
   className,
 }: {
   name: string;
-  priceLabel: string;
+  /** Omit to hide the price entirely (e.g. application-only / existing-client offers). */
+  priceLabel?: string;
   modality: string;
   blurb: string;
   features: string[];
+  /** Optional badge chip above the name (e.g. "Best Next Step", "Application Only"). */
+  badge?: string;
   ctaLabel: string;
   ctaHref: string;
   /**
@@ -51,6 +56,11 @@ export function PricingCard({
       )}
     >
       <header className="space-y-2">
+        {badge && (
+          <div>
+            <Chip tint={highlighted ? 'orchid' : 'sky'}>{badge}</Chip>
+          </div>
+        )}
         <h3 className="text-2xl font-light">{name}</h3>
         <p
           className={cn(
@@ -61,14 +71,16 @@ export function PricingCard({
           {modality}
         </p>
       </header>
-      <p
-        className={cn(
-          'text-4xl font-light',
-          highlighted ? 'text-bg' : 'text-ink',
-        )}
-      >
-        {priceLabel}
-      </p>
+      {priceLabel && (
+        <p
+          className={cn(
+            'text-4xl font-light',
+            highlighted ? 'text-bg' : 'text-ink',
+          )}
+        >
+          {priceLabel}
+        </p>
+      )}
       <p
         className={cn(
           'text-base',

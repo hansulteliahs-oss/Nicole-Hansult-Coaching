@@ -43,7 +43,7 @@ export const offers: ReadonlyArray<Offer> = [
   {
     id: 'strategy',
     slug: 'strategy-session',
-    name: '45-Minute Strategy Session',
+    name: '30-Minute Strategy Session',
     price: 88,
     priceLabel: '$88',
     modality: 'zoom',
@@ -69,13 +69,14 @@ export const offers: ReadonlyArray<Offer> = [
   {
     id: 'everyday-training',
     slug: 'everyday-training',
-    name: 'Everyday Training',
+    name: 'Personalized Training & Movement',
     price: 165,
     priceLabel: '$165/hr',
     modality: 'in-person',
     kind: 'product',
-    blurb: 'Drop-in hourly training for existing clients — no commitment.',
-    ctaLabel: 'Book Everyday Training',
+    blurb:
+      'Private 1-on-1 coaching combining personalized strength training, Pilates, and corrective exercise with integrated lifestyle and nutrition support.',
+    ctaLabel: 'Book Personalized Training',
     ctaHref: '/booking-appointment',
   },
 ];

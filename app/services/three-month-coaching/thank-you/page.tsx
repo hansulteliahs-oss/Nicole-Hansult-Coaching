@@ -45,7 +45,7 @@ export default function ThreeMonthApplicationThankYouPage() {
           </h2>
 
           <p className="text-inkSoft text-base leading-relaxed max-w-prose mx-auto mb-8">
-            A 45-minute Strategy Session ($88) gives you a clear next step on
+            A 30-minute Strategy Session ($88) gives you a clear next step on
             its own and credits toward the 3-Month Program if we move forward
             together.
           </p>

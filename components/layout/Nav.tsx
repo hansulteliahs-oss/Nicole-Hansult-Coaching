@@ -25,14 +25,13 @@ const LOGO_ALT = 'Nicole Hansult';
 
 const LINKS = [
   { label: 'About', href: '/about' },
-  { label: 'Services', href: '/#services' },
+  { label: 'Services', href: '/services' },
   { label: 'Testimonials', href: '/testimonials' },
   { label: 'Insights', href: '/insights' },
   { label: 'Contact', href: '/contact' },
 ];
 
 function isActive(pathname: string, href: string): boolean {
-  if (href === '/#services') return false;
   return pathname === href;
 }
 

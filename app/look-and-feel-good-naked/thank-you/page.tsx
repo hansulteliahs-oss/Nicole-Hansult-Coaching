@@ -2,7 +2,7 @@
  * /look-and-feel-good-naked/thank-you
  *
  * Server Component. Shown after a visitor successfully submits the lead-magnet
- * form. Confirms the PDF is on its way and pitches the 45-Minute Strategy
+ * form. Confirms the PDF is on its way and pitches the 30-Minute Strategy
  * Session as the immediate next step (FORM-07).
  *
  * Not indexed — this is a post-submission destination, not a discovery page.
@@ -45,7 +45,7 @@ export default function LeadMagnetThankYouPage() {
           </h2>
 
           <p className="text-inkSoft text-base leading-relaxed max-w-prose mx-auto mb-8">
-            The 45-Minute Strategy Session gives you a clear, actionable roadmap
+            The 30-Minute Strategy Session gives you a clear, actionable roadmap
             tailored to where you are right now — no guesswork, no generic advice.
           </p>
 

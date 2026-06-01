@@ -29,7 +29,7 @@ export default function BookingAppointmentPage() {
           <h1 className="text-4xl font-light mb-4">Book a Session</h1>
           <p className="text-inkSoft text-lg leading-relaxed">
             Ready to take the next step? Use the scheduler below to book your Clinical Longevity
-            Evaluation or 45-Minute Strategy Session. Choose the appointment type that fits where
+            Evaluation or 30-Minute Strategy Session. Choose the appointment type that fits where
             you are right now.
           </p>
         </section>

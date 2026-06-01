@@ -82,11 +82,11 @@ export function Testimonial() {
         </div>
 
         {/* Video testimonial preview card */}
-        <div className="h-[640px]">
+        <div className="aspect-[1559/1009]">
           <FloatingCard
-            imageSrc="/images/nicole-portrait-marcy-browe.jpg"
+            imageSrc="/images/nicole-portrait-living-room.jpg"
             alt="Nicole Hansult, functional longevity coach in Carlsbad CA"
-            objectFit="contain"
+            objectFit="cover"
           />
         </div>
 

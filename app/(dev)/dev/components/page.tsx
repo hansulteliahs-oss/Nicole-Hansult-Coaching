@@ -179,10 +179,10 @@ export default async function ComponentStyleguide({
             <PricingCard
               name="Strategy Session"
               priceLabel="$88"
-              modality="45-min Zoom"
+              modality="30-min Zoom"
               blurb="A focused planning call — credits toward 3-Month."
               features={[
-                '45-minute Zoom',
+                '30-minute Zoom',
                 'Recap email',
                 '$88 credit if you continue',
               ]}
