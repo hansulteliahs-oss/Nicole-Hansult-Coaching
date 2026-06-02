@@ -37,7 +37,7 @@ export function DarkCta() {
           reliable, resilient, and aligned with the life you want to live.
         </p>
         <div className="flex justify-center pt-2">
-          <Pill href="/booking-appointment" variant="sky" size="lg">
+          <Pill href="/booking-appointment" variant="orchid" size="lg">
             Book a Clinical Longevity Evaluation
           </Pill>
         </div>

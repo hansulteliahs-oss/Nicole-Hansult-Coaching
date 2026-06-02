@@ -232,50 +232,62 @@ export default function AboutPage() {
             </div>
 
             {/* What This Work Helps You Do */}
-            <div className="space-y-6">
-              <h2 className="text-ink text-3xl md:text-4xl font-light leading-tight">
-                What This Work Helps You Do
-              </h2>
-              <p className="text-inkSoft text-base">
-                Together, we focus on helping you:
-              </p>
-              <ul className="space-y-2 text-inkSoft text-base">
-                <li className="flex gap-2">
-                  <span>•</span>
-                  <span>improve mobility, posture, and strength</span>
-                </li>
-                <li className="flex gap-2">
-                  <span>•</span>
-                  <span>
-                    understand your body composition and energy patterns
-                  </span>
-                </li>
-                <li className="flex gap-2">
-                  <span>•</span>
-                  <span>
-                    build sustainable habits that actually fit your life
-                  </span>
-                </li>
-                <li className="flex gap-2">
-                  <span>•</span>
-                  <span>feel more confident and capable in your body again</span>
-                </li>
-                <li className="flex gap-2">
-                  <span>•</span>
-                  <span>stay consistent even when motivation fluctuates</span>
-                </li>
-                <li className="flex gap-2">
-                  <span>•</span>
-                  <span>
-                    stop guessing and follow a clear strategy that works for
-                    your body
-                  </span>
-                </li>
-              </ul>
-              <p className="text-inkSoft text-base">
-                Not through extremes. Through clarity, consistency, and the
-                right strategy.
-              </p>
+            <div className="grid gap-8 md:grid-cols-2 md:items-center">
+              <div className="space-y-6">
+                <h2 className="text-ink text-3xl md:text-4xl font-light leading-tight">
+                  What This Work Helps You Do
+                </h2>
+                <p className="text-inkSoft text-base">
+                  Together, we focus on helping you:
+                </p>
+                <ul className="space-y-2 text-inkSoft text-base">
+                  <li className="flex gap-2">
+                    <span>•</span>
+                    <span>improve mobility, posture, and strength</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span>•</span>
+                    <span>
+                      understand your body composition and energy patterns
+                    </span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span>•</span>
+                    <span>
+                      build sustainable habits that actually fit your life
+                    </span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span>•</span>
+                    <span>feel more confident and capable in your body again</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span>•</span>
+                    <span>stay consistent even when motivation fluctuates</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span>•</span>
+                    <span>
+                      stop guessing and follow a clear strategy that works for
+                      your body
+                    </span>
+                  </li>
+                </ul>
+                <p className="text-inkSoft text-base">
+                  Not through extremes. Through clarity, consistency, and the
+                  right strategy.
+                </p>
+              </div>
+              <div className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-cardSoft">
+                <Image
+                  src="/images/what-this-helps-you-do-personalized-movement.webp"
+                  alt="Nicole Hansult guiding personalized functional health, movement, and strength coaching"
+                  fill
+                  quality={85}
+                  sizes="(max-width: 768px) 100vw, 448px"
+                  className="object-cover"
+                />
+              </div>
             </div>
 
             {/* Education & Certifications */}

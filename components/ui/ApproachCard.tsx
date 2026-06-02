@@ -21,7 +21,7 @@ export function ApproachCard({
   return (
     <div
       className={cn(
-        'rounded-2xl bg-orchidSoft p-6 border border-orchid/20',
+        'rounded-2xl bg-sky p-6 border border-skyDeep/30',
         'flex flex-col gap-3',
         className,
       )}

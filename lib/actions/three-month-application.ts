@@ -75,7 +75,33 @@ export async function applicationAction(
   //    application from {name}") for inbox triage. Extending the template
   //    with a `kind` prop is deferred: the subject does the sorting work and
   //    avoids modifying a Phase 3 component currently in production warm-up.
-  const { firstName, lastName, email, phone, goals } = parsed.data;
+  const {
+    firstName,
+    lastName,
+    email,
+    phone,
+    struggle,
+    desiredFeeling,
+    coachingHistory,
+    mobilityLimits,
+    consistencyBlocker,
+    commitment,
+    additionalInfo,
+  } = parsed.data;
+
+  // Compose the intake answers into a single labeled block so we can reuse the
+  // Phase 3 ContactNotification template (whiteSpace: pre-wrap) untouched — it's
+  // mid sender warm-up and we'd rather not edit a production email component.
+  const blank = (v: string) => (v.trim().length > 0 ? v : '—');
+  const message = [
+    `#1 struggle (physical / mental / emotional):\n${blank(struggle)}`,
+    `Would love to feel / experience differently in the next 30–90 days:\n${blank(desiredFeeling)}`,
+    `Past work with a coach / PT / professional — what worked & didn't:\n${blank(coachingHistory)}`,
+    `Movement or mobility that feels limited / challenging:\n${blank(mobilityLimits)}`,
+    `Biggest blocker to staying consistent:\n${consistencyBlocker}`,
+    `Commitment to investing in their health right now:\n${commitment}`,
+    `Anything else Nicole should know:\n${blank(additionalInfo)}`,
+  ].join('\n\n');
 
   const { error: emailError } = await resend.emails.send({
     from:
@@ -90,7 +116,7 @@ export async function applicationAction(
       email,
       phone,
       service: '3-Month Coaching Program',
-      message: goals,
+      message,
       _hp: '',
     }),
   });
@@ -114,7 +140,19 @@ export async function applicationAction(
         form_type: 'contact', // closest existing form_type CHECK value
         kind: 'three-month-application', // discriminator added by 002_paywall.sql
         email,
-        data: { firstName, lastName, email, phone, goals },
+        data: {
+          firstName,
+          lastName,
+          email,
+          phone,
+          struggle,
+          desiredFeeling,
+          coachingHistory,
+          mobilityLimits,
+          consistencyBlocker,
+          commitment,
+          additionalInfo,
+        },
       });
       if (dbError) {
         console.error('[applicationAction] Supabase insert error:', dbError);

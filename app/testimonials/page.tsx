@@ -6,6 +6,7 @@
  * Social proof badges rendered as text chips — no external image URLs.
  */
 import type { Metadata } from 'next';
+import Image from 'next/image';
 
 import { Nav } from '@/components/layout/Nav';
 import { Footer } from '@/components/layout/Footer';
@@ -29,13 +30,32 @@ const SOCIAL_PROOF_BADGES = [
   'Best Local Fitness Influencer 2024',
 ];
 
+// Review destinations — direct to the live review pages.
+// Google: canonical Maps listing via CID (resolves to "Nicole Hansult Coaching - Google Maps").
+const GOOGLE_REVIEWS_URL = 'https://www.google.com/maps?cid=2333186323496371205';
+const YELP_REVIEWS_URL = 'https://www.yelp.com/biz/nicole-hansult-coaching-encinitas';
+
 export default function TestimonialsPage() {
   return (
     <>
       <Nav />
       <main className="bg-bg">
+        {/* Hero banner — scraped from live site (functional-group-training-carlsbad) */}
+        <section className="mx-auto max-w-6xl px-6 pt-28 md:pt-32">
+          <div className="relative aspect-[1280/720] w-full overflow-hidden rounded-2xl">
+            <Image
+              src="/images/functional-group-training-carlsbad.jpg"
+              alt="Nicole Hansult leading a functional group training session in Carlsbad, CA"
+              fill
+              priority
+              sizes="(max-width: 1152px) 100vw, 1152px"
+              className="object-cover"
+            />
+          </div>
+        </section>
+
         {/* Hero heading */}
-        <section className="mx-auto max-w-5xl px-6 pt-32 md:pt-40 pb-12 text-center">
+        <section className="mx-auto max-w-5xl px-6 pt-10 md:pt-12 pb-12 text-center">
           <h1 className="font-serif text-4xl text-ink md:text-5xl">
             Real People. Real Results.
           </h1>
@@ -114,6 +134,19 @@ export default function TestimonialsPage() {
           </div>
         </section>
 
+        {/* Section image — scraped from live site (functional-training-over-40-carlsbad) */}
+        <section className="mx-auto max-w-5xl px-6 pb-12">
+          <div className="relative aspect-[1280/720] w-full overflow-hidden rounded-2xl">
+            <Image
+              src="/images/functional-training-over-40-carlsbad.jpg"
+              alt="Nicole Hansult guiding a client through strength training and functional movement for healthy aging after 40"
+              fill
+              sizes="(max-width: 1024px) 100vw, 1024px"
+              className="object-cover"
+            />
+          </div>
+        </section>
+
         {/* Strength, Confidence & Energy */}
         <section className="mx-auto max-w-5xl px-6 pb-10">
           <h2 className="text-2xl font-medium text-ink mb-2">Strength, Confidence &amp; Energy</h2>
@@ -123,10 +156,10 @@ export default function TestimonialsPage() {
           </p>
           <div className="space-y-4">
             {[
-              { quote: "I'm at my ideal weight and continue to grow stronger and build muscle daily.", attr: 'Jayne C., North County San Diego' },
-              { quote: "She helped me realize I'm stronger than I think.", attr: 'Hillary S., North County San Diego' },
+              { quote: "I'm at my ideal weight and continue to grow stronger and build muscle daily.", attr: 'Jayne C., Encinitas, CA' },
+              { quote: "She helped me realize I'm stronger than I think.", attr: 'Hillary S., Encinitas, CA' },
               { quote: 'What I learned from Nicole completely changed my life for the long haul.', attr: 'Brie M., Carlsbad, CA' },
-              { quote: "I feel stronger, more confident, and I've seen real progress.", attr: 'Monica B., North County San Diego' },
+              { quote: "I feel stronger, more confident, and I've seen real progress.", attr: 'Monica B., Encinitas, CA' },
             ].map(({ quote, attr }) => (
               <blockquote key={attr} className="border-l-2 border-sky pl-4">
                 <p className="text-ink leading-relaxed">&ldquo;{quote}&rdquo;</p>
@@ -136,17 +169,119 @@ export default function TestimonialsPage() {
           </div>
         </section>
 
-        {/* Recognition */}
-        <section className="bg-card mx-auto max-w-5xl rounded-2xl mx-6 md:mx-auto px-8 py-12 mb-10">
+        {/* Section image — scraped from live site (active-aging-strength-and-mobility-over-40) */}
+        <section className="mx-auto max-w-5xl px-6 pb-12">
+          <div className="relative aspect-[1280/720] w-full overflow-hidden rounded-2xl">
+            <Image
+              src="/images/active-aging-strength-and-mobility-over-40.jpg"
+              alt="Nicole Hansult leading a beach workout focused on strength, mobility, and active aging for adults over 40"
+              fill
+              sizes="(max-width: 1024px) 100vw, 1024px"
+              className="object-cover"
+            />
+          </div>
+        </section>
+
+        {/* Aging & Staying Active */}
+        <section className="mx-auto max-w-5xl px-6 pb-10">
+          <h2 className="text-2xl font-medium text-ink mb-2">Aging &amp; Staying Active</h2>
+          <p className="text-inkSoft mb-2">
+            Many of Nicole&apos;s clients are active adults or former athletes who want to
+            maintain mobility, strength, balance, and independence as they age.
+          </p>
+          <p className="text-inkSoft mb-6">
+            The goal isn&apos;t simply to exercise more. It&apos;s to stay strong, mobile, and
+            fully engaged in the life you want to live.
+          </p>
+          <div className="space-y-4">
+            {[
+              { quote: 'Nicole doesn’t just train bodies, she transforms lives.', attr: 'Enid, Encinitas, CA' },
+              { quote: 'I intend to be a client for the rest of my life.', attr: 'Linda G., Encinitas, CA' },
+              { quote: 'My mobility improved and I can walk more confidently with much less pain.', attr: 'Karin S., Encinitas, CA' },
+              { quote: "Every detail was thoughtfully executed. We're thrilled with the outcome.", attr: 'Greg R., Carlsbad, CA' },
+            ].map(({ quote, attr }) => (
+              <blockquote key={attr} className="border-l-2 border-orchid pl-4">
+                <p className="text-ink leading-relaxed">&ldquo;{quote}&rdquo;</p>
+                <footer className="mt-1 text-xs text-inkSoft">— {attr}</footer>
+              </blockquote>
+            ))}
+          </div>
+        </section>
+
+        {/* Recognition — award badges + clickable Google/Yelp review logos (scraped from live site) */}
+        <section className="bg-card mx-auto max-w-5xl rounded-2xl mx-6 md:mx-auto px-8 py-12 mb-10 text-center">
           <h2 className="text-2xl font-medium text-ink mb-2">Recognition &amp; Reviews</h2>
-          <h3 className="text-base font-medium text-inkSoft mb-4">
+          <h3 className="text-base font-medium text-inkSoft mb-8">
             5-Star Rated by Clients Across North County San Diego
           </h3>
-          <ul className="list-disc list-inside space-y-1 text-ink">
-            <li>Best Personal Trainer North County 2024</li>
-            <li>Best Local Fitness Influencer 2024</li>
-            <li>5-star Google and Yelp ratings</li>
-          </ul>
+
+          {/* Award badges */}
+          <div className="flex flex-wrap items-center justify-center gap-8">
+            <Image
+              src="/images/best-personal-trainer-north-county-2024-nicole-hansult.png"
+              alt="Winner — North County San Diego Best Personal Trainer 2024"
+              width={140}
+              height={140}
+              className="h-28 w-28 md:h-32 md:w-32 object-contain"
+            />
+            <Image
+              src="/images/best-local-fitness-influencer-2024-nicole-hansult.png"
+              alt="Best Local Fitness Influencer 2024"
+              width={140}
+              height={140}
+              className="h-28 w-28 md:h-32 md:w-32 object-contain"
+            />
+          </div>
+
+          {/* 5-star strip */}
+          <a
+            href={GOOGLE_REVIEWS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-8 inline-block transition-opacity hover:opacity-80"
+          >
+            <Image
+              src="/images/5-star-client-reviews-nicole-hansult.png"
+              alt="Five-star client reviews for Nicole Hansult"
+              width={266}
+              height={50}
+              className="h-auto w-56 object-contain"
+            />
+          </a>
+
+          {/* Clickable Google + Yelp review logos */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-10">
+            <a
+              href={GOOGLE_REVIEWS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Read Nicole Hansult's 5-star Google reviews"
+              className="transition-opacity hover:opacity-80"
+            >
+              <Image
+                src="/images/google-reviews-nicole-hansult.png"
+                alt="Read Nicole Hansult's 5-star Google reviews"
+                width={120}
+                height={107}
+                className="h-16 w-auto object-contain"
+              />
+            </a>
+            <a
+              href={YELP_REVIEWS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Read Nicole Hansult's 5-star Yelp reviews"
+              className="transition-opacity hover:opacity-80"
+            >
+              <Image
+                src="/images/yelp-reviews-nicole-hansult.png"
+                alt="Read Nicole Hansult's 5-star Yelp reviews"
+                width={106}
+                height={106}
+                className="h-16 w-auto object-contain"
+              />
+            </a>
+          </div>
         </section>
 
         {/* Closing CTA */}

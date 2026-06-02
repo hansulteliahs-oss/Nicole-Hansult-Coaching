@@ -60,7 +60,14 @@ const validInput: ThreeMonthApplicationInput = {
   lastName: 'Smith',
   email: 'jane@example.com',
   phone: '+1 760 555 0100',
-  goals: 'I want to rebuild strength after menopause and feel confident in my body again.',
+  struggle:
+    'I want to rebuild strength after menopause and feel confident in my body again.',
+  desiredFeeling: 'Energetic, strong, and at home in my body.',
+  coachingHistory: 'Worked with a trainer once — loved the accountability.',
+  mobilityLimits: 'Tight hips and a cranky lower back.',
+  consistencyBlocker: 'Accountability',
+  commitment: 'Very committed',
+  additionalInfo: '',
   _hp: '',
 };
 
@@ -95,9 +102,57 @@ describe('threeMonthApplicationSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects short goals', () => {
-    const result = threeMonthApplicationSchema.safeParse({ ...validInput, goals: 'short' });
+  it('rejects short struggle', () => {
+    const result = threeMonthApplicationSchema.safeParse({ ...validInput, struggle: 'short' });
     expect(result.success).toBe(false);
+  });
+
+  it('rejects an invalid consistencyBlocker option', () => {
+    const result = threeMonthApplicationSchema.safeParse({
+      ...validInput,
+      consistencyBlocker: 'Something else',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a missing consistencyBlocker', () => {
+    const { consistencyBlocker, ...rest } = validInput;
+    void consistencyBlocker;
+    const result = threeMonthApplicationSchema.safeParse(rest);
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an invalid commitment option', () => {
+    const result = threeMonthApplicationSchema.safeParse({
+      ...validInput,
+      commitment: 'Maybe later',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a missing commitment', () => {
+    const { commitment, ...rest } = validInput;
+    void commitment;
+    const result = threeMonthApplicationSchema.safeParse(rest);
+    expect(result.success).toBe(false);
+  });
+
+  it('defaults optional intake fields to empty strings', () => {
+    const result = threeMonthApplicationSchema.safeParse({
+      firstName: 'Jane',
+      lastName: 'Smith',
+      email: 'jane@example.com',
+      phone: '+1 760 555 0100',
+      struggle: 'I want to rebuild strength and feel confident again.',
+      consistencyBlocker: 'Time constraints',
+      commitment: 'Somewhat committed',
+      _hp: '',
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.desiredFeeling).toBe('');
+      expect(result.data.additionalInfo).toBe('');
+    }
   });
 
   it('rejects non-empty honeypot at schema layer', () => {

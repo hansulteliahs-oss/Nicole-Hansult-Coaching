@@ -21,6 +21,7 @@ export const metadata: Metadata = {
 
 const threeMonth = offers.find((o) => o.id === 'three-month')!;
 const strategySession = offers.find((o) => o.id === 'strategy')!;
+const everydayTraining = offers.find((o) => o.id === 'everyday-training')!;
 
 export default function ThreeMonthCoachingPage() {
   return (
@@ -29,9 +30,14 @@ export default function ThreeMonthCoachingPage() {
       <main className="bg-bg">
         <section className="mx-auto max-w-3xl px-6 pt-24 pb-16">
           {/* Hero */}
-          <h1 className="text-4xl font-light mb-3">{threeMonth.name}</h1>
-          <p className="text-sm uppercase tracking-[0.14em] text-grayDeep mb-10">
-            {threeMonth.priceLabel} &middot; In-person &middot; Carlsbad, CA &middot; Application only
+          <h1 className="text-4xl font-light mb-3">Apply for Eligibility</h1>
+          <p className="text-sm uppercase tracking-[0.14em] text-grayDeep mb-6">
+            In-person &middot; Carlsbad, CA &middot; Application only
+          </p>
+          <p className="text-inkSoft text-lg leading-relaxed mb-10">
+            This is the first step for both the {threeMonth.name} and{' '}
+            {everydayTraining.name}. Both are in-person, 1:1 coaching in Carlsbad — tell Nicole a
+            bit about yourself and she&apos;ll help you find the right fit.
           </p>
 
           {/* Body sections — AI draft in Nicole's voice */}
@@ -91,7 +97,7 @@ export default function ThreeMonthCoachingPage() {
           {/* Phase 5 — FORM-03 inline application form */}
           <section id="apply" className="mt-12">
             <h2 className="text-2xl font-light text-ink mb-2">
-              Apply for the 3-Month Program
+              Apply for Eligibility
             </h2>
             <p className="text-sm text-inkSoft mb-8">
               Tell Nicole a bit about yourself and what you&apos;d like to work

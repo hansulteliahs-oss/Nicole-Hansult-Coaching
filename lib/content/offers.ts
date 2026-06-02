@@ -63,7 +63,7 @@ export const offers: ReadonlyArray<Offer> = [
     kind: 'application-gate',
     blurb:
       'Twelve weeks of in-person coaching — application only, not a checkout.',
-    ctaLabel: 'Apply for the 3-Month Program',
+    ctaLabel: 'Apply for Premium Coaching',
     ctaHref: '/services/three-month-coaching',
   },
   {
@@ -76,7 +76,7 @@ export const offers: ReadonlyArray<Offer> = [
     kind: 'product',
     blurb:
       'Private 1-on-1 coaching combining personalized strength training, Pilates, and corrective exercise with integrated lifestyle and nutrition support.',
-    ctaLabel: 'Book Personalized Training',
-    ctaHref: '/booking-appointment',
+    ctaLabel: 'Apply for Eligibility',
+    ctaHref: '/services/three-month-coaching',
   },
 ];

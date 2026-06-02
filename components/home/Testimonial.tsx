@@ -48,22 +48,36 @@ export function Testimonial() {
         </div>
 
         {/* Review platforms + award badges on the same row */}
-        <div className="flex flex-wrap gap-6 items-center">
+        <div className="flex flex-wrap gap-8 items-center">
           <a
-            href="https://share.google/dOvMvZt8LZxZg7qBw"
+            href="https://www.google.com/maps?cid=2333186323496371205"
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-full bg-cardSoft border border-inkFaint px-4 py-2 text-sm text-ink hover:bg-card hover:border-orchid/40 transition-colors"
+            aria-label="Read Nicole Hansult's 5-star Google reviews"
+            className="transition-opacity hover:opacity-80"
           >
-            Google Reviews ★★★★★
+            <Image
+              src="/images/google-reviews-nicole-hansult.png"
+              alt="Read Nicole Hansult's 5-star Google reviews"
+              width={120}
+              height={107}
+              className="h-16 w-auto object-contain"
+            />
           </a>
           <a
             href="https://www.yelp.com/biz/nicole-hansult-coaching-encinitas"
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-full bg-cardSoft border border-inkFaint px-4 py-2 text-sm text-ink hover:bg-card hover:border-orchid/40 transition-colors"
+            aria-label="Read Nicole Hansult's 5-star Yelp reviews"
+            className="transition-opacity hover:opacity-80"
           >
-            Yelp Reviews ★★★★★
+            <Image
+              src="/images/yelp-reviews-nicole-hansult.png"
+              alt="Read Nicole Hansult's 5-star Yelp reviews"
+              width={106}
+              height={106}
+              className="h-16 w-auto object-contain"
+            />
           </a>
           <Image
             src="/images/best-personal-trainer-north-county-2024-nicole-hansult.png"
