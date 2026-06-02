@@ -23,7 +23,6 @@ import { config } from 'dotenv';
 config({ path: '.env.local' });
 
 import { readFileSync } from 'fs';
-import React from 'react';
 import { Resend } from 'resend';
 
 import { PurchaseConfirmation } from '@/components/email/PurchaseConfirmation';
