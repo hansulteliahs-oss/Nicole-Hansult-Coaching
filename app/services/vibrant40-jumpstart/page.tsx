@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import { Nav } from '@/components/layout/Nav';
 import { Footer } from '@/components/layout/Footer';
 import { Pill } from '@/components/ui/Pill';
+import { FaqSection } from '@/components/ui/FaqSection';
 import { offers } from '@/lib/content/offers';
+import { vibrant40Faqs, faqPageSchema } from '@/lib/content/faqs';
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nicole-hansult-coaching.vercel.app';
@@ -20,9 +22,15 @@ export const metadata: Metadata = {
 
 const vibrant40 = offers.find((o) => o.id === 'vibrant40')!;
 
+const faqSchema = faqPageSchema(vibrant40Faqs);
+
 export default function Vibrant40JumpstartPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <Nav />
       <main className="bg-bg">
         <section className="mx-auto max-w-3xl px-6 pt-24 pb-16">
@@ -63,7 +71,7 @@ export default function Vibrant40JumpstartPage() {
           {/* Phase 5 Plan 02 CTA — form POST to /api/checkout creates Stripe Checkout Session */}
           <div className="mt-10 flex flex-col items-start gap-3">
             <form action="/api/checkout" method="POST">
-              <Pill variant="dark" size="md" type="submit">
+              <Pill variant="orchid" size="md" type="submit">
                 Buy Vibrant40 — $88
               </Pill>
             </form>
@@ -71,6 +79,9 @@ export default function Vibrant40JumpstartPage() {
               Secure checkout via Stripe. You&apos;ll set your password after payment.
             </p>
           </div>
+
+          {/* FAQ — ported from the live Vibrant40 Jumpstart enrollment page */}
+          <FaqSection items={vibrant40Faqs} className="mt-16" />
         </section>
       </main>
       <Footer />

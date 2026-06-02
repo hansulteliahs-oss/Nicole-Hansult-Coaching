@@ -42,14 +42,14 @@ export default function HomePage() {
       <main className="bg-bg">
         <Hero />
         <Mantra />
+        <Approach />
+        <Seca />
+        <DarkCta />
         <About />
         <Services />
-        <Seca />
-        <Approach />
-        <Pricing />
         <Testimonial />
+        <Pricing />
         <Journal />
-        <DarkCta />
       </main>
       <Footer />
     </>
