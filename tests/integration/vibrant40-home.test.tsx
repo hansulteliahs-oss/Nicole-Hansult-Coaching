@@ -1,12 +1,18 @@
 /**
  * Phase 5 Plan 05 Task 2 — /vibrant40 course home (PAY-10) + /vibrant40/welcome (PAY-09).
  *
- * Tests render the Server Components directly with mocked Supabase + DAYS.
+ * Tests render the Server Components directly with mocked Supabase + content.
  * react-server output is awaited and inspected as a tree (no DOM needed).
  *
- * Stub seeded in Plan 01 Wave 0; filled in here.
+ * Course model: 8 modules ("Days"), 23 lessons total. Each module renders as
+ * a <section> with its lessons in a <ul> of <LessonCard>s. Completion reflects
+ * the per-user `lesson_progress` table, keyed by lesson slug (column day_slug).
+ * Expectations are derived from the real content index so these tests track the
+ * rendering logic rather than hardcoded counts.
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+import { LESSONS, MODULES, TOTAL_LESSONS } from '@/lib/content/vibrant40/lessons';
 
 // ---- Mocks (must be hoisted before component imports) ---------------------
 
@@ -63,7 +69,7 @@ describe('/vibrant40 course home page', () => {
     );
   });
 
-  it('renders 8 day cards in order day-1 through day-8 for an authed member', async () => {
+  it('renders every lesson, grouped into one module section per Day, in global order', async () => {
     mocks.getClaims.mockResolvedValueOnce({
       data: { claims: { sub: 'user-1', email: 'member@example.com' } },
     });
@@ -72,59 +78,54 @@ describe('/vibrant40 course home page', () => {
     const { default: CourseHome } = await import('@/app/vibrant40/page');
     const tree: any = await CourseHome();
 
-    // Find <ul> in tree, count children
-    const ul = findNode(tree, (n) => n?.type === 'ul');
-    expect(ul).toBeTruthy();
-    const items = (Array.isArray(ul.props.children) ? ul.props.children : [ul.props.children]).filter(Boolean);
-    expect(items.length).toBe(8);
+    // One <ul> per module (Day).
+    const lists = findAll(tree, (n) => n?.type === 'ul');
+    expect(lists.length).toBe(MODULES.length);
 
-    // Each item should reference day-1..day-8 in order
-    items.forEach((item: any, idx: number) => {
-      const expected = `day-${idx + 1}`;
-      const dayCard = item.props.children;
-      expect(dayCard.props.day.slug).toBe(expected);
+    // Every lesson rendered as a LessonCard, in global order.
+    const cards = lessonCards(tree);
+    expect(cards.length).toBe(TOTAL_LESSONS);
+    cards.forEach((card, idx) => {
+      expect(card.props.lesson.slug).toBe(LESSONS[idx].slug);
     });
   });
 
-  it('marks completed days with `completed: true` from lesson_progress rows', async () => {
+  it('marks completed lessons with `completed: true` from lesson_progress rows', async () => {
+    const doneA = LESSONS[0].slug;
+    const doneB = LESSONS[2].slug;
     mocks.getClaims.mockResolvedValueOnce({
       data: { claims: { sub: 'user-1', email: 'member@example.com' } },
     });
-    mockLessonProgress([{ day_slug: 'day-1' }, { day_slug: 'day-3' }]);
+    mockLessonProgress([{ day_slug: doneA }, { day_slug: doneB }]);
 
     const { default: CourseHome } = await import('@/app/vibrant40/page');
     const tree: any = await CourseHome();
-
-    const ul = findNode(tree, (n) => n?.type === 'ul');
-    const items = (Array.isArray(ul.props.children) ? ul.props.children : [ul.props.children]).filter(Boolean);
 
     const completedMap: Record<string, boolean> = {};
-    items.forEach((item: any) => {
-      const dc = item.props.children;
-      completedMap[dc.props.day.slug] = dc.props.completed;
+    lessonCards(tree).forEach((card) => {
+      completedMap[card.props.lesson.slug] = card.props.completed;
     });
 
-    expect(completedMap['day-1']).toBe(true);
-    expect(completedMap['day-2']).toBe(false);
-    expect(completedMap['day-3']).toBe(true);
-    expect(completedMap['day-4']).toBe(false);
-    expect(completedMap['day-8']).toBe(false);
+    expect(completedMap[doneA]).toBe(true);
+    expect(completedMap[doneB]).toBe(true);
+    expect(completedMap[LESSONS[1].slug]).toBe(false);
+    expect(completedMap[LESSONS[3].slug]).toBe(false);
   });
 
-  it('shows counter "2 of 8 days complete" when 2 rows returned', async () => {
+  it(`shows counter "2 of ${TOTAL_LESSONS} lessons complete" when 2 rows returned`, async () => {
     mocks.getClaims.mockResolvedValueOnce({
       data: { claims: { sub: 'user-1', email: 'member@example.com' } },
     });
-    mockLessonProgress([{ day_slug: 'day-1' }, { day_slug: 'day-5' }]);
+    mockLessonProgress([{ day_slug: LESSONS[0].slug }, { day_slug: LESSONS[4].slug }]);
 
     const { default: CourseHome } = await import('@/app/vibrant40/page');
     const tree: any = await CourseHome();
 
-    const counter = findNode(tree, (n) => typeof n === 'object' && /of 8 days complete/.test(extractText(n)));
-    expect(extractText(counter)).toMatch(/2\s+of 8 days complete/);
+    const text = extractText(tree);
+    expect(text).toMatch(new RegExp(`2\\s+of\\s+${TOTAL_LESSONS}\\s+lessons complete`));
   });
 
-  it('shows counter "0 of 8 days complete" when no progress rows', async () => {
+  it(`shows counter "0 of ${TOTAL_LESSONS} lessons complete" when no progress rows`, async () => {
     mocks.getClaims.mockResolvedValueOnce({
       data: { claims: { sub: 'user-1', email: 'member@example.com' } },
     });
@@ -134,7 +135,7 @@ describe('/vibrant40 course home page', () => {
     const tree: any = await CourseHome();
 
     const text = extractText(tree);
-    expect(text).toMatch(/0\s+of 8 days complete/);
+    expect(text).toMatch(new RegExp(`0\\s+of\\s+${TOTAL_LESSONS}\\s+lessons complete`));
   });
 
   it('exports dynamic = "force-dynamic" (PITFALL 6 guard)', async () => {
@@ -178,6 +179,14 @@ describe('/vibrant40/welcome orientation page', () => {
 
 // ---- helpers --------------------------------------------------------------
 
+/** Every <LessonCard> element in the tree (carries lesson + completed props). */
+function lessonCards(tree: any): any[] {
+  return findAll(
+    tree,
+    (n) => typeof n === 'object' && n?.props && 'lesson' in n.props && 'completed' in n.props,
+  );
+}
+
 function findNode(node: any, predicate: (n: any) => boolean): any {
   if (node == null) return null;
   if (predicate(node)) return node;
@@ -192,6 +201,17 @@ function findNode(node: any, predicate: (n: any) => boolean): any {
     return findNode(node.props.children, predicate);
   }
   return null;
+}
+
+function findAll(node: any, predicate: (n: any) => boolean, acc: any[] = []): any[] {
+  if (node == null) return acc;
+  if (typeof node === 'object' && !Array.isArray(node) && predicate(node)) acc.push(node);
+  if (Array.isArray(node)) {
+    for (const c of node) findAll(c, predicate, acc);
+    return acc;
+  }
+  if (typeof node === 'object' && node.props) findAll(node.props.children, predicate, acc);
+  return acc;
 }
 
 function extractText(node: any): string {
