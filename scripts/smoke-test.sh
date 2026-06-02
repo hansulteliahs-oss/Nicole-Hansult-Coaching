@@ -3,6 +3,8 @@
 # Requires a running Next.js server (pnpm dev or pnpm start).
 # Usage: BASE_URL=http://localhost:3000 bash scripts/smoke-test.sh
 #
+# Post-cutover MIG-11 run: BASE_URL=https://nicolehansultcoaching.com bash scripts/smoke-test.sh
+#
 # Note on MKTG-16 (og:image): Next.js 16 with Turbopack serves head metadata
 # (og:image, og:type, etc.) via RSC streaming segments, not in the static HTML
 # shell. Against localhost, curl sees the static shell only. The check below
@@ -56,5 +58,52 @@ check "MKTG-18: /start-here -> 301/308"           "curl -sI '$BASE/start-here' |
 check "MKTG-18: /vibrant40-jumpstart-enroll -> 301" "curl -sI '$BASE/services/vibrant40-jumpstart-enroll' | grep -q '30[18]'"
 
 echo ""
+echo "=== Phase 6 / MIG-11 — Cutover Smoke (automatable checks) ==="
+# (a) Apex root returns 200
+check "MIG-11: apex root returns 200" "curl -sf -o /dev/null '${BASE}/'"
+
+# (b) /vibrant40/days/day-1 returns 200 OR redirects to /login (anonymous gate)
+#     Both are acceptable — 200 (logged in), 302/307 (anonymous → login redirect)
+check "MIG-11: /vibrant40/days/day-1 is 200/302/307 (gated or open)" \
+  "curl -sI -o /dev/null -w '%{http_code}' '${BASE}/vibrant40/days/day-1' | grep -qE '^(200|302|307)$'"
+
+# (c) /set-password returns 200
+check "MIG-11: /set-password returns 200" "curl -sf -o /dev/null '${BASE}/set-password'"
+
+# (d) HTTPS cert valid (curl over https succeeds — invalid cert would error with exit 60)
+if [[ "$BASE" == https://* ]]; then
+  check "MIG-11: HTTPS cert valid" "curl -sf -o /dev/null '${BASE}'"
+else
+  echo "  SKIP: MIG-11 HTTPS cert check (BASE is not https — run with apex domain post-cutover)"
+fi
+
+echo ""
 echo "Results: $PASS passed, $FAIL failed"
-[ "$FAIL" -eq 0 ] && echo "ALL PASS" && exit 0 || exit 1
+
+# ============================================================
+# MANUAL CHECKLIST (cannot be automated — run by hand on cutover day)
+# ============================================================
+echo ""
+echo "============================================================"
+echo "MANUAL CHECKLIST — run by hand on cutover day (MIG-11)"
+echo "============================================================"
+echo "  1. Live \$0.50 purchase via Stripe Checkout:"
+echo "     - Visit ${BASE}/services/vibrant40-jumpstart → click Buy Now"
+echo "     - Complete Stripe test checkout (PHASE5050 coupon → \$0.50)"
+echo "     - Confirm: webhook returns 200 in Stripe Dashboard event log"
+echo "     - Confirm: vibrant40_members row appears in Supabase Dashboard"
+echo "     - Confirm: migration/purchase email arrives at buyer inbox"
+echo "  2. Set password flow:"
+echo "     - Click set-password link in the email → land on ${BASE}/set-password"
+echo "     - Set a password and submit"
+echo "     - Confirm: redirected to /vibrant40/welcome"
+echo "  3. Login + video:"
+echo "     - Log in at ${BASE}/login"
+echo "     - Navigate to /vibrant40 → click Day 1"
+echo "     - Confirm: Mux video plays (Day 1 content visible)"
+echo "  4. Stripe Dashboard: update live webhook URL:"
+echo "     - Stripe Dashboard → Developers → Webhooks → live endpoint"
+echo "     - Change URL to: https://nicolehansultcoaching.com/api/webhooks/stripe"
+echo "============================================================"
+
+[ "$FAIL" -eq 0 ] && echo "ALL AUTOMATABLE CHECKS PASS" && exit 0 || exit 1
