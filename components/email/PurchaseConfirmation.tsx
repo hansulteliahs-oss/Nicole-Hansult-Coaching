@@ -21,12 +21,19 @@ interface PurchaseConfirmationProps {
  */
 export function PurchaseConfirmation({ url, kind }: PurchaseConfirmationProps) {
   const heading =
-    kind === 'purchase' ? 'Welcome to Vibrant40' : 'Set your password for Vibrant40';
+    kind === 'purchase' ? 'Welcome to Vibrant40' : 'Your Vibrant40 experience just got better';
 
   const body =
     kind === 'purchase'
       ? 'Thanks for your purchase. Click below to set your password and unlock your 8-day course.'
-      : 'Click below to set a password for your existing Vibrant40 membership.';
+      : 'Set your password to access your Vibrant40 content on the new site.';
+
+  // TTL line: purchase flow = 30 days (buyer may act later);
+  // migration = 7 days per MIG-03 (coordinated blast, immediate action expected).
+  const ttlLine =
+    kind === 'purchase'
+      ? 'This link is active for 30 days and works only once.'
+      : 'This link is active for 7 days and works only once.';
 
   return (
     <BrandedLayout>
@@ -59,7 +66,7 @@ export function PurchaseConfirmation({ url, kind }: PurchaseConfirmationProps) {
           lineHeight: '1.6',
         }}
       >
-        This link is active for 30 days and works only once.
+        {ttlLine}
       </Text>
       <Button
         href={url}
