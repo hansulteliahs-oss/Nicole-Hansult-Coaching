@@ -16,7 +16,7 @@ import { IMG_SECA_SCANNER } from '@/lib/images/keys';
 
 export function Seca() {
   return (
-    <section className="bg-bg px-6 py-24">
+    <section className="bg-bg px-6 pt-12 pb-24">
       <div className="mx-auto max-w-6xl grid md:grid-cols-2 gap-12 items-center">
         <div className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-cardSoft">
           <Image

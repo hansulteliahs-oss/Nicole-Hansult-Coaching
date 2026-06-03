@@ -36,7 +36,7 @@ const PILLARS = [
 
 export function Approach() {
   return (
-    <section className="bg-bg px-6 py-24">
+    <section className="bg-bg px-6 pt-24 pb-12">
       <div className="mx-auto max-w-6xl space-y-12">
         <div className="space-y-4 max-w-2xl">
           <Label>The approach</Label>
