@@ -96,10 +96,10 @@ export function Testimonial() {
         </div>
 
         {/* Video testimonial preview card */}
-        <div className="aspect-[1559/1009]">
+        <div className="aspect-[1600/1067]">
           <FloatingCard
-            imageSrc="/images/nicole-portrait-living-room.jpg"
-            alt="Nicole Hansult, functional longevity coach in Carlsbad CA"
+            imageSrc="/images/nicole-clients-highfive.jpg"
+            alt="Nicole Hansult high-fiving a client in Carlsbad CA"
             objectFit="cover"
           />
         </div>
