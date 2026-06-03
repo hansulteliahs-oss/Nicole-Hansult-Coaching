@@ -79,7 +79,9 @@ export default function ServicesPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
             <div className="relative z-10 max-w-2xl space-y-4 px-8 pb-10 pt-12 md:px-12 md:pb-12 text-white">
               <h1 className="text-4xl md:text-5xl font-light leading-tight">
-                How You Can Work With Me
+                How You Can
+                <br />
+                Work With Me
               </h1>
               <p className="text-white/90 text-lg leading-relaxed">
                 There isn&apos;t just one way to begin.
