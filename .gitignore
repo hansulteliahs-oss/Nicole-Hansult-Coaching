@@ -40,6 +40,10 @@ yarn-error.log*
 # supabase
 supabase/.temp/
 
+# member migration artifacts (PII + live tokens — never commit)
+migration-members.csv
+migration-report.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

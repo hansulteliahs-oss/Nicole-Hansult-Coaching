@@ -43,6 +43,20 @@ describe('parseMembersCsv', () => {
     const csv = 'Name,Phone,Zip\nJane Doe,555-1234,92008';
     expect(() => parseMembersCsv(csv)).toThrow(/email/i);
   });
+
+  it('handles fully-quoted Squarespace export (quoted header + cells)', () => {
+    // Real Squarespace exports quote every field.
+    const csv = '"Email","First Name","Last Name"\n"Jane@Example.com","Jane","Doe"';
+    const result = parseMembersCsv(csv);
+    expect(result).toEqual(['jane@example.com']);
+  });
+
+  it('handles quoted cells containing embedded commas in other columns', () => {
+    const csv =
+      '"Email","First Name","Billing Address"\n"bob@example.com","Bob","123 Main St, Apt 4"';
+    const result = parseMembersCsv(csv);
+    expect(result).toEqual(['bob@example.com']);
+  });
 });
 
 // ─── migrationExpiry ─────────────────────────────────────────────────────────

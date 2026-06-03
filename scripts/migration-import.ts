@@ -22,11 +22,42 @@
  * Assumptions:
  *  - Header row is present.
  *  - Column whose trimmed-lowercased name is "email" provides the addresses.
- *  - Simple comma split — quoted-comma edge cases are out of scope for the
- *    dry-run (Squarespace customer exports are flat).
+ *  - Real Squarespace exports quote every field (e.g. `"Email","First Name"`)
+ *    and addresses can contain commas, so we use a quote-aware line parser
+ *    (handles surrounding quotes, embedded commas, and "" escaping).
  *
  * @throws if no "email" column is found in the header.
  */
+function parseCsvLine(line: string): string[] {
+  const cells: string[] = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (line[i + 1] === '"') {
+          cur += '"'; // escaped quote
+          i++;
+        } else {
+          inQuotes = false; // closing quote
+        }
+      } else {
+        cur += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true; // opening quote
+    } else if (ch === ',') {
+      cells.push(cur);
+      cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  cells.push(cur);
+  return cells;
+}
+
 export function parseMembersCsv(csvText: string): string[] {
   const lines = csvText.split(/\r?\n/);
 
@@ -36,7 +67,7 @@ export function parseMembersCsv(csvText: string): string[] {
     throw new Error('parseMembersCsv: CSV is empty — no header row found.');
   }
 
-  const headers = lines[headerLineIndex].split(',').map((h) => h.trim().toLowerCase());
+  const headers = parseCsvLine(lines[headerLineIndex]).map((h) => h.trim().toLowerCase());
   const emailIndex = headers.indexOf('email');
   if (emailIndex === -1) {
     throw new Error(
@@ -50,7 +81,7 @@ export function parseMembersCsv(csvText: string): string[] {
     const line = lines[i];
     if (!line.trim()) continue; // skip blank lines
 
-    const cells = line.split(',');
+    const cells = parseCsvLine(line);
     const raw = cells[emailIndex] ?? '';
     const email = raw.trim().toLowerCase();
     if (!email) continue; // skip rows with empty Email cell
