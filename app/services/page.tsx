@@ -63,10 +63,10 @@ export default function ServicesPage() {
       />
       <Nav />
       <main className="bg-bg">
-        {/* Hero banner — mirrors the live Start Here page, with the heading and
-            intro overlaid on the portrait (matches the home hero treatment). */}
-        <section className="mx-auto max-w-6xl px-6 pt-24 pb-12">
-          <div className="relative min-h-[460px] md:min-h-[560px] flex items-end rounded-2xl overflow-hidden bg-cardSoft">
+        {/* Hero banner — image on top, heading and intro below (matches the
+            other pages' treatment, e.g. Testimonials). */}
+        <section className="mx-auto max-w-6xl px-6 pt-28 md:pt-32">
+          <div className="relative min-h-[460px] md:min-h-[560px] overflow-hidden rounded-2xl bg-cardSoft">
             <Image
               src={image(IMG_HERO_PORTRAIT)}
               alt="Nicole Hansult, functional longevity coach in Carlsbad, CA"
@@ -76,22 +76,21 @@ export default function ServicesPage() {
               className="object-cover"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-            <div className="relative z-10 max-w-2xl space-y-4 px-8 pb-10 pt-12 md:px-12 md:pb-12 text-white">
-              <h1 className="text-4xl md:text-5xl font-light leading-tight">
-                How You Can
-                <br />
-                Work With Me
-              </h1>
-              <p className="text-white/90 text-lg leading-relaxed">
-                There isn&apos;t just one way to begin.
-              </p>
-              <p className="text-white/90 text-lg leading-relaxed">
-                Whether you&apos;re ready for a deeper understanding of your body, want guidance and
-                accountability, or prefer to start more gradually, there is a clear path forward.
-              </p>
-            </div>
           </div>
+        </section>
+
+        {/* Hero heading */}
+        <section className="mx-auto max-w-5xl px-6 pt-10 md:pt-12 pb-12">
+          <h1 className="text-ink text-4xl md:text-5xl font-light leading-tight">
+            How You Can Work With Me
+          </h1>
+          <p className="text-inkSoft text-lg leading-relaxed mt-4 max-w-2xl">
+            There isn&apos;t just one way to begin.
+          </p>
+          <p className="text-inkSoft text-lg leading-relaxed mt-3 max-w-2xl">
+            Whether you&apos;re ready for a deeper understanding of your body, want guidance and
+            accountability, or prefer to start more gradually, there is a clear path forward.
+          </p>
         </section>
 
         <section className="mx-auto max-w-6xl space-y-12 px-6 pb-24">
