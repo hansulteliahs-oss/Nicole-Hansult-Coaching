@@ -18,7 +18,11 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
-    // Phase 1 serves migrated images from /public/images/ — local, no remotePatterns needed yet.
+    // Phase 1 serves migrated images from /public/images/ — local.
+    // Phase 6: blog hero images are uploaded to Vercel Blob, so allow that host.
+    remotePatterns: [
+      { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
+    ],
     // Components pass quality={85}; Next 16 requires explicit allowlist.
     qualities: [75, 85],
   },
