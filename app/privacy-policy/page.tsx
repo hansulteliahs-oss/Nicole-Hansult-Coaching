@@ -98,7 +98,7 @@ export default function PrivacyPolicyPage() {
               <h2 className="text-xl font-medium text-ink mb-3">Email Communications</h2>
               <p>
                 If you subscribe to our email list, we may send you newsletters, updates, and
-                promotional emails. You can opt-out at any time by clicking the
+                promotional emails. You can opt out at any time by clicking the
                 &ldquo;unsubscribe&rdquo; link in our emails or by contacting us directly at{' '}
                 <a
                   href="mailto:nicole@nicolehansultcoaching.com"
@@ -120,7 +120,7 @@ export default function PrivacyPolicyPage() {
                 <li>Access your personal data</li>
                 <li>Request corrections or updates</li>
                 <li>Request deletion of your data</li>
-                <li>Opt-out of marketing communications</li>
+                <li>Opt out of marketing communications</li>
               </ul>
               <p className="mt-4">
                 To exercise any of these rights, please contact us at{' '}
