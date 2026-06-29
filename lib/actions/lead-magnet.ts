@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 import { leadMagnetSchema, type LeadMagnetInput } from '@/lib/schemas/lead-magnet';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { LeadMagnetEmail } from '@/components/email/LeadMagnetEmail';
+import { addSubscriber } from '@/lib/mailchimp';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -80,6 +81,20 @@ export async function leadMagnetAction(
     }
   } else {
     console.warn('[lead-magnet] Supabase env vars not set — skipping DB backup');
+  }
+
+  // 7. Newsletter sync — non-blocking; only if the contact opted in.
+  if (parsed.data.newsletterOptIn) {
+    try {
+      await addSubscriber({
+        email: parsed.data.email,
+        firstName: parsed.data.firstName,
+        lastName: parsed.data.lastName,
+        tag: 'Free Guide',
+      });
+    } catch (e) {
+      console.error('[lead-magnet] Mailchimp sync failed:', e);
+    }
   }
 
   return { success: true };

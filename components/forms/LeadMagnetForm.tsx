@@ -18,7 +18,7 @@ export function LeadMagnetForm() {
     formState: { errors },
   } = useForm<LeadMagnetInput>({
     resolver: zodResolver(leadMagnetSchema),
-    defaultValues: { _hp: '' },
+    defaultValues: { _hp: '', newsletterOptIn: true },
   });
 
   function onSubmit(data: LeadMagnetInput) {
@@ -108,6 +108,19 @@ export function LeadMagnetForm() {
             {errors.email.message}
           </p>
         )}
+      </div>
+
+      {/* Newsletter opt-in — pre-checked */}
+      <div className="flex items-start gap-2">
+        <input
+          id="lm-newsletter"
+          type="checkbox"
+          className="mt-1 h-4 w-4 accent-orchid"
+          {...register('newsletterOptIn')}
+        />
+        <label htmlFor="lm-newsletter" className="text-sm text-inkSoft">
+          Send me Nicole&apos;s newsletter — tips on health, mobility, and longevity over 40.
+        </label>
       </div>
 
       {/* Server error message */}
