@@ -209,7 +209,7 @@ function IdeaFormInner({ passKey, onBadKey }: { passKey: string; onBadKey: () =>
           {IDEA_TAGS.map((t) => (
             <label key={t} className="flex-1">
               <input type="radio" value={t} className="peer sr-only" {...register('tag')} />
-              <span className="block cursor-pointer rounded-xl border border-inkFaint px-3 py-2 text-center text-sm capitalize text-ink transition peer-checked:border-orchidMid peer-checked:bg-orchidMid/10">
+              <span className="block cursor-pointer rounded-xl border-2 border-inkFaint bg-transparent px-3 py-2 text-center text-sm font-medium capitalize text-ink transition hover:border-[#b07bba] peer-checked:border-[#b07bba] peer-checked:bg-[#b07bba] peer-checked:font-semibold peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-[#b07bba] peer-focus-visible:ring-offset-1">
                 {t}
               </span>
             </label>
