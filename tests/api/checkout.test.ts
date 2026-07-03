@@ -16,13 +16,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const createSession = vi.fn();
 
 vi.mock('@/lib/stripe', () => ({
-  stripe: {
+  getStripe: () => ({
     checkout: {
       sessions: {
         create: createSession,
       },
     },
-  },
+  }),
 }));
 
 // ---- Helpers ---------------------------------------------------------------

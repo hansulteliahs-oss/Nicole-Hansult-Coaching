@@ -20,7 +20,7 @@
  */
 import { NextResponse } from 'next/server';
 
-import { stripe } from '@/lib/stripe';
+import { getStripe } from '@/lib/stripe';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -41,6 +41,7 @@ export async function POST(req: Request): Promise<Response> {
     (req.headers.get('host') ? `https://${req.headers.get('host')}` : '');
 
   try {
+    const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: [{ price: priceId, quantity: 1 }],

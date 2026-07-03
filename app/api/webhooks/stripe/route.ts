@@ -17,7 +17,7 @@
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 
-import { stripe } from '@/lib/stripe';
+import { getStripe } from '@/lib/stripe';
 import { getAdminClient } from '@/lib/supabase/admin';
 import { handleCheckoutCompleted } from '@/lib/webhooks/handle-checkout-completed';
 import { handleRefund } from '@/lib/webhooks/handle-refund';
@@ -57,6 +57,7 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   // 3. Verify.
+  const stripe = getStripe();
   let event;
   try {
     event = stripe.webhooks.constructEvent(rawBody, sig, pickSecret());

@@ -11,11 +11,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 const constructEventMock = vi.fn();
 vi.mock('@/lib/stripe', () => ({
-  stripe: {
+  getStripe: () => ({
     webhooks: {
       constructEvent: (...args: unknown[]) => constructEventMock(...args),
     },
-  },
+  }),
 }));
 
 const sendMock = vi.fn().mockResolvedValue({ data: { id: 'email_123' }, error: null });
