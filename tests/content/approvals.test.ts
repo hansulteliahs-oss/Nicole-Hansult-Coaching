@@ -14,13 +14,17 @@ const mocks = vi.hoisted(() => ({
   draftError: null as { message: string } | null,
   // Records every (table, column, value) filter the resolver issues.
   calls: [] as { table: string; column: string; value: unknown }[],
+  // Records the column list passed to select(), so a test can assert that
+  // every field which publishes is actually fetched.
+  selects: [] as { table: string; columns: string }[],
 }));
 
 vi.mock('@/lib/supabase/admin', () => ({
   getAdminClient: () => ({
     from(table: string) {
       return {
-        select() {
+        select(columns: string) {
+          mocks.selects.push({ table, columns });
           return {
             eq(column: string, value: unknown) {
               mocks.calls.push({ table, column, value });
@@ -49,6 +53,7 @@ beforeEach(() => {
   mocks.draftRow = null;
   mocks.draftError = null;
   mocks.calls = [];
+  mocks.selects = [];
 });
 
 describe('resolveApprovalToken', () => {
@@ -78,7 +83,7 @@ describe('resolveApprovalToken', () => {
       used: false,
       expires_at: FUTURE,
     };
-    mocks.draftRow = { title: 'T', body_md: '# B' };
+    mocks.draftRow = { title: 'T', slug: 's', body_md: '# B' };
     await resolveApprovalToken('raw-token-abc');
     expect(mocks.calls[0]).toEqual({
       table: 'approval_tokens',
@@ -107,11 +112,28 @@ describe('resolveApprovalToken', () => {
     mocks.tokenRow = {
       token_hash: 't', draft_kind: 'post', draft_id: 'post-9', used: false, expires_at: FUTURE,
     };
-    mocks.draftRow = { title: 'Why mobility matters', body_md: '## Intro\n\nText.' };
+    mocks.draftRow = {
+      title: 'Why mobility matters',
+      slug: 'why-mobility-matters',
+      body_md: '## Intro\n\nText.',
+      seo_title: 'Why Mobility Matters After 40',
+      meta_description: 'Stiffness is a signal.',
+      category: 'Movement',
+      hero_image_url: 'https://cdn.test/hero.jpg',
+    };
     const res = await resolveApprovalToken('t');
     expect(res).toEqual({
       ok: true,
-      draft: { kind: 'post', title: 'Why mobility matters', body_md: '## Intro\n\nText.' },
+      draft: {
+        kind: 'post',
+        title: 'Why mobility matters',
+        slug: 'why-mobility-matters',
+        body_md: '## Intro\n\nText.',
+        seo_title: 'Why Mobility Matters After 40',
+        meta_description: 'Stiffness is a signal.',
+        category: 'Movement',
+        hero_image_url: 'https://cdn.test/hero.jpg',
+      },
     });
     expect(mocks.calls[1]).toEqual({ table: 'posts', column: 'id', value: 'post-9' });
   });
@@ -153,5 +175,56 @@ describe('resolveApprovalToken', () => {
     };
     const res = await resolveApprovalToken('t');
     expect(res).toEqual({ ok: false, reason: 'missing' });
+  });
+});
+
+describe('resolveApprovalToken — post fields that publish', () => {
+  const validPostToken = () => {
+    mocks.tokenRow = {
+      token_hash: 't', draft_kind: 'post', draft_id: 'p', used: false, expires_at: FUTURE,
+    };
+  };
+
+  it('selects every column that app/insights/[slug] publishes', async () => {
+    validPostToken();
+    mocks.draftRow = { title: 'T', slug: 's', body_md: 'b' };
+    await resolveApprovalToken('t');
+
+    const postSelect = mocks.selects.find((s) => s.table === 'posts');
+    expect(postSelect).toBeDefined();
+    // Each of these renders publicly under Nicole's name and is LLM-written.
+    for (const column of [
+      'title',
+      'slug',
+      'body_md',
+      'seo_title',
+      'meta_description',
+      'category',
+      'hero_image_url',
+    ]) {
+      expect(postSelect!.columns).toContain(column);
+    }
+  });
+
+  it('normalises absent optional fields to null rather than undefined', async () => {
+    validPostToken();
+    // PostgREST omits nothing, but a null column comes back as null and a
+    // column added later would come back undefined. Both must read as "not set".
+    mocks.draftRow = { title: 'T', slug: 's', body_md: 'b' };
+    const res = await resolveApprovalToken('t');
+
+    expect(res).toEqual({
+      ok: true,
+      draft: {
+        kind: 'post',
+        title: 'T',
+        slug: 's',
+        body_md: 'b',
+        seo_title: null,
+        meta_description: null,
+        category: null,
+        hero_image_url: null,
+      },
+    });
   });
 });

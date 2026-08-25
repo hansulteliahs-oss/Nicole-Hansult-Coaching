@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Manrope, Instrument_Serif } from 'next/font/google';
-import { Analytics } from '@vercel/analytics/next';
-import { SpeedInsights } from '@vercel/speed-insights/next';
+import { ScrubbedAnalytics } from '@/components/analytics/ScrubbedAnalytics';
 import { DisclaimerBand } from '@/components/layout/DisclaimerBand';
 import { site } from '@/lib/content/site';
 import './globals.css';
@@ -76,8 +75,7 @@ export default function RootLayout({
         />
         {children}
         <DisclaimerBand />
-        <Analytics />
-        <SpeedInsights />
+        <ScrubbedAnalytics />
       </body>
     </html>
   );
