@@ -58,10 +58,11 @@ describe('/approve', () => {
   it('gives an unknown token its own copy', async () => {
     mocks.resolve.mockResolvedValue({ ok: false, reason: 'missing' });
     const html = await render({ token: 'x' });
-    // renderToStaticMarkup HTML-escapes apostrophes in text nodes (React's
-    // standard escapeHtml maps ' -> &#x27;), so the copy's apostrophe shows
-    // up escaped here even though a browser renders it as a plain '.
-    expect(html).toContain('We can&#x27;t find this draft');
+    // renderToStaticMarkup HTML-escapes apostrophes in text nodes, so the
+    // copy's apostrophe may show up as &#x27; or raw here even though a
+    // browser always renders it as a plain '. Accept either so this test
+    // tracks the copy, not the renderer's escaping choice.
+    expect(html).toMatch(/We can(?:&#x27;|')t find this draft/);
     expect(html).not.toContain('data-approve-client');
   });
 
