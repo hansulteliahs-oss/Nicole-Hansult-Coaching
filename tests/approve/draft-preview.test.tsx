@@ -10,17 +10,27 @@ import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { DraftPreview } from '@/app/approve/DraftPreview';
+import type { ApprovalDraft } from '@/lib/content/approvals';
+
+type PostDraft = Extract<ApprovalDraft, { kind: 'post' }>;
+
+/** A fully-populated post; override only what a test is about. */
+const postDraft = (over: Partial<PostDraft> = {}): PostDraft => ({
+  kind: 'post',
+  title: 'Why mobility matters',
+  slug: 'why-mobility-matters',
+  body_md: '## Intro\n\nSome body text.',
+  seo_title: 'Why Mobility Matters After 40',
+  meta_description: 'Stiffness is a signal, not a sentence.',
+  category: 'Movement',
+  hero_image_url: 'https://cdn.test/hero.jpg',
+  ...over,
+});
 
 describe('DraftPreview', () => {
   it('renders a post title and its markdown body as real HTML', () => {
     const html = renderToStaticMarkup(
-      <DraftPreview
-        draft={{
-          kind: 'post',
-          title: 'Why mobility matters',
-          body_md: '## Intro\n\nSome body text.',
-        }}
-      />,
+      <DraftPreview draft={postDraft()} />,
     );
     expect(html).toContain('Why mobility matters');
     expect(html).toContain('<h2');
@@ -68,5 +78,82 @@ describe('DraftPreview', () => {
       />,
     );
     expect(html).not.toContain('Preview text');
+  });
+});
+
+describe('DraftPreview post metadata', () => {
+  it('shows the public URL the post will live at', () => {
+    const html = renderToStaticMarkup(
+      <DraftPreview draft={postDraft({ slug: 'why-mobility-matters' })} />,
+    );
+    expect(html).toContain('/insights/why-mobility-matters');
+  });
+
+  it('shows the search title and description that publish under her name', () => {
+    const html = renderToStaticMarkup(<DraftPreview draft={postDraft()} />);
+    expect(html).toContain('Why Mobility Matters After 40');
+    expect(html).toContain('Stiffness is a signal, not a sentence.');
+  });
+
+  it('shows the category', () => {
+    const html = renderToStaticMarkup(<DraftPreview draft={postDraft({ category: 'Movement' })} />);
+    expect(html).toContain('Movement');
+  });
+
+  it('renders the share image when there is one', () => {
+    const html = renderToStaticMarkup(
+      <DraftPreview draft={postDraft({ hero_image_url: 'https://cdn.test/hero.jpg' })} />,
+    );
+    expect(html).toContain('https://cdn.test/hero.jpg');
+  });
+
+  it('says so, with the consequence, when the search description is missing', () => {
+    const html = renderToStaticMarkup(
+      <DraftPreview draft={postDraft({ meta_description: null })} />,
+    );
+    expect(html).toContain('Not set');
+    expect(html).toContain('Google will pick its own snippet');
+  });
+
+  it('says so when there is no share image', () => {
+    const html = renderToStaticMarkup(
+      <DraftPreview draft={postDraft({ hero_image_url: null })} />,
+    );
+    expect(html).toContain('Not set');
+    expect(html).toContain('no picture');
+  });
+
+  it('shows the published default category rather than hiding a null', () => {
+    const html = renderToStaticMarkup(<DraftPreview draft={postDraft({ category: null })} />);
+    // app/insights/[slug]/page.tsx falls back to this, so the preview must too.
+    expect(html).toContain('Functional Longevity');
+    expect(html).toContain('default');
+  });
+
+  it('falls back to the post title for the search title, and says it is a fallback', () => {
+    const html = renderToStaticMarkup(<DraftPreview draft={postDraft({ seo_title: null })} />);
+    expect(html).toContain('Why mobility matters');
+    expect(html).toContain('falls back to the post title');
+  });
+
+  it('still renders the body alongside the metadata', () => {
+    const html = renderToStaticMarkup(<DraftPreview draft={postDraft()} />);
+    expect(html).toContain('Some body text.');
+    expect(html).toContain('<h2');
+  });
+
+  it('shows no metadata block for a newsletter', () => {
+    const html = renderToStaticMarkup(
+      <DraftPreview
+        draft={{
+          kind: 'newsletter',
+          subject: 'S',
+          preview_text: null,
+          body_html: '<p>x</p>',
+        }}
+      />,
+    );
+    expect(html).not.toContain('Public URL');
+    expect(html).not.toContain('Search description');
   });
 });

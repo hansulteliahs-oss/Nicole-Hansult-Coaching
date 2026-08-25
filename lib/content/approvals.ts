@@ -18,8 +18,29 @@ import { getAdminClient } from '@/lib/supabase/admin';
 
 export type ApprovalRejection = 'missing' | 'used' | 'expired';
 
+/**
+ * The post variant carries every field `app/insights/[slug]/page.tsx`
+ * publishes, not just the ones that render in the body. `seo_title`,
+ * `meta_description`, `category` and `hero_image_url` are all written by the
+ * same LLM step and all go public under Nicole's name — a `meta_description`
+ * is literally the sentence a stranger reads about her in a search result.
+ * Previewing only title and body would leave "nothing ships unseen" false.
+ *
+ * All four are nullable in the schema, so absence is itself information worth
+ * showing her: it means the post publishes with no search snippet and no share
+ * image.
+ */
 export type ApprovalDraft =
-  | { kind: 'post'; title: string; body_md: string }
+  | {
+      kind: 'post';
+      title: string;
+      slug: string;
+      body_md: string;
+      seo_title: string | null;
+      meta_description: string | null;
+      category: string | null;
+      hero_image_url: string | null;
+    }
   | {
       kind: 'newsletter';
       subject: string;
@@ -66,14 +87,25 @@ export async function resolveApprovalToken(
   if (tokenRow.draft_kind === 'post') {
     const { data, error } = await admin
       .from('posts')
-      .select('title, body_md')
+      .select(
+        'title, slug, body_md, seo_title, meta_description, category, hero_image_url',
+      )
       .eq('id', tokenRow.draft_id)
       .maybeSingle();
 
     if (error || !data) return reject('missing');
     return {
       ok: true,
-      draft: { kind: 'post', title: data.title, body_md: data.body_md },
+      draft: {
+        kind: 'post',
+        title: data.title,
+        slug: data.slug,
+        body_md: data.body_md,
+        seo_title: data.seo_title ?? null,
+        meta_description: data.meta_description ?? null,
+        category: data.category ?? null,
+        hero_image_url: data.hero_image_url ?? null,
+      },
     };
   }
 

@@ -27,6 +27,22 @@ vi.mock('@/app/approve/ApproveClient', () => ({
 
 const ApprovePage = (await import('@/app/approve/page')).default;
 
+/**
+ * The resolver mock is untyped, so an incomplete fixture would silently render
+ * `slug: undefined` into the public-URL row. Build post drafts from here.
+ */
+const postDraft = (over: Record<string, unknown> = {}) => ({
+  kind: 'post',
+  title: 'Mobility',
+  slug: 'mobility',
+  body_md: 'Body text here.',
+  seo_title: 'Mobility After 40',
+  meta_description: 'A signal, not a sentence.',
+  category: 'Movement',
+  hero_image_url: null,
+  ...over,
+});
+
 async function render(params: { token?: string; kind?: string }) {
   const el = await ApprovePage({ searchParams: Promise.resolve(params) });
   return renderToStaticMarkup(el);
@@ -83,13 +99,41 @@ describe('/approve', () => {
   it('renders the post and the button on a valid token', async () => {
     mocks.resolve.mockResolvedValue({
       ok: true,
-      draft: { kind: 'post', title: 'Mobility', body_md: 'Body text here.' },
+      draft: postDraft(),
     });
     const html = await render({ token: 'tok-1', kind: 'post' });
     expect(html).toContain('Mobility');
     expect(html).toContain('Body text here.');
     expect(html).toContain('data-approve-client');
     expect(mocks.clientProps).toEqual({ token: 'tok-1', kind: 'post' });
+  });
+
+  it('renders the metadata that publishes, not just the body', async () => {
+    mocks.resolve.mockResolvedValue({ ok: true, draft: postDraft() });
+    const html = await render({ token: 'tok-1' });
+    // Everything here goes public under Nicole's name and is LLM-written.
+    expect(html).toContain('/insights/mobility');
+    expect(html).toContain('Mobility After 40');
+    expect(html).toContain('A signal, not a sentence.');
+    expect(html).toContain('Movement');
+    expect(html).not.toContain('/insights/undefined');
+  });
+
+  it('renders the newsletter body through the page, not just its subject', async () => {
+    mocks.resolve.mockResolvedValue({
+      ok: true,
+      draft: {
+        kind: 'newsletter',
+        subject: 'Your body is talking',
+        preview_text: 'Signals, not sentences.',
+        body_html: '<p>Hello list</p>',
+      },
+    });
+    const html = await render({ token: 'tok-3' });
+    expect(html).toContain('Your body is talking');
+    expect(html).toContain('Signals, not sentences.');
+    expect(html).toMatch(/srcdoc=/i);
+    expect(html).not.toContain('<p>Hello list</p>');
   });
 
   it('takes kind from the database, not from the url', async () => {
@@ -105,7 +149,7 @@ describe('/approve', () => {
   it('passes the raw token through untouched', async () => {
     mocks.resolve.mockResolvedValue({
       ok: true,
-      draft: { kind: 'post', title: 'T', body_md: 'B' },
+      draft: postDraft({ title: 'T', body_md: 'B' }),
     });
     await render({ token: 'RaW-ToKeN-123' });
     expect(mocks.resolve).toHaveBeenCalledWith('RaW-ToKeN-123');
