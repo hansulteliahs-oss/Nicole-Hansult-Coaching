@@ -50,3 +50,6 @@ next-env.d.ts
 
 # superpowers SDD scratch (ledger, briefs, review packages)
 .superpowers/
+
+# SDD scratch (subagent-driven-development ledger, briefs, review packages)
+.superpowers/
