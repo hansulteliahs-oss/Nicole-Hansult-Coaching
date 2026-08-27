@@ -282,3 +282,88 @@ $fn$;
 
 REVOKE EXECUTE ON FUNCTION public.plan_upsert(date,text,text,text,text,text,text) FROM PUBLIC, anon, authenticated;
 GRANT  EXECUTE ON FUNCTION public.plan_upsert(date,text,text,text,text,text,text) TO service_role;
+
+-- stage_post_draft — the agent's only way to put a post into the database.
+--
+-- Forces status='draft'. There is no parameter for status, so "the agent
+-- published something by accident" is not a bug that can exist.
+--
+-- Slug collision is resolved HERE, inside the same transaction as the insert.
+-- Root cause 2: on 2026-08-01 exec 164 died on `23505 posts_slug_key` before
+-- Nicole ever saw the draft, because July's unapproved idea stayed available
+-- and August re-picked it. A collision is now a suffix, not a crash.
+--
+-- The token is minted in the same transaction as the row it authorises
+-- (non-negotiable property 2). A staged draft always has a live link.
+CREATE OR REPLACE FUNCTION public.stage_post_draft(
+  p_run_id           uuid,
+  p_plan_id          uuid,
+  p_title            text,
+  p_slug             text,
+  p_body_md          text,
+  p_seo_title        text,
+  p_meta_description text,
+  p_category         text,
+  p_keyword          text,
+  p_faq              jsonb,
+  p_hero_image_url   text,
+  p_source_idea_id   uuid DEFAULT NULL
+)
+RETURNS TABLE(post_id uuid, slug text, token text)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $fn$
+DECLARE
+  v_base  text;
+  v_try   text;
+  v_n     int := 0;
+  v_id    uuid;
+  v_token text;
+BEGIN
+  v_base := trim(both '-' from regexp_replace(lower(trim(p_slug)), '[^a-z0-9]+', '-', 'g'));
+  IF v_base IS NULL OR v_base = '' THEN
+    RAISE EXCEPTION 'stage_post_draft: slug is empty after normalisation (input %)', p_slug
+      USING ERRCODE = '22023';
+  END IF;
+
+  v_try := v_base;
+  WHILE EXISTS (SELECT 1 FROM public.posts p WHERE p.slug = v_try) LOOP
+    v_n := v_n + 1;
+    v_try := CASE
+               WHEN v_n = 1 THEN v_base || '-' || to_char(current_date, 'YYYY-MM-DD')
+               ELSE v_base || '-' || to_char(current_date, 'YYYY-MM-DD') || '-' || v_n
+             END;
+  END LOOP;
+
+  INSERT INTO public.posts
+    (slug, status, title, body_md, seo_title, meta_description,
+     category, keyword, faq, hero_image_url, source_idea_id)
+  VALUES
+    (v_try, 'draft', p_title, p_body_md, p_seo_title, p_meta_description,
+     p_category, p_keyword, COALESCE(p_faq, '[]'::jsonb), p_hero_image_url, p_source_idea_id)
+  RETURNING id INTO v_id;
+
+  v_token := encode(gen_random_bytes(24), 'hex');
+  INSERT INTO public.approval_tokens (token_hash, draft_kind, draft_id, expires_at)
+  VALUES (v_token, 'post', v_id, now() + interval '14 days');
+
+  IF p_plan_id IS NOT NULL THEN
+    UPDATE public.content_plan
+       SET status = 'drafted', produced_post_id = v_id
+     WHERE id = p_plan_id;
+  END IF;
+
+  IF p_run_id IS NOT NULL THEN
+    UPDATE public.pipeline_runs
+       SET plan_id           = COALESCE(plan_id, p_plan_id),
+           produced_draft_id = v_id
+     WHERE id = p_run_id;
+  END IF;
+
+  RETURN QUERY SELECT v_id, v_try, v_token;
+END;
+$fn$;
+
+REVOKE EXECUTE ON FUNCTION public.stage_post_draft(uuid,uuid,text,text,text,text,text,text,text,jsonb,text,uuid) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION public.stage_post_draft(uuid,uuid,text,text,text,text,text,text,text,jsonb,text,uuid) TO service_role;
