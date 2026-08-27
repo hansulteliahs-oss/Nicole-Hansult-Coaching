@@ -297,3 +297,117 @@ describeIf('stage_post_draft', () => {
     expect(error!.message).toMatch(/slug is empty/i);
   });
 });
+
+describeIf('stage_newsletter_draft', () => {
+  const REAL_LINK =
+    '<p>Read it: <a href="https://nicolehansultcoaching.com/insights/knees">the post</a></p>';
+
+  it('stages a draft with a real link and mints a token', async () => {
+    const { data, error } = await admin.rpc('stage_newsletter_draft', {
+      p_run_id: null,
+      p_plan_id: null,
+      p_subject: 'Stairs, knees, quads',
+      p_preview_text: 'The short version',
+      p_body_html: REAL_LINK,
+      p_list_id: 'f531604a9a',
+      p_segment_id: null,
+      p_type: 'repurpose',
+    });
+
+    const row = data?.[0];
+    if (row) {
+      trash.push({ table: 'approval_tokens', column: 'token_hash', value: row.token });
+      trash.push({ table: 'newsletter_drafts', column: 'id', value: row.draft_id });
+    }
+    expect(error).toBeNull();
+    expect(row).toBeDefined();
+
+    expect(row.token).toMatch(/^[0-9a-f]{48}$/);
+
+    const { data: draft } = await admin
+      .from('newsletter_drafts')
+      .select('status, list_id, segment_id, batch_id')
+      .eq('id', row.draft_id)
+      .single();
+    expect(draft!.status).toBe('draft');
+    expect(draft!.list_id).toBe('f531604a9a');
+  });
+
+  it('refuses a body with no link at all — this is the 07-28 send', async () => {
+    const { error } = await admin.rpc('stage_newsletter_draft', {
+      p_run_id: null,
+      p_plan_id: null,
+      p_subject: 'Nothing to click',
+      p_preview_text: null,
+      p_body_html: '<p>Great tips this week. Reply if you want more.</p>',
+      p_list_id: 'f531604a9a',
+      p_segment_id: null,
+      p_type: 'tip',
+    });
+    expect(error).not.toBeNull();
+    expect(error!.message).toMatch(/non-Mailchimp link/i);
+  });
+
+  it('refuses a body whose only links are Mailchimp plumbing', async () => {
+    const { error } = await admin.rpc('stage_newsletter_draft', {
+      p_run_id: null,
+      p_plan_id: null,
+      p_subject: 'Unsubscribe links only',
+      p_preview_text: null,
+      p_body_html:
+        '<a href="https://nicole.us21.list-manage.com/unsubscribe?u=1">unsubscribe</a>' +
+        '<a href="https://mailchi.mp/abc/view">view in browser</a>',
+      p_list_id: 'f531604a9a',
+      p_segment_id: null,
+      p_type: 'tip',
+    });
+    expect(error).not.toBeNull();
+    expect(error!.message).toMatch(/non-Mailchimp link/i);
+  });
+
+  it('gives every draft in one batch the same token', async () => {
+    const batchId = '00000000-0000-0000-0000-0000000000b1';
+
+    const one = await admin.rpc('stage_newsletter_draft', {
+      p_run_id: null,
+      p_plan_id: null,
+      p_subject: 'Launch 1 of 2',
+      p_preview_text: null,
+      p_body_html: REAL_LINK,
+      p_list_id: 'f531604a9a',
+      p_segment_id: null,
+      p_type: 'offer',
+      p_scheduled_for: '2099-09-28T16:00:00Z',
+      p_batch_id: batchId,
+    });
+    const two = await admin.rpc('stage_newsletter_draft', {
+      p_run_id: null,
+      p_plan_id: null,
+      p_subject: 'Launch 2 of 2',
+      p_preview_text: null,
+      p_body_html: REAL_LINK,
+      p_list_id: 'f531604a9a',
+      p_segment_id: null,
+      p_type: 'offer',
+      p_scheduled_for: '2099-09-30T16:00:00Z',
+      p_batch_id: batchId,
+    });
+
+    trash.push({ table: 'approval_tokens', column: 'batch_id', value: batchId });
+    if (one.data?.[0]) trash.push({ table: 'newsletter_drafts', column: 'id', value: one.data[0].draft_id });
+    if (two.data?.[0]) trash.push({ table: 'newsletter_drafts', column: 'id', value: two.data[0].draft_id });
+    expect(one.error).toBeNull();
+    expect(two.error).toBeNull();
+    expect(one.data?.[0]).toBeDefined();
+    expect(two.data?.[0]).toBeDefined();
+
+    expect(two.data[0].token).toBe(one.data[0].token);
+
+    const { data: tokens } = await admin
+      .from('approval_tokens')
+      .select('token_hash, draft_id, batch_id')
+      .eq('batch_id', batchId);
+    expect(tokens).toHaveLength(1);
+    expect(tokens![0].draft_id).toBeNull();
+  });
+});

@@ -367,3 +367,97 @@ $fn$;
 
 REVOKE EXECUTE ON FUNCTION public.stage_post_draft(uuid,uuid,text,text,text,text,text,text,text,jsonb,text,uuid) FROM PUBLIC, anon, authenticated;
 GRANT  EXECUTE ON FUNCTION public.stage_post_draft(uuid,uuid,text,text,text,text,text,text,text,jsonb,text,uuid) TO service_role;
+
+-- stage_newsletter_draft — the agent's only way to put a newsletter into the
+-- database. Forces status='draft'.
+--
+-- Root cause 3, enforced in the database rather than the prompt
+-- (non-negotiable property 4): campaign 3f4c79f8f0 reached 1,110 inboxes on
+-- 2026-07-28 with a 0.00% click rate because the 4,811-character HTML held no
+-- non-Mailchimp link at all. Mailchimp's click-details reported total_items 0.
+-- The check below is why that send cannot be staged again, no matter how the
+-- writing prompt changes.
+--
+-- Batching (decision 7): when p_batch_id is supplied the draft mints no token
+-- of its own. The first draft in the batch mints the one batch token; every
+-- later draft returns the same string, so the agent has exactly one link to
+-- push regardless of the order it stages them in.
+CREATE OR REPLACE FUNCTION public.stage_newsletter_draft(
+  p_run_id         uuid,
+  p_plan_id        uuid,
+  p_subject        text,
+  p_preview_text   text,
+  p_body_html      text,
+  p_list_id        text,
+  p_segment_id     text,
+  p_type           text,
+  p_source_idea_id uuid        DEFAULT NULL,
+  p_scheduled_for  timestamptz DEFAULT NULL,
+  p_batch_id       uuid        DEFAULT NULL
+)
+RETURNS TABLE(draft_id uuid, token text)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $fn$
+DECLARE
+  v_id    uuid;
+  v_token text;
+BEGIN
+  -- Capture the host of every absolute URL in the body, then require at least
+  -- one that is not Mailchimp's own plumbing (unsubscribe, view-in-browser).
+  IF NOT EXISTS (
+    SELECT 1
+      FROM regexp_matches(COALESCE(p_body_html, ''), 'https?://([^\s"''<>/]+)', 'g') AS m(parts)
+     WHERE m.parts[1] !~* '(^|\.)(list-manage\.com|mailchi\.mp)$'
+  ) THEN
+    RAISE EXCEPTION
+      'stage_newsletter_draft: body_html carries no non-Mailchimp link. A newsletter with nothing to click is the 2026-07-28 send.'
+      USING ERRCODE = '23514';
+  END IF;
+
+  INSERT INTO public.newsletter_drafts
+    (type, status, subject, preview_text, body_html,
+     list_id, segment_id, source_idea_id, scheduled_for, batch_id)
+  VALUES
+    (p_type, 'draft', p_subject, p_preview_text, p_body_html,
+     COALESCE(p_list_id, 'f531604a9a'), p_segment_id, p_source_idea_id,
+     p_scheduled_for, p_batch_id)
+  RETURNING id INTO v_id;
+
+  IF p_batch_id IS NULL THEN
+    v_token := encode(gen_random_bytes(24), 'hex');
+    INSERT INTO public.approval_tokens (token_hash, draft_kind, draft_id, expires_at)
+    VALUES (v_token, 'newsletter', v_id, now() + interval '14 days');
+  ELSE
+    SELECT t.token_hash INTO v_token
+      FROM public.approval_tokens t
+     WHERE t.batch_id = p_batch_id
+     LIMIT 1;
+
+    IF v_token IS NULL THEN
+      v_token := encode(gen_random_bytes(24), 'hex');
+      INSERT INTO public.approval_tokens (token_hash, draft_kind, batch_id, expires_at)
+      VALUES (v_token, 'newsletter', p_batch_id, now() + interval '14 days');
+    END IF;
+  END IF;
+
+  IF p_plan_id IS NOT NULL THEN
+    UPDATE public.content_plan
+       SET status = 'drafted', produced_draft_id = v_id
+     WHERE id = p_plan_id;
+  END IF;
+
+  IF p_run_id IS NOT NULL THEN
+    UPDATE public.pipeline_runs
+       SET plan_id           = COALESCE(plan_id, p_plan_id),
+           produced_draft_id = v_id
+     WHERE id = p_run_id;
+  END IF;
+
+  RETURN QUERY SELECT v_id, v_token;
+END;
+$fn$;
+
+REVOKE EXECUTE ON FUNCTION public.stage_newsletter_draft(uuid,uuid,text,text,text,text,text,text,uuid,timestamptz,uuid) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION public.stage_newsletter_draft(uuid,uuid,text,text,text,text,text,text,uuid,timestamptz,uuid) TO service_role;
