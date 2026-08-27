@@ -151,3 +151,134 @@ ALTER TABLE public.scheduled_sends  ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.content_plan    FROM anon, authenticated;
 REVOKE ALL ON public.pipeline_runs   FROM anon, authenticated;
 REVOKE ALL ON public.scheduled_sends FROM anon, authenticated;
+
+-- ──────────────────────────────────────────────────────────────────────────────
+-- 6. Agent RPCs — the entire surface nicole_agent is allowed to call.
+--
+-- All SECURITY DEFINER, so the agent can do exactly these five things while
+-- holding zero table write grants. Every one carries
+-- `SET search_path = public, extensions` because gen_random_bytes() lives in
+-- the extensions schema on Supabase — `SET search_path = public` alone makes
+-- every token mint fail at runtime.
+--
+-- Each function REVOKEs EXECUTE from PUBLIC immediately after creation.
+-- Postgres grants EXECUTE to PUBLIC by default, which on a SECURITY DEFINER
+-- function means anon could call it. The GRANT to nicole_agent lands in
+-- section 8, once the role exists.
+-- ──────────────────────────────────────────────────────────────────────────────
+
+-- run_start — the durable row, written before anything else happens.
+-- Non-negotiable property 3: the row is the record, ntfy is best-effort on top.
+CREATE OR REPLACE FUNCTION public.run_start(p_kind text)
+RETURNS public.pipeline_runs
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $fn$
+DECLARE
+  v_run public.pipeline_runs;
+BEGIN
+  INSERT INTO public.pipeline_runs (kind) VALUES (p_kind) RETURNING * INTO v_run;
+  RETURN v_run;
+END;
+$fn$;
+
+REVOKE EXECUTE ON FUNCTION public.run_start(text) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION public.run_start(text) TO service_role;
+
+-- run_finish — closes the row. Refuses 'running' so a run cannot be "finished"
+-- back into the state it started in, which would make the daily sweep's
+-- "still running after an hour" check unreliable.
+CREATE OR REPLACE FUNCTION public.run_finish(
+  p_run_id uuid,
+  p_status text,
+  p_error  text  DEFAULT NULL,
+  p_notes  jsonb DEFAULT '{}'::jsonb
+)
+RETURNS public.pipeline_runs
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $fn$
+DECLARE
+  v_run public.pipeline_runs;
+BEGIN
+  IF p_status NOT IN ('ok', 'failed') THEN
+    RAISE EXCEPTION 'run_finish: status must be ok or failed, got %', p_status
+      USING ERRCODE = '22023';
+  END IF;
+
+  UPDATE public.pipeline_runs
+     SET status      = p_status,
+         finished_at = now(),
+         error       = p_error,
+         notes       = COALESCE(p_notes, '{}'::jsonb)
+   WHERE id = p_run_id
+  RETURNING * INTO v_run;
+
+  IF v_run.id IS NULL THEN
+    RAISE EXCEPTION 'run_finish: no pipeline_runs row %', p_run_id
+      USING ERRCODE = 'P0002';
+  END IF;
+
+  RETURN v_run;
+END;
+$fn$;
+
+REVOKE EXECUTE ON FUNCTION public.run_finish(uuid,text,text,jsonb) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION public.run_finish(uuid,text,text,jsonb) TO service_role;
+
+-- plan_upsert — the agent writes the calendar; it does not pick from a bag.
+--
+-- Non-negotiable property 6: the plan is a table, not a heuristic. "Pick the
+-- oldest available idea" deadlocked the pipeline twice. A slot is keyed by
+-- (planned_for, kind) and is served once.
+--
+-- The DO UPDATE is guarded on status='planned'. Once a slot is drafted,
+-- approved or sent, a later re-plan must not overwrite the working title that
+-- an existing draft was written against. In that case RETURNING yields no row,
+-- so we read the existing one back and return it: the agent learns "this slot
+-- is already spoken for" instead of receiving an error it would retry into.
+CREATE OR REPLACE FUNCTION public.plan_upsert(
+  p_planned_for   date,
+  p_kind          text,
+  p_working_title text,
+  p_angle         text,
+  p_keyword       text,
+  p_list_id       text,
+  p_segment_id    text DEFAULT NULL
+)
+RETURNS public.content_plan
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $fn$
+DECLARE
+  v_plan public.content_plan;
+BEGIN
+  INSERT INTO public.content_plan
+    (planned_for, kind, working_title, angle, keyword, list_id, segment_id, source)
+  VALUES
+    (p_planned_for, p_kind, p_working_title, p_angle, p_keyword,
+     p_list_id, p_segment_id, 'agent')
+  ON CONFLICT (planned_for, kind) DO UPDATE
+     SET working_title = EXCLUDED.working_title,
+         angle         = EXCLUDED.angle,
+         keyword       = EXCLUDED.keyword,
+         list_id       = EXCLUDED.list_id,
+         segment_id    = EXCLUDED.segment_id
+   WHERE public.content_plan.status = 'planned'
+  RETURNING * INTO v_plan;
+
+  IF v_plan.id IS NULL THEN
+    SELECT * INTO v_plan
+      FROM public.content_plan
+     WHERE planned_for = p_planned_for AND kind = p_kind;
+  END IF;
+
+  RETURN v_plan;
+END;
+$fn$;
+
+REVOKE EXECUTE ON FUNCTION public.plan_upsert(date,text,text,text,text,text,text) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION public.plan_upsert(date,text,text,text,text,text,text) TO service_role;
