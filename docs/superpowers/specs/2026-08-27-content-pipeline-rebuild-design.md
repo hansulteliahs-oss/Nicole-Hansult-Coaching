@@ -95,6 +95,14 @@ All checked live on 2026-08-27 against Supabase, Mailchimp, and the repo.
 - `lib/mailchimp.ts` contains only `addSubscriber`. All campaign create, set
   content, schedule, and send logic lives in n8n and must be written in
   TypeScript here.
+- `MAILCHIMP_AUDIENCE_ID` **is** set on Vercel Production (59 days ago) and the
+  sync works: signups on 06-29, 06-30, 07-22 and 07-23 all reached the list with
+  source `API - Generic` and the correct tags.
+- **The list is not growing.** Two subscribed additions since 2026-06-30, and
+  none at all since 2026-07-23. The ten most recent additions span 2026-02-24 to
+  2026-07-23. Four of the six most recent signups have since unsubscribed.
+  With no paid traffic before October, the merged audience is the entire
+  addressable market for the first group.
 
 **The site**
 
@@ -305,13 +313,10 @@ launch. Not recommended, but available.
 ## Open items before the build starts
 
 1. **An image generation API key.** Blocks the image feature, not the pipeline.
-2. **Confirm `MAILCHIMP_AUDIENCE_ID` is set on Vercel.** It is read by
-   `lib/mailchimp.ts:15` but is absent from `.env.local`, and `addSubscriber`
-   silently skips when it is missing. Lead-magnet signups may not be syncing.
-3. **Correct the plan doc's 1,375 to 960** before Nicole acts on it.
-4. **Nicole's four answers from the plan doc.** Question 1 (the program name)
+2. **Correct the plan doc's 1,375 to 960** before Nicole acts on it.
+3. **Nicole's four answers from the plan doc.** Question 1 (the program name)
    and question 4 (the ongoing coaching offer) are required by every launch
    email. **These are on the critical path for the Sep 22 batch.**
-5. **An ntfy topic for Eliahs**, distinct from `NICOLE_NTFY_TOPIC`.
-6. **A CMA environment and vault** for this repo, with the `nicole_agent`
+4. **An ntfy topic for Eliahs**, distinct from `NICOLE_NTFY_TOPIC`.
+5. **A CMA environment and vault** for this repo, with the `nicole_agent`
    Postgres credential and the image API key.
