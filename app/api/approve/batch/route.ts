@@ -80,13 +80,17 @@ export async function POST(req: Request) {
         previewText: draft.preview_text,
         title: `Launch ${draft.subject}`,
       });
-      await setCampaignContent(campaignId, draft.body_html);
-      await scheduleCampaign(campaignId, new Date(draft.scheduled_for!));
 
+      // Persist the id BEFORE anything else can fail. A campaign that exists
+      // and is scheduled in Mailchimp but is unknown to the database is the
+      // one state a retry turns into a duplicate send to the whole list.
       await admin
         .from('newsletter_drafts')
         .update({ mailchimp_campaign_id: campaignId })
         .eq('id', draft.id);
+
+      await setCampaignContent(campaignId, draft.body_html);
+      await scheduleCampaign(campaignId, new Date(draft.scheduled_for!));
 
       await admin.from('scheduled_sends').insert({
         newsletter_draft_id: draft.id,
