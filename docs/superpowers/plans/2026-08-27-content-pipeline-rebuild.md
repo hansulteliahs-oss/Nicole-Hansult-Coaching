@@ -3983,21 +3983,40 @@ export async function POST(req: Request) {
       // Persist the id BEFORE anything else can fail. A campaign that exists
       // and is scheduled in Mailchimp but is unknown to the database is the one
       // state a retry turns into a duplicate send to the whole list.
-      await admin
+      const { error: persistError } = await admin
         .from('newsletter_drafts')
         .update({ mailchimp_campaign_id: campaignId })
         .eq('id', draft.id);
 
+      // supabase-js RESOLVES with { error } on a failed write — it does not
+      // throw. Unchecked, a failed persist falls through and schedules a
+      // campaign the database has no record of, which a retry turns into a
+      // duplicate send to the whole list.
+      if (persistError) {
+        throw new Error(
+          `failed to record campaign ${campaignId} for "${draft.subject}": ${persistError.message}`,
+        );
+      }
+
       await setCampaignContent(campaignId, draft.body_html);
       await scheduleCampaign(campaignId, new Date(draft.scheduled_for!));
 
-      await admin.from('scheduled_sends').insert({
+      const { error: sendRowError } = await admin.from('scheduled_sends').insert({
         newsletter_draft_id: draft.id,
         mailchimp_campaign_id: campaignId,
         list_id: draft.list_id,
         segment_id: draft.segment_id,
         scheduled_for: draft.scheduled_for,
       });
+
+      // Less severe than the persist: the campaign is already scheduled and
+      // will fire. But an unrecorded send is one /queue cannot show, so say so
+      // plainly — the operator needs to know it is still armed.
+      if (sendRowError) {
+        throw new Error(
+          `campaign ${campaignId} for "${draft.subject}" is scheduled but was not recorded: ${sendRowError.message}`,
+        );
+      }
 
       scheduled += 1;
     } catch (err) {
