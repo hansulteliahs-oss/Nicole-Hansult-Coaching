@@ -73,7 +73,8 @@ in this branch. If it becomes annoying: retry the client construction in
   it stores the RAW token. Safe to correct in an applied file, and the raw-token
   fact is what the live approval token depends on.
 - **`parsePostFaq` cap/dedupe** — done in this branch (F9).
-- Remainder in `.superpowers/sdd/2026-08-27-content-pipeline-rebuild/final-review.md`.
+- Full triage of all 17, plus the whole-branch findings, in
+  `docs/superpowers/2026-08-28-content-pipeline-final-review.md`.
 
 ## Things verified against production, not inferred
 
