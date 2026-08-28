@@ -2487,12 +2487,21 @@ describe('createCampaign', () => {
     ).rejects.toThrow(/not numeric/i);
   });
 
+  it('refuses an empty-string segment id instead of silently sending to everyone', async () => {
+    stubFetch({ ok: true, status: 200, body: JSON.stringify({ id: 'abc123' }) });
+
+    await expect(
+      createCampaign({ listId: 'f531604a9a', segmentId: '', subject: 's', title: 't' }),
+    ).rejects.toThrow(/not numeric/i);
+    expect(calls).toHaveLength(0);
+  });
+
   it('throws on a non-OK response and includes the body', async () => {
     stubFetch({ ok: false, status: 400, body: '{"detail":"bad list"}' });
 
     await expect(
       createCampaign({ listId: 'nope', subject: 's', title: 't' }),
-    ).rejects.toThrow(/400.*bad list/s);
+    ).rejects.toThrow(/400[\s\S]*bad list/);
   });
 
   it('throws when Mailchimp returns 200 with no id', async () => {
@@ -2556,7 +2565,7 @@ describe('setCampaignContent / send / schedule / unschedule', () => {
 
   it('throws when a send is refused', async () => {
     stubFetch({ ok: false, status: 500, body: 'boom' });
-    await expect(sendCampaign('abc123')).rejects.toThrow(/500.*boom/s);
+    await expect(sendCampaign('abc123')).rejects.toThrow(/500[\s\S]*boom/);
   });
 });
 ```
@@ -2679,13 +2688,20 @@ export async function createCampaign(args: {
     segment_opts?: { saved_segment_id: number };
   } = { list_id: args.listId };
 
-  if (args.segmentId) {
+  // Presence, not truthiness: '' is the conventional empty value from an HTML
+  // <select>, and a truthiness test would let it fall through to "no segment" —
+  // sending to the WHOLE list instead of a 127-member one, silently.
+  if (args.segmentId !== undefined && args.segmentId !== null) {
     // "Sugar Cravings" exists as list ecacfdabed (150) AND as a saved segment
     // on the main list (127). Sending to the wrong one is silent, so a segment
     // id that is not a number is a bug we refuse rather than one we discover
     // from an open-rate report.
-    const saved = Number(args.segmentId);
-    if (!Number.isInteger(saved)) {
+    const trimmed = String(args.segmentId).trim();
+    const saved = Number(trimmed);
+    // Number('') and Number(' ') both coerce to 0, which passes
+    // Number.isInteger — trim alone would let an empty/whitespace id through
+    // as saved_segment_id: 0, so the empty check has to be explicit.
+    if (trimmed === '' || !Number.isInteger(saved)) {
       throw new Error(`createCampaign: segment id "${args.segmentId}" is not numeric`);
     }
     recipients.segment_opts = { saved_segment_id: saved };
