@@ -275,3 +275,139 @@ describeIf('claim_for_send / mark_sent / release_for_retry', () => {
     expect(tok!.used).toBe(true);
   });
 });
+
+describeIf('approve_batch', () => {
+  const batchId = '00000000-0000-0000-0000-0000000000c1';
+
+  async function stageBatchPair() {
+    const rows = [];
+    trash.push({ table: 'approval_tokens', column: 'batch_id', value: batchId });
+    for (const subject of ['Launch A', 'Launch B']) {
+      const { data, error } = await admin.rpc('stage_newsletter_draft', {
+        p_run_id: null,
+        p_plan_id: null,
+        p_subject: subject,
+        p_preview_text: null,
+        p_body_html: LINKED,
+        p_list_id: 'f531604a9a',
+        p_segment_id: null,
+        p_type: 'offer',
+        p_scheduled_for: '2099-09-28T16:00:00Z',
+        p_batch_id: batchId,
+      });
+      const row = data?.[0];
+      if (row) trash.push({ table: 'newsletter_drafts', column: 'id', value: row.draft_id });
+      if (error) throw new Error(error.message);
+      if (!row) throw new Error('stage_newsletter_draft returned no row');
+      rows.push(row);
+    }
+    return rows;
+  }
+
+  it('approves every draft in the batch on one token', async () => {
+    const rows = await stageBatchPair();
+
+    const { data, error } = await admin.rpc('approve_batch', { p_token: rows[0].token });
+    expect(error).toBeNull();
+    expect(data).toHaveLength(2);
+    expect(data.every((d: { status: string }) => d.status === 'approved')).toBe(true);
+
+    const { data: tok } = await admin
+      .from('approval_tokens')
+      .select('used')
+      .eq('batch_id', batchId)
+      .single();
+    expect(tok!.used).toBe(true);
+  });
+
+  it('is idempotent — a retry returns the same rows and re-approves nothing', async () => {
+    const { data: first } = await admin
+      .from('approval_tokens')
+      .select('token_hash')
+      .eq('batch_id', batchId)
+      .single();
+
+    // Simulate the route getting halfway: one draft already has a campaign.
+    const { data: drafts } = await admin
+      .from('newsletter_drafts')
+      .select('id')
+      .eq('batch_id', batchId)
+      .order('subject');
+    await admin
+      .from('newsletter_drafts')
+      .update({ mailchimp_campaign_id: 'probe-batch-campaign' })
+      .eq('id', drafts![0].id);
+
+    const { data, error } = await admin.rpc('approve_batch', {
+      p_token: first!.token_hash,
+    });
+    expect(error).toBeNull();
+    expect(data).toHaveLength(2);
+    // The already-created campaign is preserved, so the route can skip it.
+    const withCampaign = data.filter(
+      (d: { mailchimp_campaign_id: string | null }) => d.mailchimp_campaign_id !== null,
+    );
+    expect(withCampaign).toHaveLength(1);
+  });
+
+  it('refuses a single-draft token', async () => {
+    const staged = await stageNewsletter();
+    const { error } = await admin.rpc('approve_batch', { p_token: staged.token });
+    expect(error).not.toBeNull();
+    expect(error!.message).toMatch(/not a batch token/i);
+  });
+});
+
+describeIf('cancel_scheduled_send', () => {
+  async function seedScheduled() {
+    const staged = await stageNewsletter();
+    const { data, error } = await admin
+      .from('scheduled_sends')
+      .insert({
+        newsletter_draft_id: staged.draft_id,
+        mailchimp_campaign_id: 'probe-sched-1',
+        list_id: 'f531604a9a',
+        scheduled_for: '2099-09-28T16:00:00Z',
+      })
+      .select('id')
+      .single();
+    const row = data ?? null;
+    if (row) trash.push({ table: 'scheduled_sends', column: 'id', value: row.id });
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error('scheduled_sends insert returned no row');
+    return row.id as string;
+  }
+
+  it('cancels a queued send with a reason', async () => {
+    const id = await seedScheduled();
+
+    const { data, error } = await admin.rpc('cancel_scheduled_send', {
+      p_id: id,
+      p_reason: 'seats sold out',
+    });
+    expect(error).toBeNull();
+    expect(data.status).toBe('cancelled');
+    expect(data.cancelled_reason).toBe('seats sold out');
+  });
+
+  it('a second cancel reads as already cancelled, not an error', async () => {
+    const id = await seedScheduled();
+    await admin.rpc('cancel_scheduled_send', { p_id: id, p_reason: 'first' });
+
+    const { data, error } = await admin.rpc('cancel_scheduled_send', {
+      p_id: id,
+      p_reason: 'second',
+    });
+    expect(error).toBeNull();
+    expect(data.status).toBe('cancelled');
+    expect(data.cancelled_reason).toBe('first');
+  });
+
+  it('raises on an unknown id', async () => {
+    const { error } = await admin.rpc('cancel_scheduled_send', {
+      p_id: '00000000-0000-0000-0000-0000000000ff',
+      p_reason: 'x',
+    });
+    expect(error).not.toBeNull();
+  });
+});

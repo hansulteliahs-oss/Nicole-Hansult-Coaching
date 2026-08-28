@@ -786,3 +786,91 @@ $fn$;
 
 REVOKE EXECUTE ON FUNCTION public.release_for_retry(uuid,text) FROM PUBLIC, anon, authenticated, nicole_agent;
 GRANT  EXECUTE ON FUNCTION public.release_for_retry(uuid,text) TO service_role;
+
+-- approve_batch — decision 7. One token, one review sitting, N drafts.
+--
+-- Idempotent by construction: the token claim and the status flip happen once,
+-- but the function always RETURNS the full batch. The route can therefore be
+-- retried after a partial Mailchimp failure — it re-reads the rows, sees which
+-- already carry a mailchimp_campaign_id, and creates only the missing ones.
+CREATE OR REPLACE FUNCTION public.approve_batch(p_token text)
+RETURNS SETOF public.newsletter_drafts
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $fn$
+DECLARE
+  v_tok public.approval_tokens;
+BEGIN
+  SELECT * INTO v_tok
+    FROM public.approval_tokens
+   WHERE token_hash = p_token
+     FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'approve_batch: unknown token' USING ERRCODE = 'P0002';
+  END IF;
+  IF v_tok.batch_id IS NULL THEN
+    RAISE EXCEPTION 'approve_batch: not a batch token' USING ERRCODE = '22023';
+  END IF;
+
+  IF NOT v_tok.used THEN
+    IF v_tok.expires_at <= now() THEN
+      RAISE EXCEPTION 'approve_batch: token expired' USING ERRCODE = '22023';
+    END IF;
+
+    UPDATE public.newsletter_drafts
+       SET status = 'approved'
+     WHERE batch_id = v_tok.batch_id AND status = 'draft';
+
+    UPDATE public.approval_tokens SET used = true WHERE token_hash = p_token;
+  END IF;
+
+  RETURN QUERY
+    SELECT * FROM public.newsletter_drafts
+     WHERE batch_id = v_tok.batch_id
+     ORDER BY scheduled_for NULLS LAST, created_at;
+END;
+$fn$;
+
+REVOKE EXECUTE ON FUNCTION public.approve_batch(text) FROM PUBLIC, anon, authenticated, nicole_agent;
+GRANT  EXECUTE ON FUNCTION public.approve_batch(text) TO service_role;
+
+-- cancel_scheduled_send — decision 8. The daily agent DETECTS a stale
+-- scheduled send and pushes Eliahs; only this function, called from /queue by
+-- a human, acts on it.
+--
+-- The caller must unschedule in Mailchimp FIRST and call this only on success.
+-- A row that says 'cancelled' while the campaign is still armed is the one
+-- failure ordering that actually hurts. See lib/actions/queue.ts.
+CREATE OR REPLACE FUNCTION public.cancel_scheduled_send(p_id uuid, p_reason text)
+RETURNS public.scheduled_sends
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $fn$
+DECLARE
+  v_row public.scheduled_sends;
+BEGIN
+  UPDATE public.scheduled_sends
+     SET status           = 'cancelled',
+         cancelled_reason = p_reason
+   WHERE id = p_id AND status = 'queued'
+  RETURNING * INTO v_row;
+
+  IF v_row.id IS NULL THEN
+    -- Already sent or already cancelled. Return it unchanged so a double click
+    -- on /queue reads as "already cancelled" rather than an error.
+    SELECT * INTO v_row FROM public.scheduled_sends WHERE id = p_id;
+    IF v_row.id IS NULL THEN
+      RAISE EXCEPTION 'cancel_scheduled_send: no scheduled send %', p_id
+        USING ERRCODE = 'P0002';
+    END IF;
+  END IF;
+
+  RETURN v_row;
+END;
+$fn$;
+
+REVOKE EXECUTE ON FUNCTION public.cancel_scheduled_send(uuid,text) FROM PUBLIC, anon, authenticated, nicole_agent;
+GRANT  EXECUTE ON FUNCTION public.cancel_scheduled_send(uuid,text) TO service_role;
