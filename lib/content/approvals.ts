@@ -16,7 +16,7 @@
  */
 import { getAdminClient } from '@/lib/supabase/admin';
 
-export type ApprovalRejection = 'missing' | 'used' | 'expired';
+export type ApprovalRejection = 'missing' | 'used' | 'expired' | 'batch';
 
 /**
  * The post variant carries every field `app/insights/[slug]/page.tsx`
@@ -67,7 +67,7 @@ export async function resolveApprovalToken(
 
   const { data: tokenRow, error: tokenError } = await admin
     .from('approval_tokens')
-    .select('token_hash, draft_kind, draft_id, used, expires_at')
+    .select('token_hash, draft_kind, draft_id, batch_id, used, expires_at')
     .eq('token_hash', token)
     .maybeSingle();
 
@@ -76,6 +76,10 @@ export async function resolveApprovalToken(
     return reject('missing');
   }
   if (!tokenRow) return reject('missing');
+
+  // A batch token authorises N drafts and has no draft_id. /approve cannot
+  // render it; the page turns this into a redirect to /approve/batch.
+  if (tokenRow.batch_id) return reject('batch');
 
   // `used` is checked before `expires_at` on purpose: a token that was
   // approved and has since aged past its window should read as "already

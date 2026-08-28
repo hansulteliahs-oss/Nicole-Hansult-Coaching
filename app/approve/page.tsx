@@ -14,6 +14,7 @@
  * and approve another. It is still forwarded to /api/approve unchanged.
  */
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
 import { Nav } from '@/components/layout/Nav';
 import { Footer } from '@/components/layout/Footer';
@@ -42,6 +43,10 @@ const REJECTION_COPY: Record<ApprovalRejection, { title: string; body: string }>
   expired: {
     title: 'This link has expired',
     body: 'Approval links last 14 days. Text Eliahs and he will send a fresh one.',
+  },
+  batch: {
+    title: 'Opening your launch emails',
+    body: 'This link covers several emails at once. One moment.',
   },
 };
 
@@ -73,6 +78,9 @@ export default async function ApprovePage({
   } else {
     const resolution = await resolveApprovalToken(token);
     if (!resolution.ok) {
+      if (resolution.reason === 'batch') {
+        redirect(`/approve/batch?token=${encodeURIComponent(token)}`);
+      }
       content = <Message {...REJECTION_COPY[resolution.reason]} />;
     } else {
       content = (
