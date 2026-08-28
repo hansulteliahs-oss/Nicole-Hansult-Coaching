@@ -461,3 +461,123 @@ $fn$;
 
 REVOKE EXECUTE ON FUNCTION public.stage_newsletter_draft(uuid,uuid,text,text,text,text,text,text,uuid,timestamptz,uuid) FROM PUBLIC, anon, authenticated;
 GRANT  EXECUTE ON FUNCTION public.stage_newsletter_draft(uuid,uuid,text,text,text,text,text,text,uuid,timestamptz,uuid) TO service_role;
+
+-- ──────────────────────────────────────────────────────────────────────────────
+-- 7. The nicole_agent role.
+--
+-- Decision 2: the agent gets its own Postgres role, never SUPABASE_SECRET_KEY.
+-- Same separation as Handled OS migration 0007.
+--
+-- NOLOGIN here on purpose — no password ever lands in this file or in git.
+-- Out of band, once, from the vault (Handled OS task 169):
+--     ALTER ROLE nicole_agent LOGIN PASSWORD '<generated>';
+-- ──────────────────────────────────────────────────────────────────────────────
+DO $role$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'nicole_agent') THEN
+    CREATE ROLE nicole_agent NOLOGIN;
+  END IF;
+END
+$role$;
+
+GRANT USAGE ON SCHEMA public TO nicole_agent;
+
+GRANT SELECT ON
+  public.content_ideas,
+  public.content_plan,
+  public.posts,
+  public.newsletter_drafts,
+  public.pipeline_runs,
+  public.scheduled_sends
+TO nicole_agent;
+
+-- approval_tokens is deliberately absent above, and revoked here in case a
+-- later blanket grant ever tries to include it. The agent mints tokens through
+-- the stage_* RPCs and pushes the link; it never needs to read one back, and a
+-- SELECT here would let it approve its own work.
+REVOKE ALL ON public.approval_tokens FROM nicole_agent;
+
+-- The five agent RPCs, and only those. Section 9 revokes the site RPCs from
+-- this role explicitly as each one is created.
+GRANT EXECUTE ON FUNCTION public.run_start(text) TO nicole_agent;
+GRANT EXECUTE ON FUNCTION public.run_finish(uuid,text,text,jsonb) TO nicole_agent;
+GRANT EXECUTE ON FUNCTION public.plan_upsert(date,text,text,text,text,text,text) TO nicole_agent;
+GRANT EXECUTE ON FUNCTION public.stage_post_draft(uuid,uuid,text,text,text,text,text,text,text,jsonb,text,uuid) TO nicole_agent;
+GRANT EXECUTE ON FUNCTION public.stage_newsletter_draft(uuid,uuid,text,text,text,text,text,text,uuid,timestamptz,uuid) TO nicole_agent;
+
+-- RLS is enabled on all of these, and a table GRANT alone reads nothing
+-- through RLS. nicole_agent needs a policy per table. posts already carries
+-- "published posts are public"; policies are OR'd, so this one widens the
+-- agent to drafts without widening anon.
+DROP POLICY IF EXISTS "agent reads content_ideas" ON public.content_ideas;
+CREATE POLICY "agent reads content_ideas" ON public.content_ideas
+  FOR SELECT TO nicole_agent USING (true);
+
+DROP POLICY IF EXISTS "agent reads content_plan" ON public.content_plan;
+CREATE POLICY "agent reads content_plan" ON public.content_plan
+  FOR SELECT TO nicole_agent USING (true);
+
+DROP POLICY IF EXISTS "agent reads posts" ON public.posts;
+CREATE POLICY "agent reads posts" ON public.posts
+  FOR SELECT TO nicole_agent USING (true);
+
+DROP POLICY IF EXISTS "agent reads newsletter_drafts" ON public.newsletter_drafts;
+CREATE POLICY "agent reads newsletter_drafts" ON public.newsletter_drafts
+  FOR SELECT TO nicole_agent USING (true);
+
+DROP POLICY IF EXISTS "agent reads pipeline_runs" ON public.pipeline_runs;
+CREATE POLICY "agent reads pipeline_runs" ON public.pipeline_runs
+  FOR SELECT TO nicole_agent USING (true);
+
+DROP POLICY IF EXISTS "agent reads scheduled_sends" ON public.scheduled_sends;
+CREATE POLICY "agent reads scheduled_sends" ON public.scheduled_sends
+  FOR SELECT TO nicole_agent USING (true);
+
+-- ──────────────────────────────────────────────────────────────────────────────
+-- 8. agent_grant_report — the security property, made assertable.
+--
+-- PostgREST cannot query information_schema, and role_table_grants would not
+-- show another role's grants to service_role anyway. has_table_privilege and
+-- has_function_privilege answer for any role from any caller.
+--
+-- to_regprocedure() returns NULL rather than raising for a function that does
+-- not exist, so this report is valid at every intermediate state of the file
+-- (the site RPCs arrive in section 9). NULL reads as "not created yet".
+-- ──────────────────────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION public.agent_grant_report()
+RETURNS TABLE(object text, privilege text, granted boolean)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $fn$
+  SELECT t.tbl,
+         p.priv,
+         has_table_privilege('nicole_agent', 'public.' || t.tbl, p.priv)
+    FROM (VALUES ('content_ideas'), ('content_plan'), ('posts'),
+                 ('newsletter_drafts'), ('pipeline_runs'), ('scheduled_sends'),
+                 ('approval_tokens')) AS t(tbl)
+    CROSS JOIN (VALUES ('SELECT'), ('INSERT'), ('UPDATE'), ('DELETE')) AS p(priv)
+  UNION ALL
+  SELECT f.fn,
+         'EXECUTE',
+         CASE WHEN to_regprocedure(f.fn) IS NULL THEN NULL
+              ELSE has_function_privilege('nicole_agent', to_regprocedure(f.fn), 'EXECUTE')
+         END
+    FROM (VALUES
+      ('public.run_start(text)'),
+      ('public.run_finish(uuid,text,text,jsonb)'),
+      ('public.plan_upsert(date,text,text,text,text,text,text)'),
+      ('public.stage_post_draft(uuid,uuid,text,text,text,text,text,text,text,jsonb,text,uuid)'),
+      ('public.stage_newsletter_draft(uuid,uuid,text,text,text,text,text,text,uuid,timestamptz,uuid)'),
+      ('public.approve_and_publish(text)'),
+      ('public.claim_for_send(text)'),
+      ('public.mark_sent(uuid,text,timestamptz)'),
+      ('public.release_for_retry(uuid,text)'),
+      ('public.approve_batch(text)'),
+      ('public.cancel_scheduled_send(uuid,text)')
+    ) AS f(fn);
+$fn$;
+
+REVOKE EXECUTE ON FUNCTION public.agent_grant_report() FROM PUBLIC, anon, authenticated, nicole_agent;
+GRANT  EXECUTE ON FUNCTION public.agent_grant_report() TO service_role;
