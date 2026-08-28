@@ -2748,7 +2748,7 @@ export async function unscheduleCampaign(campaignId: string): Promise<void> {
 - [ ] **Step 4: Run the test to verify it passes**
 
 Run: `pnpm vitest run tests/mailchimp/campaigns.test.ts`
-Expected: PASS, 17 tests.
+Expected: PASS, 18 tests.
 
 - [ ] **Step 5: Document the env vars**
 
