@@ -15,8 +15,11 @@ import { Nav } from '@/components/layout/Nav';
 import { Footer } from '@/components/layout/Footer';
 import { Chip } from '@/components/ui/Chip';
 import { Pill } from '@/components/ui/Pill';
+import { FaqSection } from '@/components/ui/FaqSection';
 import { LessonBody } from '@/components/vibrant40/LessonBody';
+import { faqPageSchema } from '@/lib/content/faqs';
 import { getPublishedPost, formatPostDate } from '@/lib/content/posts';
+import { parsePostFaq } from '@/lib/content/postFaq';
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nicole-hansult-coaching.vercel.app';
@@ -58,6 +61,7 @@ export default async function PostPage({
   if (!post) notFound();
 
   const url = `${BASE_URL}/insights/${post.slug}`;
+  const faqs = parsePostFaq(post.faq);
   const blogPostingSchema = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -76,6 +80,12 @@ export default async function PostPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }}
       />
+      {faqs.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageSchema(faqs)) }}
+        />
+      )}
       <Nav />
       <main className="bg-bg">
         <article className="mx-auto max-w-3xl px-6 pt-32 md:pt-40 pb-16">
@@ -90,6 +100,8 @@ export default async function PostPage({
           </h1>
 
           <LessonBody body={post.body_md} />
+
+          {faqs.length > 0 && <FaqSection items={faqs} className="mt-12" />}
 
           {/* Soft contextual CTA */}
           <div className="mt-12 rounded-2xl bg-card border border-inkFaint p-8 text-center">

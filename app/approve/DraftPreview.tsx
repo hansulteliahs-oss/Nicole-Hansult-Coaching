@@ -21,8 +21,10 @@
  * scripts, no forms, no navigation.
  */
 import { Chip } from '@/components/ui/Chip';
+import { FaqSection } from '@/components/ui/FaqSection';
 import { LessonBody } from '@/components/vibrant40/LessonBody';
 import type { ApprovalDraft } from '@/lib/content/approvals';
+import { parsePostFaq } from '@/lib/content/postFaq';
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nicole-hansult-coaching.vercel.app';
@@ -113,6 +115,10 @@ export function DraftPreview({ draft }: { draft: ApprovalDraft }) {
         <h2 className="font-serif text-2xl text-ink mb-6">{draft.title}</h2>
         <PostMetadata draft={draft} />
         <LessonBody body={draft.body_md} />
+        {(() => {
+          const faqs = parsePostFaq(draft.faq);
+          return faqs.length > 0 ? <FaqSection items={faqs} className="mt-10" /> : null;
+        })()}
       </article>
     );
   }

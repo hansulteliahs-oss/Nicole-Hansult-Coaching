@@ -40,6 +40,7 @@ export type ApprovalDraft =
       meta_description: string | null;
       category: string | null;
       hero_image_url: string | null;
+      faq: unknown;
     }
   | {
       kind: 'newsletter';
@@ -88,7 +89,7 @@ export async function resolveApprovalToken(
     const { data, error } = await admin
       .from('posts')
       .select(
-        'title, slug, body_md, seo_title, meta_description, category, hero_image_url',
+        'title, slug, body_md, seo_title, meta_description, category, hero_image_url, faq',
       )
       .eq('id', tokenRow.draft_id)
       .maybeSingle();
@@ -105,6 +106,7 @@ export async function resolveApprovalToken(
         meta_description: data.meta_description ?? null,
         category: data.category ?? null,
         hero_image_url: data.hero_image_url ?? null,
+        faq: data.faq ?? [],
       },
     };
   }

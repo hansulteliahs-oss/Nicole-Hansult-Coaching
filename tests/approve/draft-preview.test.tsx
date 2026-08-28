@@ -24,6 +24,7 @@ const postDraft = (over: Partial<PostDraft> = {}): PostDraft => ({
   meta_description: 'Stiffness is a signal, not a sentence.',
   category: 'Movement',
   hero_image_url: 'https://cdn.test/hero.jpg',
+  faq: [],
   ...over,
 });
 

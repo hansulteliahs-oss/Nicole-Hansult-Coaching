@@ -21,6 +21,7 @@ export type Post = {
   category: string | null;
   keyword: string | null;
   hero_image_url: string | null;
+  faq: unknown;
   published_at: string | null;
   created_at: string;
 };
@@ -38,7 +39,7 @@ function readClient() {
 }
 
 const POST_COLUMNS =
-  'slug, title, body_md, seo_title, meta_description, category, keyword, hero_image_url, published_at, created_at';
+  'slug, title, body_md, seo_title, meta_description, category, keyword, hero_image_url, faq, published_at, created_at';
 
 /**
  * All published posts, newest first — for /insights.

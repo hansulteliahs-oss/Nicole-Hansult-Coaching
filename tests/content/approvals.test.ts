@@ -133,6 +133,7 @@ describe('resolveApprovalToken', () => {
         meta_description: 'Stiffness is a signal.',
         category: 'Movement',
         hero_image_url: 'https://cdn.test/hero.jpg',
+        faq: [],
       },
     });
     expect(mocks.calls[1]).toEqual({ table: 'posts', column: 'id', value: 'post-9' });
@@ -201,6 +202,7 @@ describe('resolveApprovalToken — post fields that publish', () => {
       'meta_description',
       'category',
       'hero_image_url',
+      'faq',
     ]) {
       expect(postSelect!.columns).toContain(column);
     }
@@ -224,6 +226,7 @@ describe('resolveApprovalToken — post fields that publish', () => {
         meta_description: null,
         category: null,
         hero_image_url: null,
+        faq: [],
       },
     });
   });
