@@ -1883,6 +1883,13 @@ BEGIN
   -- thing for a phone to do, not an error worth showing Nicole.
   IF v_tok.used THEN
     SELECT p.slug INTO v_slug FROM public.posts p WHERE p.id = v_tok.draft_id;
+    -- Same guard the first-tap path applies. Without it a used token whose post
+    -- was later deleted returns (slug: NULL, already: true) silently, while the
+    -- identical condition raises on the first tap.
+    IF v_slug IS NULL THEN
+      RAISE EXCEPTION 'approve_and_publish: post % is gone', v_tok.draft_id
+        USING ERRCODE = 'P0002';
+    END IF;
     RETURN QUERY SELECT v_slug, true;
     RETURN;
   END IF;
@@ -2022,9 +2029,14 @@ BEGIN
      SET status = 'approved'
    WHERE id = p_draft_id AND status = 'sending';
 
-  UPDATE public.approval_tokens
-     SET used = false
-   WHERE draft_id = p_draft_id AND draft_kind = 'newsletter';
+  -- Only un-claim if the draft was actually reverted. Ungated, these two
+  -- diverge: a call on a draft that is not 'sending' no-ops the draft while
+  -- still handing back a live approval link for an issue that already went out.
+  IF FOUND THEN
+    UPDATE public.approval_tokens
+       SET used = false
+     WHERE draft_id = p_draft_id AND draft_kind = 'newsletter';
+  END IF;
 
   INSERT INTO public.pipeline_runs (kind, status, finished_at, produced_draft_id, error, notes)
   VALUES ('send', 'failed', now(), p_draft_id, p_error,

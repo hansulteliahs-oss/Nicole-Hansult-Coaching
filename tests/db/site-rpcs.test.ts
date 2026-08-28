@@ -247,4 +247,31 @@ describeIf('claim_for_send / mark_sent / release_for_retry', () => {
     expect(data[0].already).toBe(true);
     expect(data[0].draft_id).toBe(staged.draft_id);
   });
+
+  it('release_for_retry does not un-claim the token when the draft was not sending', async () => {
+    const staged = await stageNewsletter();
+    await admin.rpc('claim_for_send', { p_token: staged.token });
+    await admin.rpc('mark_sent', {
+      p_draft_id: staged.draft_id,
+      p_campaign_id: 'probe-campaign-guard',
+      p_sent_at: '2099-01-01T00:00:00Z',
+    });
+
+    trash.push({ table: 'pipeline_runs', column: 'produced_draft_id', value: staged.draft_id });
+    const { error } = await admin.rpc('release_for_retry', {
+      p_draft_id: staged.draft_id,
+      p_error: 'late failure after send',
+    });
+    expect(error).toBeNull();
+
+    // The draft was 'sent', not 'sending', so nothing should have been reverted
+    // and the token must stay claimed.
+    const { data: draft } = await admin
+      .from('newsletter_drafts').select('status').eq('id', staged.draft_id).single();
+    expect(draft!.status).toBe('sent');
+
+    const { data: tok } = await admin
+      .from('approval_tokens').select('used').eq('token_hash', staged.token).single();
+    expect(tok!.used).toBe(true);
+  });
 });
