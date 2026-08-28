@@ -5,9 +5,11 @@
  * status='published' rows (enforced by RLS policy "published posts are public").
  *
  * Reads use a plain anon-key client (no cookies) wrapped in `unstable_cache`
- * so the result is statically cacheable and tag-invalidated. On publish, n8n
- * calls /api/revalidate which runs revalidateTag('blog') + the per-slug tag —
- * so a freshly published post appears within seconds without a redeploy.
+ * so the result is statically cacheable and tag-invalidated. On publish,
+ * app/api/approve revalidates in-process (revalidateTag('blog') + the
+ * per-slug tag) — so a freshly published post appears within seconds without
+ * a redeploy. /api/revalidate still exists as a manual escape hatch; see its
+ * own comment.
  */
 import { unstable_cache } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';

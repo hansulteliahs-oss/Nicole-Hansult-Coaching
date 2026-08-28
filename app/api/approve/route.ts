@@ -85,11 +85,16 @@ async function sendNewsletter(admin: SupabaseClient, token: string) {
   // claim_for_send deliberately does not carry preview_text — its contract is
   // "everything needed to send". The preview line is part of what Nicole
   // approved though, so read it here rather than dropping it.
-  const { data: extra } = await admin
+  const { data: extra, error: extraError } = await admin
     .from('newsletter_drafts')
     .select('preview_text')
     .eq('id', claim.draft_id)
     .maybeSingle();
+  if (extraError) {
+    // Fails soft on purpose — the campaign just loses its preview line, not
+    // the send — but a silent failure here is still worth a log line.
+    console.error(`[approve] preview_text read failed: ${extraError.message}`);
+  }
 
   let campaignId: string | undefined;
   let sendAttempted = false;

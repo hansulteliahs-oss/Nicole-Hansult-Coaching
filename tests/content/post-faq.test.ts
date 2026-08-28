@@ -58,4 +58,28 @@ describe('parsePostFaq', () => {
       },
     ]);
   });
+
+  it('caps at 12 entries — an LLM run-on must not reach the public page or its JSON-LD', () => {
+    const many = Array.from({ length: 40 }, (_, i) => ({
+      question: `Question ${i}`,
+      answer: `Answer ${i}`,
+    }));
+    const result = parsePostFaq(many);
+    expect(result).toHaveLength(12);
+    expect(result[0].question).toBe('Question 0');
+    expect(result[11].question).toBe('Question 11');
+  });
+
+  it('dedupes by question, keeping the first answer given', () => {
+    expect(
+      parsePostFaq([
+        { question: 'Is it arthritis?', answer: 'Usually not.' },
+        { question: 'Is it arthritis?', answer: 'A different answer the second time.' },
+        { question: 'Should I stop stairs?', answer: 'No.' },
+      ]),
+    ).toEqual([
+      { question: 'Is it arthritis?', answer: 'Usually not.' },
+      { question: 'Should I stop stairs?', answer: 'No.' },
+    ]);
+  });
 });

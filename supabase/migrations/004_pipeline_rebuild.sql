@@ -406,9 +406,14 @@ DECLARE
 BEGIN
   -- Capture the host of every absolute URL in the body, then require at least
   -- one that is not Mailchimp's own plumbing (unsubscribe, view-in-browser).
+  -- 'gi' not 'g': the scheme match is case-SENSITIVE without the i flag, so an
+  -- uppercase HTTPS:// link is invisible to it — a body whose only link is
+  -- written that way would be wrongly rejected. Protocol-relative links
+  -- (`//host/...`) still fail this check on purpose; that's bad practice in
+  -- email regardless.
   IF NOT EXISTS (
     SELECT 1
-      FROM regexp_matches(COALESCE(p_body_html, ''), 'https?://([^\s"''<>/]+)', 'g') AS m(parts)
+      FROM regexp_matches(COALESCE(p_body_html, ''), 'https?://([^\s"''<>/]+)', 'gi') AS m(parts)
      WHERE m.parts[1] !~* '(^|\.)(list-manage\.com|mailchi\.mp)$'
   ) THEN
     RAISE EXCEPTION
@@ -551,6 +556,12 @@ STABLE
 SECURITY DEFINER
 SET search_path = pg_catalog, public
 AS $fn$
+  -- F13 / deferred 9: has_table_privilege and has_function_privilege below
+  -- say nothing about schema-level USAGE. Without it every grant on this role
+  -- is inert — the agent would fail at runtime with "permission denied for
+  -- schema public" while every other row in this report still read granted.
+  SELECT 'public', 'USAGE', has_schema_privilege('nicole_agent', 'public', 'USAGE')
+  UNION ALL
   SELECT t.tbl,
          p.priv,
          has_table_privilege('nicole_agent', 'public.' || t.tbl, p.priv)
@@ -829,7 +840,9 @@ BEGIN
   RETURN QUERY
     SELECT * FROM public.newsletter_drafts
      WHERE batch_id = v_tok.batch_id
-     ORDER BY scheduled_for NULLS LAST, created_at;
+     -- id breaks ties: created_at alone is not unique, and the batch route's
+     -- "scheduled N of M" message reads its list off this order.
+     ORDER BY scheduled_for NULLS LAST, created_at, id;
 END;
 $fn$;
 

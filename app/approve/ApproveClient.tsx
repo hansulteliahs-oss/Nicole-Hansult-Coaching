@@ -3,9 +3,9 @@
 /**
  * Client half of /approve — the approve button.
  *
- * POSTs the token to /api/approve (which resumes the n8n workflow) and renders
- * the outcome inline. Idempotency lives server-side (approval_tokens), so a
- * double-tap is safe.
+ * POSTs the token to /api/approve, which calls the site RPCs directly and
+ * renders the outcome inline. Idempotency lives server-side (approval_tokens),
+ * so a double-tap is safe.
  *
  * The draft itself is rendered above this by DraftPreview.
  *

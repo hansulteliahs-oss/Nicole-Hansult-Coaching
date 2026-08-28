@@ -1,5 +1,12 @@
 /**
- * POST /api/revalidate — called by n8n on publish to refresh the blog cache.
+ * POST /api/revalidate — a manual escape hatch for the blog cache.
+ *
+ * n8n used to call this on every publish; app/api/approve now revalidates
+ * in-process instead, so nothing calls this route automatically anymore.
+ * It is kept on purpose as a deliberate manual path — a way to force the
+ * 'blog' tag fresh (e.g. after a direct database edit, or a cache that
+ * didn't clear) without redeploying. REVALIDATE_SECRET stays set for exactly
+ * this.
  *
  * Auth: shared secret in the `x-revalidate-secret` header (or JSON body
  * `secret`) must match REVALIDATE_SECRET. Revalidates the 'blog' tag (the

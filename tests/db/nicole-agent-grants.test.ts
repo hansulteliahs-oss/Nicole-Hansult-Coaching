@@ -3,13 +3,13 @@
  * tables and call five functions, and can do nothing else.
  *
  * Asserted through agent_grant_report(), which wraps has_table_privilege /
- * has_function_privilege. PostgREST cannot query information_schema, and
- * information_schema.role_table_grants would not show another role's grants to
- * service_role anyway.
+ * has_function_privilege / has_schema_privilege. PostgREST cannot query
+ * information_schema, and information_schema.role_table_grants would not
+ * show another role's grants to service_role anyway.
  *
- * `granted: null` means the function does not exist yet — expected while
- * Tasks 6 and 7 are still unwritten. The assertions below are therefore
- * "never true", not "always false".
+ * All eleven RPCs (five agent, six site) exist now, so every assertion below
+ * is a real "is/is not granted" check — none of them is "never true" against
+ * a not-yet-created function anymore.
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
@@ -94,8 +94,17 @@ describeIf('nicole_agent privileges', () => {
 
   it('may never execute a site RPC', () => {
     for (const fn of SITE_FUNCTIONS) {
-      // null = not created yet (Tasks 6/7 pending). Never true.
-      expect(find(fn, 'EXECUTE')?.granted, fn).not.toBe(true);
+      expect(find(fn, 'EXECUTE')?.granted, fn).toBe(false);
     }
+  });
+
+  // F13 / deferred 9: has_table_privilege and has_function_privilege say
+  // nothing about schema-level USAGE. If a future edit ever dropped
+  // `GRANT USAGE ON SCHEMA public TO nicole_agent`, every table SELECT and
+  // every RPC EXECUTE above would still report exactly as granted while the
+  // agent broke at runtime with "permission denied for schema public". This
+  // is the one grant those checks cannot see.
+  it('has USAGE on the public schema — without it, every grant above is inert', () => {
+    expect(find('public', 'USAGE')?.granted).toBe(true);
   });
 });

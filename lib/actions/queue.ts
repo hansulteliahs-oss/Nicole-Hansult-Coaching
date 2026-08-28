@@ -78,7 +78,10 @@ export async function loadQueueAction(key: string): Promise<QueueResult> {
     .limit(50);
 
   if (runs.error || sends.error) {
-    console.error(`[queue] load failed: ${runs.error?.message ?? sends.error?.message}`);
+    // Log both — `??` here would hide the sends-side error whenever both
+    // reads fail at once, and there is no reason to give up either half.
+    if (runs.error) console.error(`[queue] runs load failed: ${runs.error.message}`);
+    if (sends.error) console.error(`[queue] sends load failed: ${sends.error.message}`);
     return { ok: false, error: 'server' };
   }
 

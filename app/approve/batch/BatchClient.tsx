@@ -6,6 +6,12 @@
  * Two presses, not one, for the same reason a single newsletter takes two:
  * this arms real sends to the full list and cannot be recalled from here.
  * Cancelling afterwards means /queue.
+ *
+ * `pending` can be less than `total`: approve_batch claims the token on the
+ * FIRST press but the route can fail partway through Mailchimp, so a refresh
+ * after a partial failure lands here again with some drafts already carrying
+ * a mailchimp_campaign_id. The copy says so rather than repeating "review
+ * done" for emails that were already reviewed on the first press.
  */
 import { useState } from 'react';
 
@@ -14,7 +20,16 @@ import { NEWSLETTER_AUDIENCE_APPROX } from '@/app/approve/approval-state';
 
 type State = 'idle' | 'confirming' | 'working' | 'done' | 'error';
 
-export function BatchClient({ token, count }: { token: string; count: number }) {
+export function BatchClient({
+  token,
+  total,
+  pending,
+}: {
+  token: string;
+  total: number;
+  pending: number;
+}) {
+  const retry = pending < total;
   const [state, setState] = useState<State>('idle');
   const [message, setMessage] = useState('');
 
@@ -41,7 +56,7 @@ export function BatchClient({ token, count }: { token: string; count: number }) 
       <div className="text-center">
         <h2 className="font-serif text-3xl text-ink mb-4">Scheduled 🎉</h2>
         <p className="text-inkSoft">
-          All {count} emails are queued in Mailchimp. You can close this tab.
+          All {total} emails are queued in Mailchimp. You can close this tab.
         </p>
       </div>
     );
@@ -51,7 +66,7 @@ export function BatchClient({ token, count }: { token: string; count: number }) 
     <div className="text-center">
       {state === 'confirming' && (
         <p className="mx-auto mb-6 max-w-md rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-          This schedules {count} emails to roughly{' '}
+          This schedules {pending} email{pending === 1 ? '' : 's'} to roughly{' '}
           {NEWSLETTER_AUDIENCE_APPROX.toLocaleString('en-US')} people each. They
           will send on their own at the times listed above.
         </p>
@@ -74,10 +89,12 @@ export function BatchClient({ token, count }: { token: string; count: number }) 
         {state === 'working'
           ? 'Scheduling…'
           : state === 'confirming'
-            ? `Yes, schedule all ${count}`
+            ? `Yes, schedule ${pending}`
             : state === 'error'
               ? 'Try again'
-              : `Review done — schedule ${count} emails`}
+              : retry
+                ? `Finish scheduling — ${pending} left`
+                : `Review done — schedule ${pending} emails`}
       </Pill>
 
       {state === 'error' && (

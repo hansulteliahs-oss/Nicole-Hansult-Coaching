@@ -4,8 +4,15 @@
  * The scenario that matters most is the last one: a Mailchimp failure after
  * the token is claimed must RELEASE the draft, not strand it. That is root
  * cause 1, and three real drafts are stranded by it today.
+ *
+ * The 'approve_and_publish' block below is the only one that touches
+ * `posts.status`, and "published posts are public" (003) makes a published
+ * probe anon-readable on the live blog for as long as it exists. That block
+ * drains its own trash in an afterEach, so the exposure window is one test,
+ * not the whole file — and the beforeAll sweep below self-heals if a prior
+ * run crashed before its own cleanup ran.
  */
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { config as loadEnv } from 'dotenv';
 import path from 'node:path';
@@ -67,11 +74,18 @@ async function stageNewsletter() {
   return row as { draft_id: string; token: string };
 }
 
-beforeAll(() => {
+beforeAll(async () => {
   if (!RUN) return;
   admin = createClient(SUPABASE_URL!, SUPABASE_SECRET!, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+
+  // Self-heal: an interrupt, a crash, or the known "JWT issued at future"
+  // flake can leave a prior run's afterAll cleanup unrun, stranding a
+  // published "probe" post live and anon-readable on /insights. Every slug
+  // this file stages is prefixed 'site-rpc-', so sweep those before this run
+  // adds more.
+  await admin.from('posts').delete().like('slug', 'site-rpc-%');
 });
 
 afterAll(async () => {
@@ -82,6 +96,20 @@ afterAll(async () => {
 });
 
 describeIf('approve_and_publish', () => {
+  // Drain right after each test rather than waiting for the file's afterAll.
+  // A published post is anon-readable the moment approve_and_publish runs, so
+  // this narrows the exposure window from "the whole suite" to "this test".
+  // Only entries pushed during THIS test are in `trash` at this point — every
+  // earlier test in this block already drained its own — so splicing the
+  // shared array here is safe without threading per-test state through it.
+  afterEach(async () => {
+    if (!RUN) return;
+    const pending = trash.splice(0, trash.length);
+    for (const row of pending.reverse()) {
+      await admin.from(row.table).delete().eq(row.column, row.value);
+    }
+  });
+
   it('publishes the post and claims the token together', async () => {
     const staged = await stagePost(`site-rpc-publish-${Date.now()}`);
 
