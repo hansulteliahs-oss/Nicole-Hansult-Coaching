@@ -148,7 +148,7 @@ async function sendNewsletter(admin: SupabaseClient, token: string) {
     // directly — release_for_retry's forensics insert must NOT fire on this
     // path, but the one genuinely dangerous outcome still has to show up in
     // /queue.
-    await admin.from('pipeline_runs').insert({
+    const { error: insertError } = await admin.from('pipeline_runs').insert({
       kind: 'send',
       status: 'failed',
       finished_at: new Date().toISOString(),
@@ -156,6 +156,14 @@ async function sendNewsletter(admin: SupabaseClient, token: string) {
       error: message,
       notes: { send_outcome: 'unknown', held: true },
     });
+    if (insertError) {
+      // Log only — do not change the response. The 502 below is already
+      // correct and the draft is already held; a failed forensics write must
+      // not make the answer worse.
+      console.error(
+        `[approve] could not record the held send for draft ${claim.draft_id}: ${insertError.message}`,
+      );
+    }
     console.error(`[approve] send outcome UNKNOWN, draft held in sending: ${message}`);
     return NextResponse.json(
       {

@@ -10,6 +10,22 @@
 
 **Spec:** `docs/superpowers/specs/2026-08-27-content-pipeline-rebuild-design.md`
 
+> **Post-execution correction (Task 9, Ruling 15 + Ruling 20).** The Task 9 route
+> as written below wraps `createCampaign`, `setCampaignContent` and `sendCampaign`
+> in one try/catch that always calls `release_for_retry`. That is unsafe: a
+> `sendCampaign` timeout can mean Mailchimp accepted and sent while the response
+> was lost, so releasing hands back a live link whose next tap sends to the whole
+> list a second time. The shipped route tracks a `sendAttempted` flag set
+> immediately before the send call, releases only on pre-send failures, and on a
+> send-phase failure holds the draft in `sending`, writes a `pipeline_runs` row
+> with `notes: { send_outcome: 'unknown', held: true }`, and returns a 502 telling
+> the operator to check Mailchimp first.
+>
+> Separately, `@supabase/supabase-js` RESOLVES with `{ error }` on a failed write
+> or RPC — it does not throw. Every `await admin.rpc(...)` and
+> `await admin.from(...)` in this plan that ignores `{ error }` is a silent
+> failure, including that `pipeline_runs` insert. Check them.
+
 ---
 
 ## Global Constraints

@@ -193,6 +193,36 @@ describe('POST /api/approve', () => {
     expect(mocks.rpcCalls[1].args.p_campaign_id).toBe('campaign-1');
   });
 
+  it('reports success when mark_sent fails after the send actually went out', async () => {
+    mocks.tokenRow = { draft_kind: 'newsletter', batch_id: null };
+    mocks.rpcResults.claim_for_send = {
+      data: [
+        {
+          draft_id: 'd-1',
+          subject: 'Stairs',
+          body_html: '<p>x</p>',
+          list_id: 'f531604a9a',
+          segment_id: null,
+          already: false,
+        },
+      ],
+      error: null,
+    };
+    mocks.rpcResults.mark_sent = { data: null, error: { message: 'boom' } };
+
+    const res = await post({ token: 't' });
+    // The send DID happen — Mailchimp already sent it. Telling the operator
+    // it failed would be a lie that invites a retry, and a retry here is a
+    // duplicate send to the whole list.
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.already).toBe(false);
+    expect(body.campaignId).toBe('campaign-1');
+    expect(body.warning).toBeTruthy();
+
+    expect(mocks.mailchimpCalls).toEqual(['create', 'content', 'send']);
+  });
+
   it('does not touch Mailchimp when the claim reports already', async () => {
     mocks.tokenRow = { draft_kind: 'newsletter', batch_id: null };
     mocks.rpcResults.claim_for_send = {
