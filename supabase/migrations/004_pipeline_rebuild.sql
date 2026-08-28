@@ -581,3 +581,198 @@ $fn$;
 
 REVOKE EXECUTE ON FUNCTION public.agent_grant_report() FROM PUBLIC, anon, authenticated, nicole_agent;
 GRANT  EXECUTE ON FUNCTION public.agent_grant_report() TO service_role;
+
+-- ──────────────────────────────────────────────────────────────────────────────
+-- 9. Site RPCs — every irreversible action lives here.
+--
+-- Decision 3: the agent proposes, the site acts. None of these is ever granted
+-- to nicole_agent, and each one revokes EXECUTE from PUBLIC on creation.
+--
+-- ROOT CAUSE 1 is fixed by the structure, not by care: in each function the
+-- token claim and the state change are statements in one function body, so
+-- they share a transaction. The n8n pipeline set used=true in a node that ran
+-- BEFORE the publish node, which is why three drafts are stranded today.
+-- ──────────────────────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION public.approve_and_publish(p_token text)
+RETURNS TABLE(slug text, already boolean)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $fn$
+DECLARE
+  v_tok  public.approval_tokens;
+  v_slug text;
+BEGIN
+  -- FOR UPDATE so two taps in the same second serialise rather than race.
+  SELECT * INTO v_tok
+    FROM public.approval_tokens
+   WHERE token_hash = p_token
+     FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'approve_and_publish: unknown token' USING ERRCODE = 'P0002';
+  END IF;
+  IF v_tok.batch_id IS NOT NULL THEN
+    RAISE EXCEPTION 'approve_and_publish: this token approves a batch, use approve_batch'
+      USING ERRCODE = '22023';
+  END IF;
+  IF v_tok.draft_kind <> 'post' THEN
+    RAISE EXCEPTION 'approve_and_publish: not a post token' USING ERRCODE = '22023';
+  END IF;
+
+  -- Already approved: report the slug and say so. A double tap is a normal
+  -- thing for a phone to do, not an error worth showing Nicole.
+  IF v_tok.used THEN
+    SELECT p.slug INTO v_slug FROM public.posts p WHERE p.id = v_tok.draft_id;
+    RETURN QUERY SELECT v_slug, true;
+    RETURN;
+  END IF;
+
+  IF v_tok.expires_at <= now() THEN
+    RAISE EXCEPTION 'approve_and_publish: token expired' USING ERRCODE = '22023';
+  END IF;
+
+  UPDATE public.posts
+     SET status       = 'published',
+         published_at = COALESCE(published_at, now())
+   WHERE id = v_tok.draft_id
+  RETURNING posts.slug INTO v_slug;   -- qualified: bare `slug` is the OUT param
+
+  IF v_slug IS NULL THEN
+    RAISE EXCEPTION 'approve_and_publish: post % is gone', v_tok.draft_id
+      USING ERRCODE = 'P0002';
+  END IF;
+
+  UPDATE public.approval_tokens SET used = true WHERE token_hash = p_token;
+
+  -- 'approved' is terminal for a post slot: published IS approved. 'sent' is
+  -- reserved for newsletters, where the two are genuinely different events.
+  UPDATE public.content_plan
+     SET status = 'approved'
+   WHERE produced_post_id = v_tok.draft_id;
+
+  RETURN QUERY SELECT v_slug, false;
+END;
+$fn$;
+
+REVOKE EXECUTE ON FUNCTION public.approve_and_publish(text) FROM PUBLIC, anon, authenticated, nicole_agent;
+GRANT  EXECUTE ON FUNCTION public.approve_and_publish(text) TO service_role;
+
+-- claim_for_send — moves the draft to 'sending' and claims the token together,
+-- then hands back the payload. 'sending' is the intermediate state that makes
+-- a Mailchimp timeout releasable rather than terminal.
+CREATE OR REPLACE FUNCTION public.claim_for_send(p_token text)
+RETURNS TABLE(draft_id uuid, subject text, body_html text,
+              list_id text, segment_id text, already boolean)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $fn$
+DECLARE
+  v_tok public.approval_tokens;
+  v_d   public.newsletter_drafts;
+BEGIN
+  SELECT * INTO v_tok
+    FROM public.approval_tokens
+   WHERE token_hash = p_token
+     FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'claim_for_send: unknown token' USING ERRCODE = 'P0002';
+  END IF;
+  IF v_tok.batch_id IS NOT NULL THEN
+    RAISE EXCEPTION 'claim_for_send: this token approves a batch, use approve_batch'
+      USING ERRCODE = '22023';
+  END IF;
+  IF v_tok.draft_kind <> 'newsletter' THEN
+    RAISE EXCEPTION 'claim_for_send: not a newsletter token' USING ERRCODE = '22023';
+  END IF;
+
+  SELECT * INTO v_d FROM public.newsletter_drafts WHERE id = v_tok.draft_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'claim_for_send: draft % is gone', v_tok.draft_id USING ERRCODE = 'P0002';
+  END IF;
+
+  IF v_tok.used OR v_d.status IN ('sending', 'sent') THEN
+    RETURN QUERY SELECT v_d.id, v_d.subject, v_d.body_html, v_d.list_id, v_d.segment_id, true;
+    RETURN;
+  END IF;
+
+  IF v_tok.expires_at <= now() THEN
+    RAISE EXCEPTION 'claim_for_send: token expired' USING ERRCODE = '22023';
+  END IF;
+
+  UPDATE public.newsletter_drafts SET status = 'sending' WHERE id = v_d.id;
+  UPDATE public.approval_tokens   SET used = true        WHERE token_hash = p_token;
+
+  RETURN QUERY SELECT v_d.id, v_d.subject, v_d.body_html, v_d.list_id, v_d.segment_id, false;
+END;
+$fn$;
+
+REVOKE EXECUTE ON FUNCTION public.claim_for_send(text) FROM PUBLIC, anon, authenticated, nicole_agent;
+GRANT  EXECUTE ON FUNCTION public.claim_for_send(text) TO service_role;
+
+-- mark_sent — the send landed. Completes the draft, the plan slot, and any
+-- scheduled_sends row that was waiting on this draft.
+CREATE OR REPLACE FUNCTION public.mark_sent(
+  p_draft_id    uuid,
+  p_campaign_id text,
+  p_sent_at     timestamptz
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $fn$
+BEGIN
+  UPDATE public.newsletter_drafts
+     SET status                = 'sent',
+         mailchimp_campaign_id = p_campaign_id,
+         sent_at               = COALESCE(p_sent_at, now())
+   WHERE id = p_draft_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'mark_sent: draft % is gone', p_draft_id USING ERRCODE = 'P0002';
+  END IF;
+
+  UPDATE public.content_plan SET status = 'sent' WHERE produced_draft_id = p_draft_id;
+
+  UPDATE public.scheduled_sends
+     SET status = 'sent'
+   WHERE newsletter_draft_id = p_draft_id AND status = 'queued';
+END;
+$fn$;
+
+REVOKE EXECUTE ON FUNCTION public.mark_sent(uuid,text,timestamptz) FROM PUBLIC, anon, authenticated, nicole_agent;
+GRANT  EXECUTE ON FUNCTION public.mark_sent(uuid,text,timestamptz) TO service_role;
+
+-- release_for_retry — Mailchimp failed after the claim. Return the draft to
+-- 'approved' and un-claim the token so the SAME link works again.
+--
+-- This is the whole point of root cause 1. Under n8n this path did not exist:
+-- the token was already burnt, so a failure here stranded the draft forever
+-- and needed a hand rescue. Three drafts are in that state right now.
+CREATE OR REPLACE FUNCTION public.release_for_retry(p_draft_id uuid, p_error text)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $fn$
+BEGIN
+  UPDATE public.newsletter_drafts
+     SET status = 'approved'
+   WHERE id = p_draft_id AND status = 'sending';
+
+  UPDATE public.approval_tokens
+     SET used = false
+   WHERE draft_id = p_draft_id AND draft_kind = 'newsletter';
+
+  INSERT INTO public.pipeline_runs (kind, status, finished_at, produced_draft_id, error, notes)
+  VALUES ('send', 'failed', now(), p_draft_id, p_error,
+          jsonb_build_object('released', true));
+END;
+$fn$;
+
+REVOKE EXECUTE ON FUNCTION public.release_for_retry(uuid,text) FROM PUBLIC, anon, authenticated, nicole_agent;
+GRANT  EXECUTE ON FUNCTION public.release_for_retry(uuid,text) TO service_role;
