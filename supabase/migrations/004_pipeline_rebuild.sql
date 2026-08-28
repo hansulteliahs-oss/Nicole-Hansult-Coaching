@@ -549,7 +549,7 @@ RETURNS TABLE(object text, privilege text, granted boolean)
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-SET search_path = public, pg_catalog
+SET search_path = pg_catalog, public
 AS $fn$
   SELECT t.tbl,
          p.priv,
