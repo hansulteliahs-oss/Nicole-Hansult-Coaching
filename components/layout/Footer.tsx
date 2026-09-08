@@ -3,7 +3,7 @@
  *
  * 4 link groups:
  *   1. Home / About / Testimonials / Insights / Contact
- *   2. Services / Clinical Longevity Evaluation / Vibrant40 Jumpstart
+ *   2. Services / Clinical Longevity Assessment / Vibrant40 Jumpstart
  *   3. Download Guide / Book a Session
  *   4. Privacy Policy / Terms & Conditions
  *
@@ -28,7 +28,7 @@ const FOOTER_GROUPS = [
     label: 'Services',
     links: [
       { label: 'Services', href: '/services' },
-      { label: 'Clinical Longevity Evaluation', href: '/services/clinical-longevity-evaluation' },
+      { label: 'Clinical Longevity Assessment', href: '/services/clinical-longevity-evaluation' },
       { label: 'Vibrant40 Jumpstart', href: '/services/vibrant40-jumpstart' },
     ],
   },

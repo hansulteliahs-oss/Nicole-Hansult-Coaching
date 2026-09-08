@@ -62,13 +62,13 @@ export default function ThreeMonthCoachingPage() {
             <div className="space-y-3">
               <h2 className="text-2xl font-light text-ink">Who it&apos;s for</h2>
               <p className="text-inkSoft">
-                People who have completed the Clinical Longevity Evaluation or a Strategy Session
+                People who have completed the Clinical Longevity Assessment or a Strategy Session
                 and are ready for sustained, structured progress. You have a clear baseline. Now
                 you want someone to help you apply it consistently over time.
               </p>
               <p className="text-inkSoft">
                 This is not a good fit for someone who prefers self-paced or is still exploring
-                options. Start with the CLE or a Strategy Session if you&apos;re not sure.
+                options. Start with the Clinical Longevity Assessment or a Strategy Session if you&apos;re not sure.
               </p>
             </div>
 

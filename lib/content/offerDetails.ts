@@ -102,7 +102,7 @@ export function offerImageSide(id: OfferId): 'left' | 'right' {
 export const offerImage: Partial<Record<OfferId, { src: string; alt: string }>> = {
   cle: {
     src: '/images/clinical-longevity-evaluation-seca-scan-carlsbad.jpg',
-    alt: 'Nicole Hansult guiding a client through a Seca body composition scan during a clinical longevity evaluation in Carlsbad, CA',
+    alt: 'Nicole Hansult guiding a client through a Seca body composition scan during a clinical longevity assessment in Carlsbad, CA',
   },
   'everyday-training': {
     src: '/images/personalized-training-movement-coaching-carlsbad.jpg',

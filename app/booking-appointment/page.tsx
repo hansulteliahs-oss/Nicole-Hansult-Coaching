@@ -9,12 +9,12 @@ const BASE_URL =
 export const metadata: Metadata = {
   title: 'Book an Appointment',
   description:
-    'Schedule a Clinical Longevity Evaluation or Strategy Session with Nicole Hansult in Carlsbad, CA.',
+    'Schedule a Clinical Longevity Assessment or Strategy Session with Nicole Hansult in Carlsbad, CA.',
   alternates: { canonical: `${BASE_URL}/booking-appointment` },
   openGraph: {
     title: 'Book an Appointment — Nicole Hansult Coaching',
     description:
-      'Schedule a Clinical Longevity Evaluation or Strategy Session with Nicole Hansult in Carlsbad, CA.',
+      'Schedule a Clinical Longevity Assessment or Strategy Session with Nicole Hansult in Carlsbad, CA.',
   },
 };
 

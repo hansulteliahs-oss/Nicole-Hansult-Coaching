@@ -94,7 +94,7 @@ export default function ServicesPage() {
         </section>
 
         <section className="mx-auto max-w-6xl space-y-12 px-6 pb-24">
-          {/* Hero — the Clinical Longevity Evaluation, the recommended first step */}
+          {/* Hero — the Clinical Longevity Assessment, the recommended first step */}
           <OfferLadderCard id={HERO_ID} />
 
           {/* Tier 2 — where the CLE leads: ongoing in-person coaching */}
@@ -132,7 +132,7 @@ export default function ServicesPage() {
             </Pill>
           </div>
 
-          {/* FAQ — ported from the live Clinical Longevity Evaluation page */}
+          {/* FAQ — ported from the live Clinical Longevity Assessment page */}
           <FaqSection items={cleFaqs} />
         </section>
       </main>

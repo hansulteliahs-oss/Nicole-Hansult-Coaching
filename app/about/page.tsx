@@ -393,11 +393,11 @@ export default function AboutPage() {
               Not Sure Where to Start?
             </h2>
             <p className="text-inkSoft text-lg">
-              Book a Clinical Longevity Evaluation — the clearest way to begin.
+              Book a Clinical Longevity Assessment — the clearest way to begin.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Pill href="/booking-appointment" variant="orchid" size="lg">
-                Book a Clinical Longevity Evaluation
+                Book a Clinical Longevity Assessment
               </Pill>
               <Pill href="/services" variant="ghost" size="lg">
                 Explore services

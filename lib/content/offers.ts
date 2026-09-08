@@ -18,14 +18,14 @@ export const offers: ReadonlyArray<Offer> = [
   {
     id: 'cle',
     slug: 'clinical-longevity-evaluation',
-    name: 'Clinical Longevity Evaluation',
+    name: 'Clinical Longevity Assessment',
     price: 295,
     priceLabel: '$295',
     modality: 'in-person',
     kind: 'product',
     blurb:
       'A single-session baseline — Seca body composition + movement screen + plan.',
-    ctaLabel: 'Book the CLE',
+    ctaLabel: 'Book the Assessment',
     ctaHref: '/booking-appointment',
   },
   {

@@ -2,8 +2,8 @@
  * Services — home page section 4: "Start With a Clear Plan".
  *
  * CLE intro section on the home page. Introduces the Clinical Longevity
- * Evaluation as the recommended starting point, with the 4-bullet "During the
- * evaluation, we will:" list.
+ * Assessment as the recommended starting point, with the 4-bullet "During the
+ * assessment, we will:" list.
  *
  * Copy: verbatim from CONTENT-AUDIT.md §Home Page §Start With a Clear Plan.
  * Prices: none in this section — prices are sourced from offers.ts and surface
@@ -21,7 +21,7 @@ export function Services() {
           Start With a Clear Plan
         </h2>
         <p className="text-inkSoft text-lg max-w-2xl">
-          The best way to begin is with a Clinical Longevity Evaluation —
+          The best way to begin is with a Clinical Longevity Assessment —
           giving us the insight needed to build a personalized strategy for
           your body.
         </p>
@@ -30,7 +30,7 @@ export function Services() {
         </p>
         <div className="space-y-4">
           <p className="text-ink text-base font-medium">
-            During the evaluation, we will:
+            During the assessment, we will:
           </p>
           <ul className="space-y-2 text-inkSoft text-base max-w-xl">
             <li className="flex gap-2">
@@ -56,7 +56,7 @@ export function Services() {
           how to support your body moving forward.
         </p>
         <Pill href="/booking-appointment" variant="orchid" size="lg">
-          Book a Clinical Longevity Evaluation
+          Book a Clinical Longevity Assessment
         </Pill>
       </div>
     </section>

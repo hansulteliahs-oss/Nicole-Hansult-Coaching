@@ -4,7 +4,7 @@
  * Sits between Services and Approach. Two-column on desktop, stacked on
  * mobile. Image left, text right (mirrors About).
  *
- * Featured during the Clinical Longevity Evaluation. Replaces the Squarespace
+ * Featured during the Clinical Longevity Assessment. Replaces the Squarespace
  * site's mention of clinical-grade body composition technology on the home page.
  */
 import Image from 'next/image';
@@ -74,7 +74,7 @@ export function Seca() {
             on how your body is currently functioning.
           </p>
           <Pill href="/booking-appointment" variant="orchid" size="md">
-            Start with a Clinical Longevity Evaluation
+            Start with a Clinical Longevity Assessment
           </Pill>
         </div>
       </div>

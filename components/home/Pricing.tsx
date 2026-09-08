@@ -1,7 +1,7 @@
 /**
  * Pricing — home page section: "Choose Your Best Starting Point".
  *
- * CLE-hero offer ladder. The Clinical Longevity Evaluation is the visual hero
+ * CLE-hero offer ladder. The Clinical Longevity Assessment is the visual hero
  * (full-width HeroOfferCard) — it's the funnel front door we push hardest.
  * Beneath it, the remaining offers are arranged as a top-to-bottom funnel:
  *   "Coaching that continues" → Personalized Training + 3-Month Program (the revenue)
@@ -32,7 +32,7 @@ export function Pricing() {
           </h2>
         </div>
 
-        {/* Hero — the Clinical Longevity Evaluation, the funnel front door */}
+        {/* Hero — the Clinical Longevity Assessment, the funnel front door */}
         <OfferLadderCard id={HERO_ID} />
 
         {/* Tier 2 — where the CLE leads: ongoing in-person coaching */}

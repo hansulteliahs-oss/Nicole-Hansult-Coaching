@@ -47,7 +47,7 @@ export function Hero() {
           </p>
           <div className="flex gap-3 flex-wrap">
             <Pill href="/booking-appointment" variant="orchid" size="lg">
-              Start with a Clinical Longevity Evaluation
+              Start with a Clinical Longevity Assessment
             </Pill>
             <Pill
               href="/services"

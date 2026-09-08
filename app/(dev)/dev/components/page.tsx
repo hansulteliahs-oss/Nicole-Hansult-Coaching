@@ -127,7 +127,7 @@ export default async function ComponentStyleguide({
           <h2 className="text-ink text-2xl font-light">ServiceCard</h2>
           <div className="grid md:grid-cols-2 gap-6">
             <ServiceCard
-              title="Clinical Longevity Evaluation"
+              title="Clinical Longevity Assessment"
               blurb="A single-session baseline — body composition + movement screen + plan."
               bullets={[
                 'Seca body composition',
@@ -135,7 +135,7 @@ export default async function ComponentStyleguide({
                 'Plan you walk out with',
               ]}
               priceLabel="$295"
-              ctaLabel="Book the CLE"
+              ctaLabel="Book the Assessment"
               ctaHref="#"
               tint="sky"
             />

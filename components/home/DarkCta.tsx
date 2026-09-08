@@ -38,7 +38,7 @@ export function DarkCta() {
         </p>
         <div className="flex justify-center pt-2">
           <Pill href="/booking-appointment" variant="orchid" size="lg">
-            Book a Clinical Longevity Evaluation
+            Book a Clinical Longevity Assessment
           </Pill>
         </div>
       </div>
