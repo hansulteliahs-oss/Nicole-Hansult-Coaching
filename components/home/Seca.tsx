@@ -70,7 +70,7 @@ export function Seca() {
           </ul>
           <p className="text-inkSoft text-base">
             This information becomes the foundation of your Clinical Longevity
-            Evaluation, allowing us to stop guessing and build a strategy based
+            Assessment, allowing us to stop guessing and build a strategy based
             on how your body is currently functioning.
           </p>
           <Pill href="/booking-appointment" variant="orchid" size="md">

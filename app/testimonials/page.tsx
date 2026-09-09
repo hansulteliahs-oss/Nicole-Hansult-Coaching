@@ -294,7 +294,7 @@ export default function TestimonialsPage() {
             what your body needs as you age, the first step is gaining clarity.
           </p>
           <Pill href="/booking-appointment" variant="orchid" size="lg">
-            Book Your Evaluation
+            Book Your Assessment
           </Pill>
         </section>
       </main>

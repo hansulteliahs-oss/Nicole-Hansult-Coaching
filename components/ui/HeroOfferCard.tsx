@@ -2,7 +2,7 @@
  * HeroOfferCard — the featured offer treatment.
  *
  * A full-width, image + content card used to make ONE offer (the Clinical
- * Longevity Evaluation) the visual hero of the offer ladder on both the home
+ * Longevity Assessment) the visual hero of the offer ladder on both the home
  * Pricing section and the /services page. Deliberately distinct from the dark
  * `highlighted` PricingCard (reserved for the 3-Month Program) so the two
  * featured treatments don't clash: the hero earns prominence through scale +
