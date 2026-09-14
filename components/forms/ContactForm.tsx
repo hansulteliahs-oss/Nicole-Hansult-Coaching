@@ -8,11 +8,18 @@ import { contactSchema } from '@/lib/schemas/contact';
 import type { ContactInput } from '@/lib/schemas/contact';
 import { contactAction } from '@/lib/actions/contact';
 import { offers } from '@/lib/content/offers';
+import { TurnstileWidget } from '@/components/forms/TurnstileWidget';
+
+// Absent in local dev until the key is set; the widget is then skipped and the
+// Server Action fails open, so the form keeps working.
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileReset, setTurnstileReset] = useState(0);
 
   const {
     register,
@@ -26,11 +33,25 @@ export function ContactForm() {
   const onSubmit = (data: ContactInput) => {
     setServerError(null);
     startTransition(async () => {
-      const result = await contactAction(data);
+      const result = await contactAction({
+        ...data,
+        turnstileToken: turnstileToken ?? undefined,
+      });
       if (result.success) {
         setSubmitted(true);
-      } else if ('error' in result && result.error === 'rate_limited') {
+        return;
+      }
+
+      // A Turnstile token is single-use and expires, so any failed attempt
+      // has to re-challenge before the visitor can retry.
+      setTurnstileReset((n) => n + 1);
+
+      if ('error' in result && result.error === 'rate_limited') {
         setServerError('Too many submissions. Please wait a minute and try again.');
+      } else if ('error' in result && result.error === 'spam') {
+        setServerError(
+          "We couldn't verify your browser. Please refresh the page and try again, or email nicole@nicolehansultcoaching.com directly.",
+        );
       } else {
         setServerError(
           'Something went wrong. Please try again or email nicole@nicolehansultcoaching.com directly.',
@@ -186,6 +207,15 @@ export function ContactForm() {
           <p className={errorClass}>{errors.message.message}</p>
         )}
       </div>
+
+      {/* Bot verification — invisible to most visitors, blocks scripted submits */}
+      {TURNSTILE_SITE_KEY && (
+        <TurnstileWidget
+          siteKey={TURNSTILE_SITE_KEY}
+          onToken={setTurnstileToken}
+          resetSignal={turnstileReset}
+        />
+      )}
 
       {/* Server-level error (email_failed or unexpected) */}
       {serverError && (

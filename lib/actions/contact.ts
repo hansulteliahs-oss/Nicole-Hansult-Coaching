@@ -7,6 +7,7 @@ import { createClient } from '@supabase/supabase-js';
 import { contactSchema } from '@/lib/schemas/contact';
 import type { ContactInput } from '@/lib/schemas/contact';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { verifyTurnstile } from '@/lib/turnstile';
 import { ContactNotification } from '@/components/email/ContactNotification';
 
 // Initialised once at module level — avoids re-instantiation on every call.
@@ -33,7 +34,17 @@ export async function contactAction(data: ContactInput): Promise<ContactActionRe
     return { success: false, error: 'rate_limited' };
   }
 
-  // 3. Server-side Zod validation
+  // 3. Turnstile — the layer the 2026-09-11 bot cannot pass. It rendered the
+  // real page (so the honeypot stayed empty) and paced itself under the rate
+  // limit, but it cannot mint a valid Cloudflare token. Runs before Zod so a
+  // bot is rejected before any further work, and returns the same opaque
+  // 'spam' result as the honeypot so failures reveal nothing.
+  const human = await verifyTurnstile(data.turnstileToken, ip);
+  if (!human) {
+    return { success: false, error: 'spam' };
+  }
+
+  // 4. Server-side Zod validation
   const parsed = contactSchema.safeParse(data);
   if (!parsed.success) {
     return {
@@ -42,7 +53,7 @@ export async function contactAction(data: ContactInput): Promise<ContactActionRe
     };
   }
 
-  // 4. Send email via Resend — reply-to set to visitor's email so Nicole can reply directly
+  // 5. Send email via Resend — reply-to set to visitor's email so Nicole can reply directly
   const { error: emailError } = await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL ?? 'Nicole Hansult Coaching <notifications@mail.nicolehansultcoaching.com>',
     to: ['nicole@nicolehansultcoaching.com'],
@@ -56,7 +67,7 @@ export async function contactAction(data: ContactInput): Promise<ContactActionRe
     return { success: false, error: 'email_failed' };
   }
 
-  // 5. Supabase backup row — service role key bypasses RLS (Phase 3 — no auth yet)
+  // 6. Supabase backup row — service role key bypasses RLS (Phase 3 — no auth yet)
   // Non-fatal: email delivered = primary goal; log Supabase errors but still return success
   try {
     const supabase = createClient(
@@ -64,12 +75,17 @@ export async function contactAction(data: ContactInput): Promise<ContactActionRe
       process.env.SUPABASE_SECRET_KEY!,
     );
 
+    // Allowlist: the honeypot and the Turnstile token are anti-spam plumbing,
+    // not submission content, and the token is a short-lived credential.
+    const { firstName, lastName, email, phone, service, message } = parsed.data;
+    const payload = { firstName, lastName, email, phone, service, message };
+
     const { error: dbError } = await supabase
       .from('submissions')
       .insert({
         form_type: 'contact',
         email: parsed.data.email,
-        data: parsed.data,
+        data: payload,
       });
 
     if (dbError) {
