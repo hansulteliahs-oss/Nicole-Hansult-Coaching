@@ -46,7 +46,9 @@ describe('DraftPreview', () => {
           kind: 'newsletter',
           subject: 'Your body is talking',
           preview_text: 'Signals, not sentences.',
-          body_html: '<p>Hello list</p>',
+          list_id: 'f531604a9a',
+        segment_id: null,
+        body_html: '<p>Hello list</p>',
         }}
       />,
     );
@@ -61,7 +63,9 @@ describe('DraftPreview', () => {
           kind: 'newsletter',
           subject: 'S',
           preview_text: null,
-          body_html: '<p id="needle">Hello list</p>',
+          list_id: 'f531604a9a',
+        segment_id: null,
+        body_html: '<p id="needle">Hello list</p>',
         }}
       />,
     );
@@ -75,7 +79,14 @@ describe('DraftPreview', () => {
   it('omits the preview-text line when there is none', () => {
     const html = renderToStaticMarkup(
       <DraftPreview
-        draft={{ kind: 'newsletter', subject: 'S', preview_text: null, body_html: '<p>x</p>' }}
+        draft={{
+          kind: 'newsletter',
+          subject: 'S',
+          preview_text: null,
+          body_html: '<p>x</p>',
+          list_id: 'f531604a9a',
+          segment_id: null,
+        }}
       />,
     );
     expect(html).not.toContain('Preview text');
@@ -150,7 +161,9 @@ describe('DraftPreview post metadata', () => {
           kind: 'newsletter',
           subject: 'S',
           preview_text: null,
-          body_html: '<p>x</p>',
+          list_id: 'f531604a9a',
+        segment_id: null,
+        body_html: '<p>x</p>',
         }}
       />,
     );

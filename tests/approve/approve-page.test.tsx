@@ -127,6 +127,8 @@ describe('/approve', () => {
         subject: 'Your body is talking',
         preview_text: 'Signals, not sentences.',
         body_html: '<p>Hello list</p>',
+        list_id: 'f531604a9a',
+        segment_id: null,
       },
     });
     const html = await render({ token: 'tok-3' });
@@ -139,11 +141,38 @@ describe('/approve', () => {
   it('takes kind from the database, not from the url', async () => {
     mocks.resolve.mockResolvedValue({
       ok: true,
-      draft: { kind: 'newsletter', subject: 'S', preview_text: null, body_html: '<p>x</p>' },
+      draft: {
+        kind: 'newsletter',
+        subject: 'S',
+        preview_text: null,
+        body_html: '<p>x</p>',
+        list_id: 'f531604a9a',
+        segment_id: null,
+      },
     });
     // URL lies about the kind; the DB row is authoritative.
     await render({ token: 'tok-2', kind: 'post' });
-    expect(mocks.clientProps).toEqual({ token: 'tok-2', kind: 'newsletter' });
+    expect(mocks.clientProps).toMatchObject({ token: 'tok-2', kind: 'newsletter' });
+  });
+
+  it('hands the client the resolved audience for a newsletter, and none for a post', async () => {
+    mocks.resolve.mockResolvedValue({
+      ok: true,
+      draft: {
+        kind: 'newsletter',
+        subject: 'S',
+        preview_text: null,
+        body_html: '<p>x</p>',
+        list_id: 'f531604a9a',
+        segment_id: '4242',
+      },
+    });
+    await render({ token: 'tok-2' });
+    expect(mocks.clientProps?.audience).toEqual({ label: 'Main list · segment 4242', approx: null });
+
+    mocks.resolve.mockResolvedValue({ ok: true, draft: postDraft() });
+    await render({ token: 'tok-1' });
+    expect(mocks.clientProps?.audience).toBeUndefined();
   });
 
   it('passes the raw token through untouched', async () => {

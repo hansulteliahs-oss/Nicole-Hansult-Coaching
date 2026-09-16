@@ -2,7 +2,7 @@
  * app/approve/approval-state — the press gate.
  *
  * A blog post publishes on one press: publishing is reversible. A newsletter
- * send is not — it reaches roughly 1,110 people and cannot be recalled — and
+ * send is not — it reaches a list or a segment and cannot be recalled — and
  * there is no ARM interlock anywhere in the n8n workflow (the `Live Send?
  * (ARM)` node the README describes does not exist; verified 2026-08-24). With
  * approval moving to one tap on a phone from an SMS link, a newsletter takes
@@ -10,11 +10,7 @@
  */
 import { describe, it, expect } from 'vitest';
 
-import {
-  nextOnPress,
-  pressLabel,
-  NEWSLETTER_AUDIENCE_APPROX,
-} from '@/app/approve/approval-state';
+import { nextOnPress, pressLabel } from '@/app/approve/approval-state';
 
 describe('nextOnPress', () => {
   it('submits a post on the first press', () => {
@@ -59,14 +55,29 @@ describe('nextOnPress', () => {
 });
 
 describe('pressLabel', () => {
-  it('names the audience size on the newsletter confirm press', () => {
-    const label = pressLabel('confirming', 'newsletter');
-    expect(label).toContain(String(NEWSLETTER_AUDIENCE_APPROX).slice(0, 1));
+  it('names the audience, by label and size, on the newsletter confirm press', () => {
+    const label = pressLabel('confirming', 'newsletter', { label: 'Main list', approx: 1157 });
+    expect(label).toContain('Main list');
+    expect(label).toContain('1,157');
     expect(label.toLowerCase()).toContain('send');
   });
 
+  it('says the size is not known for a segment with no configured size, rather than showing 1,110', () => {
+    const label = pressLabel('confirming', 'newsletter', {
+      label: 'Main list · segment 42',
+      approx: null,
+    });
+    expect(label).toContain('segment 42');
+    expect(label).not.toContain('1,110');
+    expect(label.toLowerCase()).toContain('not known');
+  });
+
+  it('still confirms when no audience was resolved at all', () => {
+    expect(pressLabel('confirming', 'newsletter').toLowerCase()).toContain('send');
+  });
+
   it('does not name an audience before the first press', () => {
-    expect(pressLabel('idle', 'newsletter').toLowerCase()).not.toContain('1,110');
+    expect(pressLabel('idle', 'newsletter', { label: 'Main list', approx: 1157 })).not.toContain('1,157');
   });
 
   it('reads as publishing for a post', () => {

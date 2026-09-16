@@ -47,6 +47,8 @@ export type ApprovalDraft =
       subject: string;
       preview_text: string | null;
       body_html: string;
+      list_id: string;
+      segment_id: string | null;
     };
 
 export type ApprovalResolution =
@@ -118,7 +120,7 @@ export async function resolveApprovalToken(
   if (tokenRow.draft_kind === 'newsletter') {
     const { data, error } = await admin
       .from('newsletter_drafts')
-      .select('subject, preview_text, body_html')
+      .select('subject, preview_text, body_html, list_id, segment_id')
       .eq('id', tokenRow.draft_id)
       .maybeSingle();
 
@@ -130,6 +132,8 @@ export async function resolveApprovalToken(
         subject: data.subject,
         preview_text: data.preview_text,
         body_html: data.body_html,
+        list_id: data.list_id,
+        segment_id: data.segment_id ?? null,
       },
     };
   }

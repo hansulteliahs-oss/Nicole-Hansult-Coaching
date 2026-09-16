@@ -15,19 +15,18 @@ import { useState } from 'react';
 
 import { Pill } from '@/components/ui/Pill';
 
-import {
-  nextOnPress,
-  pressLabel,
-  NEWSLETTER_AUDIENCE_APPROX,
-  type ApproveState,
-} from './approval-state';
+import { audienceSentence, type Audience } from '@/lib/content/audience';
+
+import { nextOnPress, pressLabel, type ApproveState } from './approval-state';
 
 export function ApproveClient({
   token,
   kind,
+  audience,
 }: {
   token: string;
   kind: 'post' | 'newsletter';
+  audience?: Audience;
 }) {
   const [state, setState] = useState<ApproveState>('idle');
   const [message, setMessage] = useState('');
@@ -81,9 +80,9 @@ export function ApproveClient({
 
       {state === 'confirming' && (
         <p className="mx-auto mb-6 max-w-md rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-          This sends the newsletter to roughly{' '}
-          {NEWSLETTER_AUDIENCE_APPROX.toLocaleString('en-US')} people. It is not a
-          test and it cannot be recalled.
+          This sends the newsletter to{' '}
+          {audience ? audienceSentence(audience) : 'its list'}. It is not a test and
+          it cannot be recalled.
         </p>
       )}
 
@@ -93,7 +92,7 @@ export function ApproveClient({
         onClick={press}
         disabled={state === 'working'}
       >
-        {pressLabel(state, kind)}
+        {pressLabel(state, kind, audience)}
       </Pill>
 
       {state === 'error' && (

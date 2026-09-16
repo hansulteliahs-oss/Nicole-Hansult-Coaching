@@ -15,6 +15,7 @@ import {
   scheduleCampaign,
   sendCampaign,
   unscheduleCampaign,
+  getCampaign,
   mailchimpConfig,
 } from '@/lib/mailchimp/campaigns';
 
@@ -210,5 +211,29 @@ describe('setCampaignContent / send / schedule / unschedule', () => {
   it('throws when a send is refused', async () => {
     stubFetch({ ok: false, status: 500, body: 'boom' });
     await expect(sendCampaign('abc123')).rejects.toThrow(/500[\s\S]*boom/);
+  });
+});
+
+describe('getCampaign', () => {
+  it('GETs the campaign and returns id, status and send time', async () => {
+    stubFetch({
+      ok: true,
+      status: 200,
+      body: JSON.stringify({ id: 'abc', status: 'sent', send_time: '2026-10-12T15:00:12+00:00' }),
+    });
+    const c = await getCampaign('abc');
+    expect(c).toEqual({ id: 'abc', status: 'sent', sendTime: '2026-10-12T15:00:12+00:00' });
+    expect(calls[0].url).toContain('/campaigns/abc');
+    expect(calls[0].init.method).toBe('GET');
+  });
+
+  it('returns a null send time for a campaign that has not been sent', async () => {
+    stubFetch({ ok: true, status: 200, body: JSON.stringify({ id: 'abc', status: 'save', send_time: '' }) });
+    expect((await getCampaign('abc')).sendTime).toBeNull();
+  });
+
+  it('throws on a 404 rather than reporting a phantom status', async () => {
+    stubFetch({ ok: false, status: 404, body: '{"title":"Resource Not Found"}' });
+    await expect(getCampaign('nope')).rejects.toThrow(/404/);
   });
 });

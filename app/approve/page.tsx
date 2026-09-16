@@ -19,6 +19,7 @@ import { redirect } from 'next/navigation';
 import { Nav } from '@/components/layout/Nav';
 import { Footer } from '@/components/layout/Footer';
 import { resolveApprovalToken, type ApprovalRejection } from '@/lib/content/approvals';
+import { describeAudience } from '@/lib/content/audience';
 
 import { ApproveClient } from './ApproveClient';
 import { DraftPreview } from './DraftPreview';
@@ -86,7 +87,15 @@ export default async function ApprovePage({
       content = (
         <>
           <DraftPreview draft={resolution.draft} />
-          <ApproveClient token={token} kind={resolution.draft.kind} />
+          <ApproveClient
+            token={token}
+            kind={resolution.draft.kind}
+            audience={
+              resolution.draft.kind === 'newsletter'
+                ? describeAudience(resolution.draft.list_id, resolution.draft.segment_id)
+                : undefined
+            }
+          />
         </>
       );
     }
