@@ -320,3 +320,29 @@ launch. Not recommended, but available.
 4. **An ntfy topic for Eliahs**, distinct from `NICOLE_NTFY_TOPIC`.
 5. **A CMA environment and vault** for this repo, with the `nicole_agent`
    Postgres credential and the image API key.
+
+## Addendum 2026-09-16: deviations recorded when the agent half was built
+
+The site half above shipped as designed. The agent half was built three weeks
+late (plan: `client-nicole/agent/DESIGN.md`), and four decisions changed on
+the way. Everything else in the table of 12 stands.
+
+| # | Was | Now | Why |
+|---|---|---|---|
+| 1 | A scheduled Claude Managed Agents deployment. | **A Claude Code cloud routine** (weekly Fri 06:00 PT, daily 07:00 PT, plus two one-off batch runs). | Eliahs's preference. Same propose/act split, same RPC surface. |
+| 2 | `nicole_agent` gets `LOGIN` and a password out of band; the agent connects to Postgres directly. | **`nicole_agent` stays `NOLOGIN`.** The agent presents an HS256 JWT with `role: nicole_agent` to PostgREST; migration `006` grants `authenticator` `SET` on the role with `INHERIT FALSE`. | The routine's egress is an HTTP proxy, so Postgres TCP is unreachable anyway. No password ever exists, and `REVOKE nicole_agent FROM authenticator` revokes every token at once. Verified 2026-09-16: a locally minted token answered 42501 before 006 and 200 after. |
+| 5/6 | ntfy to Eliahs on failure; Nicole first for approvals. | Unchanged in intent. **The routine's network allowlist is `ntfy.sh` only**; Supabase is reached through an API credential and **the site domain is not reachable from the routine**. | The agent holds approval tokens at staging time. If it could reach `/approve`, it could approve its own work. Keeping the site unreachable makes that structurally impossible rather than a rule. |
+| 7 | (Mailchimp was site-only.) | **The agent reads Mailchimp reports through a Viewer-role key**, stored as an API credential locked to `us3.api.mailchimp.com`. It never holds a key that can create or send. | Verified 2026-09-15: Viewer returns 200 on reports, campaigns and list metadata, 403 on members, segments and `POST /campaigns`. Deliverability monitoring becomes automatic; segment edits stay manual. |
+
+Deferred past the Oct 12 launch, not reversed: decision 10 (hero images, needs
+an image API key; nulls render fine) and decision 11 (the audience merge;
+per-draft `list_id` already reaches Sugar Cravings). Decision 9 softens to
+**every other week** for Oct 26 to Dec 27, because after seven launch emails in
+fourteen days the list needs rest and nothing is for sale until Jan 4.
+
+Also from 006: `pipeline_runs.kind` accepts `reopen_batch`, the backfill
+trigger function lost its default `EXECUTE` to `PUBLIC`, and
+`agent_grant_report()` now asserts the role's shape (no `LOGIN`, no
+`BYPASSRLS`, no memberships, `SET` from `authenticator`, a 15s
+`statement_timeout`) plus a catalog catch-all for any executable function
+outside the five staging RPCs.
