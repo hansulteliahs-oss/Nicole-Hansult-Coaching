@@ -39,6 +39,15 @@ afterAll(async () => {
 });
 
 describeIf('run_start / run_finish', () => {
+  // Migration 006 widened the kind CHECK: the Dec 14 reopen routine opens a
+  // run as 'reopen_batch', which 004 rejected with 23514.
+  it("accepts 'reopen_batch' as a run kind", async () => {
+    const { data: run, error } = await admin.rpc('run_start', { p_kind: 'reopen_batch' });
+    expect(error).toBeNull();
+    trash.push({ table: 'pipeline_runs', column: 'id', value: run.id });
+    expect(run.kind).toBe('reopen_batch');
+  });
+
   it('opens a running row and closes it with status, error and notes', async () => {
     const { data: run, error } = await admin.rpc('run_start', { p_kind: 'weekly' });
     expect(error).toBeNull();

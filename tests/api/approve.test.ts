@@ -18,6 +18,9 @@ const mocks = vi.hoisted(() => ({
   rpcResults: {} as Record<string, { data: unknown; error: { message: string } | null }>,
   rpcCalls: [] as { fn: string; args: Record<string, unknown> }[],
   previewText: null as string | null,
+  bodyHtml: '<p>hi</p>' as string,
+  publishedSlugs: [] as string[],
+  postsQueried: [] as string[][],
   createThrows: null as Error | null,
   contentThrows: null as Error | null,
   sendThrows: null as Error | null,
@@ -35,8 +38,20 @@ vi.mock('@/lib/supabase/admin', () => ({
             maybeSingle: async () =>
               table === 'approval_tokens'
                 ? { data: mocks.tokenRow, error: mocks.tokenError }
-                : { data: { preview_text: mocks.previewText }, error: null },
+                : {
+                    data: { preview_text: mocks.previewText, body_html: mocks.bodyHtml },
+                    error: null,
+                  },
           }),
+          in: (_col: string, slugs: string[]) => {
+            mocks.postsQueried.push(slugs);
+            return {
+              eq: async () => ({
+                data: mocks.publishedSlugs.filter((x) => slugs.includes(x)).map((slug) => ({ slug })),
+                error: null,
+              }),
+            };
+          },
         }),
         insert: async (payload: Record<string, unknown>) => {
           mocks.inserts.push({ table, payload });
@@ -89,6 +104,9 @@ beforeEach(() => {
   mocks.rpcResults = {};
   mocks.rpcCalls = [];
   mocks.previewText = null;
+  mocks.bodyHtml = '<p>hi</p>';
+  mocks.publishedSlugs = [];
+  mocks.postsQueried = [];
   mocks.createThrows = null;
   mocks.contentThrows = null;
   mocks.sendThrows = null;
@@ -234,6 +252,56 @@ describe('POST /api/approve', () => {
     expect(res.status).toBe(200);
     expect((await res.json()).already).toBe(true);
     expect(mocks.mailchimpCalls).toEqual([]);
+  });
+
+  it('refuses to send a newsletter that links to an unpublished /insights/ post, without claiming the token', async () => {
+    mocks.tokenRow = { draft_kind: 'newsletter', draft_id: 'd-1', batch_id: null };
+    mocks.bodyHtml =
+      '<p>Hi everyone,</p><p><a href="https://www.nicolehansultcoaching.com/insights/sit-to-stand">read</a></p>';
+    mocks.publishedSlugs = [];
+
+    const res = await post({ token: 't' });
+    expect(res.status).toBe(422);
+    expect((await res.json()).error).toMatch(/sit-to-stand/);
+    // The dead link is caught before the token is spent and before Mailchimp
+    // hears about it: the same link works again once the post is live.
+    expect(mocks.rpcCalls.map((c) => c.fn)).not.toContain('claim_for_send');
+    expect(mocks.mailchimpCalls).toHaveLength(0);
+    expect(mocks.postsQueried).toEqual([['sit-to-stand']]);
+  });
+
+  it('sends a newsletter whose /insights/ link is published', async () => {
+    mocks.tokenRow = { draft_kind: 'newsletter', draft_id: 'd-1', batch_id: null };
+    mocks.bodyHtml =
+      '<p>Hi everyone,</p><p><a href="https://www.nicolehansultcoaching.com/insights/sit-to-stand">read</a></p>';
+    mocks.publishedSlugs = ['sit-to-stand'];
+    mocks.rpcResults.claim_for_send = {
+      data: [
+        {
+          draft_id: 'd-1',
+          subject: 'S',
+          body_html: mocks.bodyHtml,
+          list_id: 'f531604a9a',
+          segment_id: null,
+          already: false,
+        },
+      ],
+      error: null,
+    };
+
+    const res = await post({ token: 't' });
+    expect(res.status).toBe(200);
+    expect(mocks.mailchimpCalls).toEqual(['create', 'content', 'send']);
+  });
+
+  it('does not query posts at all for a newsletter with no /insights/ link', async () => {
+    mocks.tokenRow = { draft_kind: 'newsletter', draft_id: 'd-1', batch_id: null };
+    mocks.bodyHtml = '<p>Hi everyone,</p><p><a href="https://www.skool.com/x">join</a></p>';
+    mocks.rpcResults.claim_for_send = { data: [{ draft_id: 'd-1', already: true }], error: null };
+
+    const res = await post({ token: 't' });
+    expect(res.status).toBe(200);
+    expect(mocks.postsQueried).toEqual([]);
   });
 
   it('ROOT CAUSE 1 (before dispatch): releases the draft when createCampaign throws', async () => {

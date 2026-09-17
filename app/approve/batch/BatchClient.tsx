@@ -16,7 +16,6 @@
 import { useState } from 'react';
 
 import { Pill } from '@/components/ui/Pill';
-import { NEWSLETTER_AUDIENCE_APPROX } from '@/app/approve/approval-state';
 
 type State = 'idle' | 'confirming' | 'working' | 'done' | 'error';
 
@@ -24,10 +23,13 @@ export function BatchClient({
   token,
   total,
   pending,
+  audiences = [],
 }: {
   token: string;
   total: number;
   pending: number;
+  /** Distinct audience sentences for the drafts still to schedule, from lib/content/audience. */
+  audiences?: string[];
 }) {
   const retry = pending < total;
   const [state, setState] = useState<State>('idle');
@@ -66,9 +68,9 @@ export function BatchClient({
     <div className="text-center">
       {state === 'confirming' && (
         <p className="mx-auto mb-6 max-w-md rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-          This schedules {pending} email{pending === 1 ? '' : 's'} to roughly{' '}
-          {NEWSLETTER_AUDIENCE_APPROX.toLocaleString('en-US')} people each. They
-          will send on their own at the times listed above.
+          This schedules {pending} email{pending === 1 ? '' : 's'}
+          {audiences.length > 0 ? ` to ${audiences.join('; ')}` : ''}. They will
+          send on their own at the times listed above.
         </p>
       )}
 

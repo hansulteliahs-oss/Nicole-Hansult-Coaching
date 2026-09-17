@@ -1,6 +1,8 @@
 /**
  * The security property this whole rebuild rests on: nicole_agent can read six
- * tables and call five functions, and can do nothing else.
+ * tables and call five functions, and can do nothing else. Migration 006 adds
+ * the role-shape rows: authenticator may SET to it, it cannot log in, it
+ * inherits nothing, and no function outside the five is executable.
  *
  * Asserted through agent_grant_report(), which wraps has_table_privilege /
  * has_function_privilege / has_schema_privilege. PostgREST cannot query
@@ -106,5 +108,43 @@ describeIf('nicole_agent privileges', () => {
   // is the one grant those checks cannot see.
   it('has USAGE on the public schema — without it, every grant above is inert', () => {
     expect(find('public', 'USAGE')?.granted).toBe(true);
+  });
+
+  // Migration 006: the agent reaches the DB only through PostgREST, which
+  // connects as `authenticator` and switches to the JWT's role. That switch is
+  // a SET privilege on the membership, granted with INHERIT FALSE so
+  // authenticator never picks up the agent's grants itself.
+  it('lets authenticator SET ROLE to nicole_agent, so a role-claim JWT works', () => {
+    expect(find('nicole_agent', 'SET')?.granted).toBe(true);
+  });
+
+  it('cannot log in — no password exists, PostgREST is the only door', () => {
+    expect(find('nicole_agent', 'LOGIN')?.granted).toBe(false);
+  });
+
+  it('cannot bypass RLS and is not a superuser', () => {
+    expect(find('nicole_agent', 'BYPASSRLS')?.granted).toBe(false);
+    expect(find('nicole_agent', 'SUPERUSER')?.granted).toBe(false);
+  });
+
+  it('is a member of no other role — nothing to inherit from', () => {
+    expect(find('nicole_agent', 'MEMBER OF ANY ROLE')?.granted).toBe(false);
+  });
+
+  it('runs under a 15s statement_timeout', () => {
+    expect(find('nicole_agent', 'statement_timeout=15s')?.granted).toBe(true);
+  });
+
+  // Every new function grants EXECUTE to PUBLIC by default. The named list
+  // above cannot see a function it does not know about, so this row asks the
+  // catalog directly: is there any function in public, outside the five, that
+  // nicole_agent could execute? The backfill trigger function was the first
+  // one caught by this check.
+  it('cannot execute the backfill trigger function', () => {
+    expect(find('public.backfill_vibrant40_user_id()', 'EXECUTE')?.granted).toBe(false);
+  });
+
+  it('cannot execute any public function outside the five staging RPCs', () => {
+    expect(find('public.<any function outside the five>', 'EXECUTE')?.granted).toBe(false);
   });
 });

@@ -1,6 +1,6 @@
 /**
  * Mailchimp Marketing API v3 — campaign create, content, schedule, send,
- * unschedule.
+ * unschedule, and a read of one campaign's status.
  *
  * All of this lived in the n8n workflow. `lib/mailchimp.ts` only ever held
  * addSubscriber, so every send path had to be written here in TypeScript as
@@ -160,4 +160,29 @@ export async function sendCampaign(campaignId: string): Promise<void> {
 
 export async function unscheduleCampaign(campaignId: string): Promise<void> {
   await call(`/campaigns/${campaignId}/actions/unschedule`, 'POST');
+}
+
+/**
+ * One campaign's state, as Mailchimp sees it. Used by the batch route to
+ * resume a draft whose campaign id was persisted but whose content or
+ * schedule never landed, and by the reconcile cron to flip queued sends to
+ * sent. `status` is Mailchimp's own vocabulary: save, paused, schedule,
+ * sending, sent (and others this code does not handle).
+ */
+export async function getCampaign(
+  campaignId: string,
+): Promise<{ id: string; status: string; sendTime: string | null }> {
+  const data = (await call(
+    `/campaigns/${encodeURIComponent(campaignId)}?fields=id,status,send_time`,
+    'GET',
+  )) as { id?: string; status?: string; send_time?: string } | null;
+
+  if (!data?.id) {
+    throw new Error(`getCampaign: Mailchimp returned no campaign for ${campaignId}`);
+  }
+  return {
+    id: data.id,
+    status: data.status ?? 'unknown',
+    sendTime: data.send_time ? data.send_time : null,
+  };
 }

@@ -9,15 +9,9 @@
  * `Live Send? (ARM)` IF node the README describes is not in the n8n workflow
  * (verified 2026-08-24), so the approve tap goes straight to a full-list send.
  */
-export type ApproveState = 'idle' | 'confirming' | 'working' | 'done' | 'error';
+import { audienceSentence, type Audience } from '@/lib/content/audience';
 
-/**
- * Approximate Mailchimp audience size, shown so the reader knows the scale of
- * what one press does. Deliberately not fetched live: this page must not
- * depend on Mailchimp being reachable. Update it when the list grows
- * materially.
- */
-export const NEWSLETTER_AUDIENCE_APPROX = 1110;
+export type ApproveState = 'idle' | 'confirming' | 'working' | 'done' | 'error';
 
 export function nextOnPress(
   state: ApproveState,
@@ -33,15 +27,21 @@ export function nextOnPress(
   return { state: 'working', submit: true };
 }
 
+/**
+ * `audience` is the list or segment this draft targets, resolved server-side
+ * from the draft row (lib/content/audience). The confirm press names it, by
+ * label and size, so the reader knows the scale of what one press does.
+ */
 export function pressLabel(
   state: ApproveState,
   kind: 'post' | 'newsletter',
+  audience?: Audience,
 ): string {
   if (state === 'working') {
     return kind === 'newsletter' ? 'Sending…' : 'Publishing…';
   }
   if (state === 'confirming') {
-    return `Yes, send it to ~${NEWSLETTER_AUDIENCE_APPROX.toLocaleString('en-US')} people`;
+    return audience ? `Yes, send it to ${audienceSentence(audience)}` : 'Yes, send it';
   }
   if (state === 'error') {
     return 'Try again';

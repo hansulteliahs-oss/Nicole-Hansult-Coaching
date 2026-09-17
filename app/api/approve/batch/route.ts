@@ -2,9 +2,19 @@
  * POST /api/approve/batch — approve N drafts and park N campaigns in Mailchimp.
  *
  * Retry-safe by construction. approve_batch claims the token once but always
- * returns the full batch, and this route skips any draft that already carries
- * a mailchimp_campaign_id. So a partial failure — three created, then a 504 —
- * is fixed by pressing the button again, not by a rescue.
+ * returns the full batch. On a retry this route skips only a draft that has a
+ * scheduled_sends row, because that row is the one thing written AFTER the
+ * campaign is fully parked. A draft with a campaign id but no sends row is a
+ * campaign that was created and then lost content or schedule to a failure
+ * (the id is persisted first on purpose, see below), so it is RESUMED from
+ * Mailchimp's own view of the campaign: still in `save` means content and
+ * schedule it; already `schedule` means just record it; already `sent` means
+ * record it as sent. The old rule skipped any draft with an id, which left
+ * exactly those half-done campaigns stranded forever.
+ *
+ * A body that links to an /insights/ post which is not yet published is
+ * refused before the claim, for the same reason the undated check is: the
+ * token must not be spent on a batch that cannot go out as written.
  *
  * The undated-draft check runs BEFORE approve_batch, not after. approve_batch
  * claims the token and flips every draft to 'approved' in the same statement,
@@ -21,10 +31,12 @@
 import { NextResponse } from 'next/server';
 
 import { getAdminClient } from '@/lib/supabase/admin';
+import { unpublishedInsightsSlugs } from '@/lib/content/links';
 import {
   createCampaign,
   setCampaignContent,
   scheduleCampaign,
+  getCampaign,
 } from '@/lib/mailchimp/campaigns';
 
 type Draft = {
@@ -71,7 +83,7 @@ export async function POST(req: Request) {
 
   const { data: preDrafts, error: preDraftsError } = await admin
     .from('newsletter_drafts')
-    .select('subject, scheduled_for, mailchimp_campaign_id')
+    .select('id, subject, body_html, scheduled_for, mailchimp_campaign_id')
     .eq('batch_id', tokenRow.batch_id);
 
   if (preDraftsError) {
@@ -79,9 +91,47 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'could not read the batch' }, { status: 502 });
   }
 
-  const preUndated = (preDrafts ?? []).filter(
-    (d) => !d.mailchimp_campaign_id && !d.scheduled_for,
+  // Which drafts are already fully parked. Read once, used by the pre-claim
+  // checks and by the loop below.
+  const preIds = (preDrafts ?? []).map((d) => d.id as string).filter(Boolean);
+  const { data: sendRows, error: sendRowsError } = await admin
+    .from('scheduled_sends')
+    .select('newsletter_draft_id')
+    .in('newsletter_draft_id', preIds);
+
+  if (sendRowsError) {
+    console.error(`[approve/batch] scheduled_sends read failed: ${sendRowsError.message}`);
+    return NextResponse.json({ error: 'could not read scheduled sends' }, { status: 502 });
+  }
+  const parked = new Set(
+    ((sendRows ?? []) as { newsletter_draft_id: string }[]).map((r) => r.newsletter_draft_id),
   );
+
+  const notParked = (preDrafts ?? []).filter((d) => !parked.has(d.id as string));
+
+  // Links to unpublished posts, checked before the claim so the fix (approve
+  // the post) leaves this link working.
+  let missing: string[];
+  try {
+    missing = await unpublishedInsightsSlugs(
+      admin,
+      notParked.map((d) => (d.body_html as string) ?? ''),
+    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'link check failed';
+    console.error(`[approve/batch] ${message}`);
+    return NextResponse.json({ error: message }, { status: 502 });
+  }
+  if (missing.length > 0) {
+    return NextResponse.json(
+      {
+        error: `this batch links to a post that is not published yet: ${missing.join(', ')}. Approve the post first, then open this link again.`,
+      },
+      { status: 422 },
+    );
+  }
+
+  const preUndated = notParked.filter((d) => !d.scheduled_for);
   if (preUndated.length > 0) {
     return NextResponse.json(
       {
@@ -104,13 +154,66 @@ export async function POST(req: Request) {
 
   let scheduled = 0;
   let skipped = 0;
+  let resumed = 0;
+
+  const recordSend = async (draft: Draft, campaignId: string, status?: 'sent') => {
+    const { error: sendRowError } = await admin.from('scheduled_sends').insert({
+      newsletter_draft_id: draft.id,
+      mailchimp_campaign_id: campaignId,
+      list_id: draft.list_id,
+      segment_id: draft.segment_id,
+      scheduled_for: draft.scheduled_for,
+      ...(status ? { status } : {}),
+    });
+    // Less severe than the persist below: the campaign is already scheduled
+    // and will fire regardless, so this failure mode is a send /queue doesn't
+    // know about — exactly the drift decision 8's daily agent check exists
+    // to catch. The message says so, because an operator seeing this 502
+    // needs to know the send is still armed.
+    if (sendRowError) {
+      throw new Error(
+        `campaign ${campaignId} for "${draft.subject}" is scheduled but was not recorded: ${sendRowError.message}`,
+      );
+    }
+  };
 
   for (const draft of drafts) {
-    if (draft.mailchimp_campaign_id) {
+    if (parked.has(draft.id)) {
       skipped += 1;
       continue;
     }
     try {
+      if (draft.mailchimp_campaign_id) {
+        // Created on an earlier press, then lost somewhere before the sends
+        // row. Ask Mailchimp where it got to and finish from there. Never a
+        // second createCampaign: that is the duplicate-send bug.
+        const campaignId = draft.mailchimp_campaign_id;
+        const campaign = await getCampaign(campaignId);
+        if (campaign.status === 'sent' || campaign.status === 'sending') {
+          await recordSend(draft, campaignId, 'sent');
+          const { error: markError } = await admin.rpc('mark_sent', {
+            p_draft_id: draft.id,
+            p_campaign_id: campaignId,
+            p_sent_at: campaign.sendTime ?? draft.scheduled_for,
+          });
+          if (markError) {
+            console.error(`[approve/batch] mark_sent for "${draft.subject}": ${markError.message}`);
+          }
+        } else if (campaign.status === 'schedule') {
+          await recordSend(draft, campaignId);
+        } else if (campaign.status === 'save' || campaign.status === 'paused') {
+          await setCampaignContent(campaignId, draft.body_html);
+          await scheduleCampaign(campaignId, new Date(draft.scheduled_for!));
+          await recordSend(draft, campaignId);
+        } else {
+          throw new Error(
+            `campaign ${campaignId} is in state "${campaign.status}", which this route does not know how to resume. Check it in Mailchimp.`,
+          );
+        }
+        resumed += 1;
+        continue;
+      }
+
       const campaignId = await createCampaign({
         listId: draft.list_id,
         segmentId: draft.segment_id,
@@ -139,25 +242,7 @@ export async function POST(req: Request) {
 
       await setCampaignContent(campaignId, draft.body_html);
       await scheduleCampaign(campaignId, new Date(draft.scheduled_for!));
-
-      const { error: sendRowError } = await admin.from('scheduled_sends').insert({
-        newsletter_draft_id: draft.id,
-        mailchimp_campaign_id: campaignId,
-        list_id: draft.list_id,
-        segment_id: draft.segment_id,
-        scheduled_for: draft.scheduled_for,
-      });
-
-      // Less severe than the persist above: the campaign is already
-      // scheduled and will fire regardless, so this failure mode is a send
-      // /queue doesn't know about — exactly the drift decision 8's daily
-      // agent check exists to catch. The message says so, because an
-      // operator seeing this 502 needs to know the send is still armed.
-      if (sendRowError) {
-        throw new Error(
-          `campaign ${campaignId} for "${draft.subject}" is scheduled but was not recorded: ${sendRowError.message}`,
-        );
-      }
+      await recordSend(draft, campaignId);
 
       scheduled += 1;
     } catch (err) {
@@ -172,5 +257,5 @@ export async function POST(req: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true, scheduled, skipped });
+  return NextResponse.json({ ok: true, scheduled, skipped, resumed });
 }

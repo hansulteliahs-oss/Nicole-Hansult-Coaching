@@ -38,6 +38,12 @@ const mocks = vi.hoisted(() => ({
   contentThrows: null as Error | null,
   updateError: null as { message: string } | null,
   insertError: null as { message: string } | null,
+  inserts: [] as { table: string; payload: Record<string, unknown> }[],
+  // Drafts that already have a scheduled_sends row (by draft id).
+  sendRows: [] as string[],
+  // Mailchimp GET /campaigns/{id} answers, keyed by campaign id.
+  campaigns: {} as Record<string, { status: string; sendTime: string | null }>,
+  publishedSlugs: [] as string[],
 }));
 
 vi.mock('@/lib/supabase/admin', () => ({
@@ -67,11 +73,31 @@ vi.mock('@/lib/supabase/admin', () => ({
               const rows =
                 mocks.preDrafts ??
                 mocks.batchData.map((d) => ({
+                  id: d.id,
                   subject: d.subject,
+                  body_html: d.body_html,
                   scheduled_for: d.scheduled_for,
                   mailchimp_campaign_id: d.mailchimp_campaign_id,
                 }));
               return Promise.resolve({ data: rows, error: mocks.preDraftsError });
+            },
+            in(_col: string, values: string[]) {
+              if (table === 'scheduled_sends') {
+                mocks.calls.push('db:select:scheduled_sends');
+                return Promise.resolve({
+                  data: mocks.sendRows
+                    .filter((id) => values.includes(id))
+                    .map((id) => ({ newsletter_draft_id: id })),
+                  error: null,
+                });
+              }
+              // posts: published slugs among the requested ones.
+              return {
+                eq: async () => ({
+                  data: mocks.publishedSlugs.filter((x) => values.includes(x)).map((slug) => ({ slug })),
+                  error: null,
+                }),
+              };
             },
           };
         },
@@ -83,8 +109,9 @@ vi.mock('@/lib/supabase/admin', () => ({
             },
           };
         },
-        insert: async () => {
+        insert: async (payload: Record<string, unknown>) => {
           mocks.calls.push(`db:insert:${table}`);
+          mocks.inserts.push({ table, payload });
           return { data: null, error: mocks.insertError };
         },
       };
@@ -103,6 +130,12 @@ vi.mock('@/lib/mailchimp/campaigns', () => ({
   },
   scheduleCampaign: async () => {
     mocks.calls.push('mailchimp:schedule');
+  },
+  getCampaign: async (id: string) => {
+    mocks.calls.push(`mailchimp:get:${id}`);
+    const c = mocks.campaigns[id];
+    if (!c) throw new Error(`Mailchimp GET /campaigns/${id} failed (404)`);
+    return { id, ...c };
   },
 }));
 
@@ -129,6 +162,22 @@ beforeEach(() => {
   mocks.contentThrows = null;
   mocks.updateError = null;
   mocks.insertError = null;
+  mocks.inserts = [];
+  mocks.sendRows = [];
+  mocks.campaigns = {};
+  mocks.publishedSlugs = [];
+});
+
+const draft = (over: Record<string, unknown> = {}) => ({
+  id: 'd-1',
+  subject: 'Doors open',
+  preview_text: null,
+  body_html: '<p>hi</p>',
+  list_id: 'f531604a9a',
+  segment_id: null,
+  scheduled_for: '2026-10-12T15:00:00Z',
+  mailchimp_campaign_id: null,
+  ...over,
 });
 
 describe('POST /api/approve/batch', () => {
@@ -206,26 +255,111 @@ describe('POST /api/approve/batch', () => {
     // Mirrors approve_batch's own skip rule: a draft already scheduled in
     // Mailchimp doesn't need a scheduled_for re-check on a retry.
     mocks.preDrafts = [
-      { subject: 'Doors open', scheduled_for: null, mailchimp_campaign_id: 'campaign-1' },
+      { id: 'd-1', subject: 'Doors open', body_html: '<p>hi</p>', scheduled_for: null, mailchimp_campaign_id: 'campaign-1' },
     ];
-    mocks.batchData = [
-      {
-        id: 'd-1',
-        subject: 'Doors open',
-        preview_text: null,
-        body_html: '<p>hi</p>',
-        list_id: 'f531604a9a',
-        segment_id: null,
-        scheduled_for: null,
-        mailchimp_campaign_id: 'campaign-1',
-      },
-    ];
+    mocks.batchData = [draft({ scheduled_for: null, mailchimp_campaign_id: 'campaign-1' })];
+    mocks.sendRows = ['d-1'];
 
     const res = await post({ token: 't' });
     expect(res.status).toBe(200);
     expect(mocks.rpcCalls).toContain('approve_batch');
     const json = await res.json();
-    expect(json).toEqual({ ok: true, scheduled: 0, skipped: 1 });
+    expect(json).toEqual({ ok: true, scheduled: 0, skipped: 1, resumed: 0 });
+  });
+
+  // BATCH RETRY BUG. The old rule skipped any draft with a campaign id. But
+  // the id is persisted BEFORE content and schedule on purpose, so a failure
+  // in either left a draft with an id, no content, no schedule, and a retry
+  // that skipped it forever. Only a scheduled_sends row proves the draft is
+  // actually parked in Mailchimp; anything else is resumed from Mailchimp's
+  // own view of the campaign.
+  it('RETRY: skips only drafts with a scheduled_sends row', async () => {
+    mocks.batchData = [
+      draft({ id: 'd-1', mailchimp_campaign_id: 'campaign-1' }),
+      draft({ id: 'd-2', subject: 'Second', mailchimp_campaign_id: 'campaign-2' }),
+    ];
+    mocks.sendRows = ['d-1'];
+    mocks.campaigns['campaign-2'] = { status: 'save', sendTime: null };
+
+    const res = await post({ token: 't' });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true, scheduled: 0, skipped: 1, resumed: 1 });
+    expect(mocks.calls).not.toContain('mailchimp:get:campaign-1');
+    expect(mocks.calls).toContain('mailchimp:get:campaign-2');
+  });
+
+  it('RETRY: a campaign still in save gets content, schedule and a sends row, with no second create', async () => {
+    mocks.batchData = [draft({ mailchimp_campaign_id: 'campaign-1' })];
+    mocks.campaigns['campaign-1'] = { status: 'save', sendTime: null };
+
+    const res = await post({ token: 't' });
+    expect(res.status).toBe(200);
+    expect(mocks.calls).not.toContain('mailchimp:create');
+    expect(mocks.calls).toContain('mailchimp:content');
+    expect(mocks.calls).toContain('mailchimp:schedule');
+    expect(mocks.calls).toContain('db:insert:scheduled_sends');
+    expect(mocks.inserts[0].payload).toMatchObject({
+      newsletter_draft_id: 'd-1',
+      mailchimp_campaign_id: 'campaign-1',
+    });
+  });
+
+  it('RETRY: a campaign already scheduled in Mailchimp only gets its sends row', async () => {
+    mocks.batchData = [draft({ mailchimp_campaign_id: 'campaign-1' })];
+    mocks.campaigns['campaign-1'] = { status: 'schedule', sendTime: '2026-10-12T15:00:00+00:00' };
+
+    const res = await post({ token: 't' });
+    expect(res.status).toBe(200);
+    expect(mocks.calls.filter((c) => c.startsWith('mailchimp:'))).toEqual(['mailchimp:get:campaign-1']);
+    expect(mocks.calls).toContain('db:insert:scheduled_sends');
+    expect(await res.json()).toEqual({ ok: true, scheduled: 0, skipped: 0, resumed: 1 });
+  });
+
+  it('RETRY: a campaign Mailchimp already sent is recorded as sent, never rescheduled', async () => {
+    mocks.batchData = [draft({ mailchimp_campaign_id: 'campaign-1' })];
+    mocks.campaigns['campaign-1'] = { status: 'sent', sendTime: '2026-10-12T15:00:12+00:00' };
+
+    const res = await post({ token: 't' });
+    expect(res.status).toBe(200);
+    expect(mocks.calls).not.toContain('mailchimp:schedule');
+    expect(mocks.inserts[0].payload).toMatchObject({ newsletter_draft_id: 'd-1', status: 'sent' });
+  });
+
+  it('RETRY: an unknown campaign status stops the batch with a 502 and touches nothing else', async () => {
+    mocks.batchData = [draft({ mailchimp_campaign_id: 'campaign-1' })];
+    mocks.campaigns['campaign-1'] = { status: 'archived', sendTime: null };
+
+    const res = await post({ token: 't' });
+    expect(res.status).toBe(502);
+    expect((await res.json()).error).toMatch(/archived/);
+    expect(mocks.calls).not.toContain('db:insert:scheduled_sends');
+  });
+
+  it('refuses a batch whose draft links to an unpublished /insights/ post, before claiming', async () => {
+    mocks.batchData = [
+      draft({
+        body_html: '<p><a href="https://www.nicolehansultcoaching.com/insights/grip-strength">read</a></p>',
+      }),
+    ];
+    mocks.publishedSlugs = [];
+
+    const res = await post({ token: 't' });
+    expect(res.status).toBe(422);
+    expect((await res.json()).error).toMatch(/grip-strength/);
+    expect(mocks.rpcCalls).not.toContain('approve_batch');
+  });
+
+  it('lets a batch through when its /insights/ links are published', async () => {
+    mocks.batchData = [
+      draft({
+        body_html: '<p><a href="https://www.nicolehansultcoaching.com/insights/grip-strength">read</a></p>',
+      }),
+    ];
+    mocks.publishedSlugs = ['grip-strength'];
+
+    const res = await post({ token: 't' });
+    expect(res.status).toBe(200);
+    expect(mocks.rpcCalls).toContain('approve_batch');
   });
 
   it('404s on an unknown token before reading any drafts or claiming', async () => {

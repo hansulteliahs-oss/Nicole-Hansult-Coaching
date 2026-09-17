@@ -19,6 +19,7 @@ import type { Metadata } from 'next';
 import { Nav } from '@/components/layout/Nav';
 import { Footer } from '@/components/layout/Footer';
 import { resolveBatchToken } from '@/lib/content/batch';
+import { describeAudience, audienceSentence } from '@/lib/content/audience';
 
 import { BatchClient } from './BatchClient';
 
@@ -38,17 +39,11 @@ function formatWhen(iso: string | null): string {
   });
 }
 
-// The only two ids the spec names. "Sugar Cravings" exists as BOTH a list and
-// a static segment on the main list — different audiences, same name — so a
-// raw id is shown whenever it isn't one of these two.
-const KNOWN_LISTS: Record<string, string> = {
-  f531604a9a: 'Main list',
-  ecacfdabed: 'Sugar Cravings list',
-};
-
+// "Sugar Cravings" exists as BOTH a list and a static segment on the main
+// list — different audiences, same name — so lib/content/audience shows a raw
+// id for anything it does not know, and a size only when one is configured.
 function formatAudience(listId: string, segmentId: string | null): string {
-  const listLabel = KNOWN_LISTS[listId] ?? listId;
-  return segmentId ? `${listLabel} · segment ${segmentId}` : listLabel;
+  return audienceSentence(describeAudience(listId, segmentId));
 }
 
 export default async function ApproveBatchPage({
@@ -126,6 +121,7 @@ export default async function ApproveBatchPage({
                 token={token!}
                 total={resolution.drafts.length}
                 pending={pending.length}
+                audiences={[...new Set(pending.map((d) => formatAudience(d.list_id, d.segment_id)))]}
               />
             </>
           )}

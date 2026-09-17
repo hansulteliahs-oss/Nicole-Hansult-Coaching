@@ -29,6 +29,7 @@ import { revalidateTag, revalidatePath } from 'next/cache';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { getAdminClient } from '@/lib/supabase/admin';
+import { unpublishedInsightsSlugs } from '@/lib/content/links';
 import {
   createCampaign,
   setCampaignContent,
@@ -67,7 +68,41 @@ async function publishPost(admin: SupabaseClient, token: string) {
   return NextResponse.json({ ok: true, already: row.already, slug: row.slug });
 }
 
-async function sendNewsletter(admin: SupabaseClient, token: string) {
+async function sendNewsletter(admin: SupabaseClient, token: string, draftId: string | null) {
+  // BEFORE the claim: a newsletter that links to a post which is not
+  // published yet must not go out, and must not burn its token either. Read
+  // the body by draft id, check every /insights/<slug> against posts, and
+  // refuse with the slugs so the fix (approve the post) is obvious.
+  if (draftId) {
+    const { data: pre, error: preError } = await admin
+      .from('newsletter_drafts')
+      .select('body_html')
+      .eq('id', draftId)
+      .maybeSingle();
+    if (preError) {
+      console.error(`[approve] pre-claim body read failed: ${preError.message}`);
+      return NextResponse.json({ error: 'could not read the draft' }, { status: 502 });
+    }
+    if (pre?.body_html) {
+      let missing: string[];
+      try {
+        missing = await unpublishedInsightsSlugs(admin, pre.body_html as string);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'link check failed';
+        console.error(`[approve] ${message}`);
+        return NextResponse.json({ error: message }, { status: 502 });
+      }
+      if (missing.length > 0) {
+        return NextResponse.json(
+          {
+            error: `this newsletter links to a post that is not published yet: ${missing.join(', ')}. Approve the post first, then open this link again.`,
+          },
+          { status: 422 },
+        );
+      }
+    }
+  }
+
   const { data, error } = await admin.rpc('claim_for_send', { p_token: token });
   if (error) {
     console.error(`[approve] claim_for_send: ${error.message}`);
@@ -219,7 +254,7 @@ export async function POST(req: Request) {
 
   const { data: tokenRow, error } = await admin
     .from('approval_tokens')
-    .select('draft_kind, batch_id')
+    .select('draft_kind, draft_id, batch_id')
     .eq('token_hash', token)
     .maybeSingle();
 
@@ -238,7 +273,9 @@ export async function POST(req: Request) {
   }
 
   if (tokenRow.draft_kind === 'post') return publishPost(admin, token);
-  if (tokenRow.draft_kind === 'newsletter') return sendNewsletter(admin, token);
+  if (tokenRow.draft_kind === 'newsletter') {
+    return sendNewsletter(admin, token, (tokenRow.draft_id as string | null) ?? null);
+  }
 
   return NextResponse.json({ error: 'unknown draft kind' }, { status: 400 });
 }

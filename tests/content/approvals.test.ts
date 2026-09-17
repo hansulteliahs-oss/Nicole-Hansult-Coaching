@@ -147,6 +147,8 @@ describe('resolveApprovalToken', () => {
       subject: 'Your body is talking',
       preview_text: 'Signals, not sentences.',
       body_html: '<p>hello</p>',
+      list_id: 'ecacfdabed',
+      segment_id: null,
     };
     const res = await resolveApprovalToken('t');
     expect(res).toEqual({
@@ -156,9 +158,17 @@ describe('resolveApprovalToken', () => {
         subject: 'Your body is talking',
         preview_text: 'Signals, not sentences.',
         body_html: '<p>hello</p>',
+        list_id: 'ecacfdabed',
+        segment_id: null,
       },
     });
     expect(mocks.calls[1]).toEqual({ table: 'newsletter_drafts', column: 'id', value: 'nl-3' });
+    // The audience is part of what Nicole approves: /approve names the list
+    // or segment on the confirm press, so the resolver has to carry it.
+    const draftSelect = mocks.selects.find((s) => s.table === 'newsletter_drafts')!;
+    for (const col of ['list_id', 'segment_id']) {
+      expect(draftSelect.columns).toContain(col);
+    }
   });
 
   it('rejects a valid token whose draft row has gone as missing', async () => {
