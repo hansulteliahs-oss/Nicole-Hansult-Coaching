@@ -12,6 +12,8 @@
  * fine, and "it looked fine" is the failure class this rebuild exists to kill.
  * Callers decide what to do with the throw; nothing here swallows one.
  */
+import { wrapEmail } from './emailLayout';
+
 const API_ROOT = (server: string) => `https://${server}.api.mailchimp.com/3.0`;
 
 export type MailchimpConfig = {
@@ -143,8 +145,9 @@ export async function createCampaign(args: {
   return data.id;
 }
 
+/** Every campaign body goes out inside the branded shell (./emailLayout). */
 export async function setCampaignContent(campaignId: string, html: string): Promise<void> {
-  await call(`/campaigns/${campaignId}/content`, 'PUT', { html });
+  await call(`/campaigns/${campaignId}/content`, 'PUT', { html: wrapEmail(html) });
 }
 
 export async function scheduleCampaign(campaignId: string, when: Date): Promise<void> {

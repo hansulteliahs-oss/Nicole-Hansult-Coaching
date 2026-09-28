@@ -18,6 +18,7 @@ import {
   getCampaign,
   mailchimpConfig,
 } from '@/lib/mailchimp/campaigns';
+import { wrapEmail } from '@/lib/mailchimp/emailLayout';
 
 type Call = { url: string; init: RequestInit };
 let calls: Call[];
@@ -165,7 +166,9 @@ describe('setCampaignContent / send / schedule / unschedule', () => {
 
     expect(calls[0].url).toBe('https://us21.api.mailchimp.com/3.0/campaigns/abc123/content');
     expect(calls[0].init.method).toBe('PUT');
-    expect(JSON.parse(calls[0].init.body as string)).toEqual({ html: '<p>hi</p>' });
+    const { html } = JSON.parse(calls[0].init.body as string);
+    expect(html).toBe(wrapEmail('<p>hi</p>'));
+    expect(html).toContain('>hi</p>');
   });
 
   it('sends, tolerating the empty 204 body Mailchimp returns', async () => {
