@@ -20,7 +20,7 @@ import { Journal } from '@/components/home/Journal';
 import { DarkCta } from '@/components/home/DarkCta';
 
 export const metadata: Metadata = {
-  title: 'Nicole Hansult Coaching',
+  title: { absolute: 'Longevity Coaching Over 40 in Carlsbad, CA | Nicole Hansult' },
   description:
     'Functional longevity coaching in Carlsbad, CA. Stop guessing what your body needs — get a personalized plan.',
   alternates: {

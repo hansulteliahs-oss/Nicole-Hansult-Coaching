@@ -17,14 +17,14 @@ const BASE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nicole-hansult-coaching.vercel.app';
 
 export const metadata: Metadata = {
-  title: 'Contact | Nicole Hansult Coaching',
+  title: 'Contact',
   description:
     'Reach out to Nicole Hansult Coaching — functional longevity coaching in Carlsbad, CA. Nicole personally reads every message.',
   alternates: {
     canonical: `${BASE_URL}/contact`,
   },
   openGraph: {
-    title: 'Contact | Nicole Hansult Coaching',
+    title: 'Contact — Nicole Hansult Coaching',
     description:
       'Reach out to Nicole Hansult Coaching — functional longevity coaching in Carlsbad, CA.',
   },

@@ -22,7 +22,7 @@ export function Hero() {
       <div className="absolute inset-x-0 bottom-0 top-24 md:top-28">
         <Image
           src="/images/nicole-hero-marcy-browe.jpg"
-          alt=""
+          alt="Nicole Hansult, functional longevity coach in Carlsbad"
           fill
           priority
           quality={85}

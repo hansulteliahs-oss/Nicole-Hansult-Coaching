@@ -17,6 +17,7 @@ export function JournalCard({
   category,
   date,
   imageSrc,
+  imageAlt,
   href,
   className,
 }: {
@@ -24,6 +25,8 @@ export function JournalCard({
   category: string;
   date: string;
   imageSrc?: string;
+  /** Defaults to the post title. */
+  imageAlt?: string;
   href: string;
   className?: string;
 }) {
@@ -40,7 +43,7 @@ export function JournalCard({
         {imageSrc ? (
           <Image
             src={imageSrc}
-            alt=""
+            alt={imageAlt ?? title}
             fill
             quality={75}
             sizes="(max-width: 768px) 100vw, 33vw"

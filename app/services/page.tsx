@@ -22,12 +22,12 @@ const BASE_URL =
 export const metadata: Metadata = {
   title: 'Services',
   description:
-    'Five ways to work with Nicole Hansult — from a single clinical evaluation to 12 weeks of in-person coaching in Carlsbad, CA.',
+    'Five ways to work with Nicole Hansult — from a single Clinical Longevity Assessment to 12 weeks of in-person coaching in Carlsbad, CA.',
   alternates: { canonical: `${BASE_URL}/services` },
   openGraph: {
     title: 'Services — Nicole Hansult Coaching',
     description:
-      'Five ways to work with Nicole Hansult — from a single clinical evaluation to 12 weeks of in-person coaching in Carlsbad, CA.',
+      'Five ways to work with Nicole Hansult — from a single Clinical Longevity Assessment to 12 weeks of in-person coaching in Carlsbad, CA.',
   },
 };
 

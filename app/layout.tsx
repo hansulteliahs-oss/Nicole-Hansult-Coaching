@@ -39,11 +39,15 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image', images: ['/og.png'] },
 };
 
+const socialUrls = Object.values(site.socials).filter(Boolean);
+
+// City only on purpose: no street address or phone is published (decided 2026-09-30).
 const localBusinessSchema = {
   '@context': 'https://schema.org',
   '@graph': [
     {
       '@type': 'LocalBusiness',
+      '@id': `${BASE_URL}/#business`,
       name: site.nap.name,
       address: {
         '@type': 'PostalAddress',
@@ -51,14 +55,22 @@ const localBusinessSchema = {
         addressRegion: site.nap.region,
         addressCountry: site.nap.country,
       },
+      areaServed: ['Carlsbad', 'Encinitas', 'Oceanside', 'San Marcos', 'Vista'].map(
+        (name) => ({ '@type': 'City', name }),
+      ),
       email: site.contactEmail,
       url: BASE_URL,
+      image: `${BASE_URL}/og.png`,
+      sameAs: socialUrls,
+      founder: { '@id': `${BASE_URL}/#nicole` },
     },
     {
       '@type': 'Person',
+      '@id': `${BASE_URL}/#nicole`,
       name: 'Nicole Hansult',
       jobTitle: 'Functional Longevity Coach',
-      worksFor: { '@type': 'LocalBusiness', name: site.nap.name },
+      worksFor: { '@id': `${BASE_URL}/#business` },
+      sameAs: socialUrls,
     },
   ],
 };
