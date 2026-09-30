@@ -3,7 +3,6 @@
  *
  * Source pages:
  *   - cleFaqs       → /services/clinical-longevity-evaluation (now /services)
- *   - vibrant40Faqs → /services/vibrant40-jumpstart-enroll
  *
  * Used both for the rendered <FaqSection /> accordion and to generate the
  * FAQPage JSON-LD (via faqPageSchema), so the visible copy and the structured
@@ -62,29 +61,6 @@ export const cleFaqs: ReadonlyArray<Faq> = [
     question: 'What should I wear?',
     answer:
       'Something comfortable that allows you to move easily. Gym clothes are not required.',
-  },
-];
-
-export const vibrant40Faqs: ReadonlyArray<Faq> = [
-  {
-    question: 'Do I need to be fit to start this?',
-    answer:
-      'Nope. This program is designed for beginners or those getting back on track after time off.',
-  },
-  {
-    question: 'How much time will it take each day?',
-    answer:
-      'About 15–20 minutes, max. Movement sessions are short, and everything is self-paced.',
-  },
-  {
-    question: 'Is this just for women?',
-    answer:
-      "No! While many of Nicole's clients are women over 40, this program is effective and inclusive for men, too.",
-  },
-  {
-    question: 'What if I miss a day?',
-    answer:
-      "No problem. This isn't about being perfect. It's about continuing to show up for yourself.",
   },
 ];
 

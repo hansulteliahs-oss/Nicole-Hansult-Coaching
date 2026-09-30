@@ -27,8 +27,6 @@ function offerById(id: Offer['id']): Offer {
 
 export function OfferLadderCard({ id }: { id: Offer['id'] }) {
   const offer = offerById(id);
-  // Phase 5 Plan 02: Vibrant40 CTA POSTs to /api/checkout (Stripe Checkout).
-  const isVibrant40 = id === 'vibrant40';
   const image = offerImage[id];
 
   return (
@@ -39,9 +37,9 @@ export function OfferLadderCard({ id }: { id: Offer['id'] }) {
       blurb={id === HERO_ID ? HERO_WHO_FOR : offer.blurb}
       features={offerFeatures[id].slice(0, 3)}
       badge={offerBadge[id]}
-      ctaLabel={isVibrant40 ? 'Buy Vibrant40 — $88' : offer.ctaLabel}
+      ctaLabel={offer.ctaLabel}
       ctaHref={offer.ctaHref}
-      ctaFormAction={isVibrant40 ? '/api/checkout' : undefined}
+      ctaExternal={offer.external}
       imageSrc={image?.src}
       imageAlt={image?.alt}
       imagePosition={offerImageSide(id)}

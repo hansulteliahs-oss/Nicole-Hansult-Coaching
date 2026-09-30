@@ -114,7 +114,7 @@ describe('lib/supabase/proxy — updateSession (Phase 5 gating extension)', () =
     expect(location).toContain('next=%2Faccount');
   });
 
-  it('authenticated request to /vibrant40 with no member row redirects to /services/vibrant40-jumpstart', async () => {
+  it('authenticated request to /vibrant40 with no member row redirects to /services', async () => {
     const updateSession = await loadUpdateSession();
     mockState.claims = { sub: 'user-uuid', email: 'nonmember@example.com' };
     mockState.member = null;
@@ -122,10 +122,10 @@ describe('lib/supabase/proxy — updateSession (Phase 5 gating extension)', () =
     const res = await updateSession(makeRequest('/vibrant40'));
     expect(res.status).toBe(307);
     const location = res.headers.get('location') ?? '';
-    expect(location).toContain('/services/vibrant40-jumpstart');
+    expect(new URL(location).pathname).toBe('/services');
   });
 
-  it('authenticated request to /vibrant40 with status=refunded redirects to /services/vibrant40-jumpstart', async () => {
+  it('authenticated request to /vibrant40 with status=refunded redirects to /services', async () => {
     const updateSession = await loadUpdateSession();
     mockState.claims = { sub: 'user-uuid', email: 'refunded@example.com' };
     mockState.member = { status: 'refunded' };
@@ -133,7 +133,7 @@ describe('lib/supabase/proxy — updateSession (Phase 5 gating extension)', () =
     const res = await updateSession(makeRequest('/vibrant40'));
     expect(res.status).toBe(307);
     const location = res.headers.get('location') ?? '';
-    expect(location).toContain('/services/vibrant40-jumpstart');
+    expect(new URL(location).pathname).toBe('/services');
   });
 
   it('authenticated active member request to /vibrant40 passes through (NextResponse.next)', async () => {
