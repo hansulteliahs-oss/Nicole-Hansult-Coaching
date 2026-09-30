@@ -33,7 +33,11 @@ export async function generateMetadata({
   const post = await getPublishedPost(slug);
   if (!post) return { title: 'Not found' };
 
-  const title = post.seo_title ?? post.title;
+  // The layout template appends the brand, so drop one the pipeline already added.
+  const title = (post.seo_title ?? post.title).replace(
+    /\s*[|—–-]\s*Nicole Hansult Coaching\s*$/,
+    '',
+  );
   const description = post.meta_description ?? undefined;
   const url = `${BASE_URL}/insights/${post.slug}`;
 

@@ -1,9 +1,8 @@
 /**
  * Journal — home page section 8: "Insights" preview.
  *
- * 3 preview cards linking to /insights (non-linked state per CONTEXT.md —
- * no /insights/[slug] routes in Phase 2). Post titles from CONTENT-AUDIT.md
- * §Insights Blog Post Index.
+ * 3 preview cards linking to live /insights/[slug] posts. Hardcoded, so swap
+ * them by hand when a newer post should lead.
  *
  * CTA: "All insights" → "/insights"
  */
@@ -19,26 +18,28 @@ import {
 
 const POSTS = [
   {
-    title:
-      'The 3 Biggest Mistakes People Make When Trying to "Get Back in Shape" After 40',
-    category: 'Functional Longevity',
-    date: 'Apr 2026',
-    href: '/insights',
-    imageSrc: image(IMG_JOURNAL_MOVEMENT),
-  },
-  {
-    title: 'Why the Scale Isn\'t Telling the Whole Story About Your Body After 40',
-    category: 'Body Composition',
-    date: 'Jan 2026',
-    href: '/insights',
+    title: 'Am I Losing Muscle on a GLP-1?',
+    category: 'Physical Health',
+    date: 'Sep 2026',
+    href: '/insights/am-i-losing-muscle-on-a-glp-1',
     imageSrc: image(IMG_JOURNAL_BODY_COMP),
+    imageAlt: 'Seca body composition assessment in Carlsbad',
   },
   {
     title: 'Your Body Is Talking. Are You Listening?',
     category: 'Mobility',
-    date: 'Feb 2026',
-    href: '/insights',
+    date: 'Aug 2026',
+    href: '/insights/your-body-is-talking-are-you-listening',
     imageSrc: image(IMG_JOURNAL_WELLNESS),
+    imageAlt: "Nicole Hansult's wellness studio in Carlsbad",
+  },
+  {
+    title: 'The Fascia Factor: What It Is and Why It Could Be the Reason You Feel Stiff',
+    category: 'Mobility',
+    date: 'Jun 2026',
+    href: '/insights/the-fascia-factor-why-you-feel-stiff-after-40',
+    imageSrc: image(IMG_JOURNAL_MOVEMENT),
+    imageAlt: 'Functional movement coaching for adults over 40 in Carlsbad',
   },
 ];
 

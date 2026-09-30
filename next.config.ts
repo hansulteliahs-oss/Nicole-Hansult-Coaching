@@ -17,6 +17,19 @@ const nextConfig: NextConfig = {
       { source: '/services/clinical-longevity-evaluation',     destination: '/services',                    permanent: true },
       // Additional old Squarespace paths discovered via crawl
       { source: '/cart',                                        destination: '/',                            permanent: true },
+      // Squarespace posts, bodies not recovered (SEO audit 2026-09-30). Each points at the
+      // closest live page. Delete the line if a post is republished at its old slug.
+      { source: '/insights/the-fascia-factor-what-it-is-and-why-it-could-be-the-reason-you-feel-stiff', destination: '/insights/the-fascia-factor-why-you-feel-stiff-after-40', permanent: true },
+      { source: '/insights/3-daily-stretches-that-take-you-from-stiff-and-sore-to-confident-and-strong', destination: '/insights/the-fascia-factor-why-you-feel-stiff-after-40', permanent: true },
+      { source: '/insights/2025/why-mobility-matters-more', destination: '/insights/why-mobility-matters-more-than-intense-workouts-after-40', permanent: true },
+      { source: '/insights/the-power-of-mobility', destination: '/insights/why-mobility-matters-more-than-intense-workouts-after-40', permanent: true },
+      { source: '/insights/im-too-old-to-start-exercising-or-am-i', destination: '/insights/why-mobility-matters-more-than-intense-workouts-after-40', permanent: true },
+      { source: '/insights/the-3-biggest-mistakes-people-make-when-trying-to-get-back-in-shape-after-40', destination: '/insights/why-mobility-matters-more-than-intense-workouts-after-40', permanent: true },
+      { source: '/insights/why-the-scale-isnt-telling-the-whole-story-about-your-body-after-40', destination: '/insights/am-i-losing-muscle-on-a-glp-1', permanent: true },
+      { source: '/insights/the-confidence-connection-how-better-posture-changes-how-others-see-you', destination: '/insights/your-body-is-talking-are-you-listening', permanent: true },
+      { source: '/insights/reclaiming-strength-after-50', destination: '/testimonials', permanent: true },
+      { source: '/insights/december-reset-how-to-take-care-of-yourself-without-opting-out-during-the-holidays', destination: '/insights', permanent: true },
+      { source: '/insights/smart-people-over-40-rethinking-water-habits', destination: '/insights', permanent: true },
     ];
   },
   images: {

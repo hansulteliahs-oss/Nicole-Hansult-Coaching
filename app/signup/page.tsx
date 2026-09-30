@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { SignupForm } from './SignupForm';
 
 export const metadata: Metadata = {
-  title: 'Create account | Nicole Hansult Coaching',
+  title: 'Create account',
   robots: { index: false },
 };
 export const dynamic = 'force-dynamic';

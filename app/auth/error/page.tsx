@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Link expired | Nicole Hansult Coaching',
+  title: 'Link expired',
   robots: { index: false },
 };
 

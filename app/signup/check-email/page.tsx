@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { CheckEmailBody } from './CheckEmailBody';
 
 export const metadata: Metadata = {
-  title: 'Check your email | Nicole Hansult Coaching',
+  title: 'Check your email',
   robots: { index: false },
 };
 
