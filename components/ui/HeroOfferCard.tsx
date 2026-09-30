@@ -27,6 +27,7 @@ export function HeroOfferCard({
   ctaLabel,
   ctaHref,
   ctaFormAction,
+  ctaExternal,
   imageSrc,
   imageAlt,
   imagePosition = 'left',
@@ -45,9 +46,10 @@ export function HeroOfferCard({
   /**
    * If provided, the CTA renders as `<form action={ctaFormAction} method="POST">`
    * wrapping a submit-style Pill, instead of an `<a href={ctaHref}>` Pill.
-   * Used by the Vibrant40 card to POST to /api/checkout (Stripe Checkout).
    */
   ctaFormAction?: string;
+  /** CTA leaves the site: opens in a new tab. */
+  ctaExternal?: boolean;
   /** Omit to render a neutral placeholder block until a real image is supplied. */
   imageSrc?: string;
   imageAlt?: string;
@@ -129,6 +131,7 @@ export function HeroOfferCard({
             variant="orchid"
             size="lg"
             className="self-start mt-auto"
+            {...(ctaExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
           >
             {ctaLabel}
           </Pill>

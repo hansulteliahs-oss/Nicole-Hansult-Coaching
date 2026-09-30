@@ -12,7 +12,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: BASE_URL, changeFrequency: 'weekly', priority: 1.0 },
     { url: `${BASE_URL}/about`, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${BASE_URL}/services`, changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${BASE_URL}/services/vibrant40-jumpstart`, priority: 0.8 },
     { url: `${BASE_URL}/services/three-month-coaching`, priority: 0.8 },
     { url: `${BASE_URL}/testimonials`, priority: 0.7 },
     { url: `${BASE_URL}/insights`, priority: 0.6 },

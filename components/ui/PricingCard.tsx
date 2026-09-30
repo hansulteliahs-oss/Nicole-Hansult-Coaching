@@ -39,7 +39,6 @@ export function PricingCard({
   /**
    * Phase 5: if provided, the CTA renders as `<form action={ctaFormAction} method="POST">`
    * wrapping a `<button>`-style Pill, instead of an `<a href={ctaHref}>` Pill.
-   * Used by the Vibrant40 card to POST to /api/checkout (Stripe Checkout).
    */
   ctaFormAction?: string;
   highlighted?: boolean;

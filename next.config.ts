@@ -11,7 +11,9 @@ const nextConfig: NextConfig = {
       { source: '/start-here',                                 destination: '/services',                    permanent: true },
       { source: '/services/vibrant40-jumpstart-enroll',         destination: '/services',                    permanent: true },
       { source: '/services/vibrant40-jumpstart-enroll/:path*', destination: '/services',                    permanent: true },
-      { source: '/vibrant40-jumpstart',                         destination: '/services/vibrant40-jumpstart', permanent: true },
+      { source: '/vibrant40-jumpstart',                         destination: '/services',                    permanent: true },
+      // Vibrant40 taken off sale 2026-09-30; it lives in the paid Skool community now
+      { source: '/services/vibrant40-jumpstart',                destination: '/services',                    permanent: true },
       { source: '/services/clinical-longevity-evaluation',     destination: '/services',                    permanent: true },
       // Additional old Squarespace paths discovered via crawl
       { source: '/cart',                                        destination: '/',                            permanent: true },

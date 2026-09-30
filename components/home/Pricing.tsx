@@ -5,7 +5,7 @@
  * (full-width HeroOfferCard) — it's the funnel front door we push hardest.
  * Beneath it, the remaining offers are arranged as a top-to-bottom funnel:
  *   "Coaching that continues" → Personalized Training + 3-Month Program (the revenue)
- *   "Prefer to start gently?" → Strategy Session + Vibrant40
+ *   "Prefer to start gently?" → Strategy Session + Keep Your Muscle (free Skool community)
  *   Free Guide → secondary banner (not a tier).
  *
  * CRITICAL: no inline price strings — all prices come from offers.ts priceLabel.

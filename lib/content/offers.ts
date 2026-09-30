@@ -1,8 +1,10 @@
-export type OfferModality = 'in-person' | 'online-self-paced' | 'zoom';
+import { site } from './site';
+
+export type OfferModality = 'in-person' | 'online-community' | 'zoom';
 export type OfferKind = 'product' | 'application-gate';
 
 export interface Offer {
-  id: 'cle' | 'vibrant40' | 'strategy' | 'three-month' | 'everyday-training';
+  id: 'cle' | 'community' | 'strategy' | 'three-month' | 'everyday-training';
   slug: string;
   name: string;
   price: number;
@@ -12,6 +14,8 @@ export interface Offer {
   blurb: string;
   ctaLabel: string;
   ctaHref: string;
+  /** CTA leaves the site (opens in a new tab). */
+  external?: boolean;
 }
 
 export const offers: ReadonlyArray<Offer> = [
@@ -29,16 +33,20 @@ export const offers: ReadonlyArray<Offer> = [
     ctaHref: '/booking-appointment',
   },
   {
-    id: 'vibrant40',
-    slug: 'vibrant40-jumpstart',
-    name: 'Vibrant40 Jumpstart',
-    price: 88,
-    priceLabel: '$88',
-    modality: 'online-self-paced',
+    id: 'community',
+    slug: 'keep-your-muscle',
+    name: 'Keep Your Muscle',
+    price: 0,
+    priceLabel: 'Free',
+    modality: 'online-community',
     kind: 'product',
-    blurb: 'Eight-day self-paced foundation for functional longevity over 40.',
-    ctaLabel: 'Start Vibrant40',
-    ctaHref: '/services/vibrant40-jumpstart',
+    // GLP-1 wording is the approved claim (client-nicole/agent/claim-rules.md).
+    // The disclaimer is covered by the site-wide DisclaimerBand in the root layout.
+    blurb:
+      "On a GLP-1, up to 40% of the weight lost can be muscle. Your doctor manages the medication; Nicole's free group shows you what to do alongside it.",
+    ctaLabel: 'Join free',
+    ctaHref: site.community.url,
+    external: true,
   },
   {
     id: 'strategy',

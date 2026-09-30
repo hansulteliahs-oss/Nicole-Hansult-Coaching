@@ -15,6 +15,15 @@ export interface SiteConfig {
     facebook?: string;
     linkedin?: string;
   };
+  /**
+   * The Skool community the site links to. Follows the cart: the free group
+   * while paid doors are closed, the paid group Oct 12-25 and from Jan 4.
+   * Swap name + url here (and the card copy in offers.ts / offerDetails.ts).
+   */
+  community: {
+    name: string;
+    url: string;
+  };
 }
 
 export const site: SiteConfig = {
@@ -33,5 +42,9 @@ export const site: SiteConfig = {
     instagram: 'https://www.instagram.com/nicole_hansultcoaching/',
     facebook: 'https://www.facebook.com/nicolehansultcoaching/',
     linkedin: 'https://www.linkedin.com/in/nicole-hansult-coaching/',
+  },
+  community: {
+    name: 'Keep Your Muscle (Free)',
+    url: 'https://www.skool.com/nicoles-free-community-7461/about',
   },
 };

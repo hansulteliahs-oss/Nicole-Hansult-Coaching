@@ -140,15 +140,15 @@ export default async function ComponentStyleguide({
               tint="sky"
             />
             <ServiceCard
-              title="Vibrant40 Jumpstart"
-              blurb="Eight-week self-paced foundation."
+              title="Keep Your Muscle"
+              blurb="Free online community."
               bullets={[
-                'Weekly modules',
-                'Mobile-friendly video',
-                'Lifetime access',
+                'Two posts a week',
+                'At-home strength test',
+                'Launch dates first',
               ]}
-              priceLabel="$88"
-              ctaLabel="Start Vibrant40"
+              priceLabel="Free"
+              ctaLabel="Join free"
               ctaHref="#"
               tint="orchid"
             />

@@ -13,7 +13,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  *
  * Gating model (Phase 5 — PAY-06):
  *   - Anonymous + /vibrant40/* OR /account/*   → /login?next=<path>
- *   - Authenticated + /vibrant40/* + no active member row → /services/vibrant40-jumpstart
+ *   - Authenticated + /vibrant40/* + no active member row → /services
  *   - Authenticated + /vibrant40/* + active member row    → pass through
  *   - /account/* never runs the membership query (Phase 4 behavior preserved)
  *   - Public paths are matched out at the proxy.ts matcher level.
@@ -70,7 +70,7 @@ export async function updateSession(request: NextRequest) {
 
     if (!member || member.status !== 'active') {
       const url = request.nextUrl.clone();
-      url.pathname = '/services/vibrant40-jumpstart';
+      url.pathname = '/services'; // Vibrant40 off sale 2026-09-30
       url.search = '';
       return NextResponse.redirect(url);
     }

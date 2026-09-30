@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
-import { offers } from '@/lib/content/offers';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata = {
@@ -36,7 +35,6 @@ export default async function AccountPage({ searchParams }: Props) {
   const isVibrant40Member = member?.status === 'active';
 
   const { welcome } = await searchParams;
-  const vibrant40 = offers.find((o) => o.id === 'vibrant40')!;
 
   return (
     <main className="max-w-lg mx-auto px-4 py-16">
@@ -47,7 +45,7 @@ export default async function AccountPage({ searchParams }: Props) {
             Welcome back — your Vibrant40 access carried over.
           </p>
           <a
-            href={vibrant40.ctaHref}
+            href="/vibrant40"
             className="text-white underline text-sm"
           >
             Explore your Vibrant40 content
@@ -77,33 +75,22 @@ export default async function AccountPage({ searchParams }: Props) {
         <p className="text-ink font-medium">{claims.email as string}</p>
       </section>
 
-      {/* Vibrant40 status — real DB read keyed by user_id (see proxy gate). */}
-      <section className="bg-bgAlt rounded-xl p-6 mb-8">
-        <p className="text-xs text-inkSoft uppercase tracking-wide mb-1">
-          Vibrant40 membership
-        </p>
-        {isVibrant40Member ? (
-          <>
-            <p className="text-ink mb-3">Active member ✓</p>
-            <a
-              href="/vibrant40"
-              className="inline-block bg-orchidDeep text-white rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition"
-            >
-              Open Vibrant40
-            </a>
-          </>
-        ) : (
-          <>
-            <p className="text-ink mb-3">Not a Vibrant40 member yet.</p>
-            <a
-              href={vibrant40.ctaHref}
-              className="inline-block bg-orchidDeep text-white rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition"
-            >
-              {vibrant40.ctaLabel} — {vibrant40.priceLabel}
-            </a>
-          </>
-        )}
-      </section>
+      {/* Vibrant40 status — real DB read keyed by user_id (see proxy gate).
+          Vibrant40 is off sale (2026-09-30), so only existing members see this. */}
+      {isVibrant40Member && (
+        <section className="bg-bgAlt rounded-xl p-6 mb-8">
+          <p className="text-xs text-inkSoft uppercase tracking-wide mb-1">
+            Vibrant40 membership
+          </p>
+          <p className="text-ink mb-3">Active member ✓</p>
+          <a
+            href="/vibrant40"
+            className="inline-block bg-orchidDeep text-white rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition"
+          >
+            Open Vibrant40
+          </a>
+        </section>
+      )}
 
       {/* Logout */}
       <form action="/auth/signout" method="post">

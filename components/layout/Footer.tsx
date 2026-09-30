@@ -3,7 +3,7 @@
  *
  * 4 link groups:
  *   1. Home / About / Testimonials / Insights / Contact
- *   2. Services / Clinical Longevity Assessment / Vibrant40 Jumpstart
+ *   2. Services / Clinical Longevity Assessment / Skool community (external)
  *   3. Download Guide / Book a Session
  *   4. Privacy Policy / Terms & Conditions
  *
@@ -13,7 +13,9 @@
 import Link from 'next/link';
 import { site } from '@/lib/content/site';
 
-const FOOTER_GROUPS = [
+type FooterLink = { label: string; href: string; external?: boolean };
+
+const FOOTER_GROUPS: { label: string; links: FooterLink[] }[] = [
   {
     label: 'Navigate',
     links: [
@@ -28,8 +30,8 @@ const FOOTER_GROUPS = [
     label: 'Services',
     links: [
       { label: 'Services', href: '/services' },
-      { label: 'Clinical Longevity Assessment', href: '/services/clinical-longevity-evaluation' },
-      { label: 'Vibrant40 Jumpstart', href: '/services/vibrant40-jumpstart' },
+      { label: 'Clinical Longevity Assessment', href: '/services' },
+      { label: site.community.name, href: site.community.url, external: true },
     ],
   },
   {
@@ -155,12 +157,23 @@ export function Footer() {
               <ul className="flex flex-col gap-2">
                 {group.links.map((link) => (
                   <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-inkSoft hover:text-ink transition-colors"
-                    >
-                      {link.label}
-                    </Link>
+                    {link.external ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-inkSoft hover:text-ink transition-colors"
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="text-sm text-inkSoft hover:text-ink transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

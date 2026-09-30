@@ -20,11 +20,10 @@ export const offerFeatures: Record<OfferId, string[]> = {
     'Precise Body Composition Analysis: Differentiates exact skeletal muscle mass, fat mass, and total body water distribution.',
     'Structural & Mobility Assessment: Reviews key posture, joint mechanics, and recovery indicators to optimize movement.',
   ],
-  vibrant40: [
-    'Eight days of self-paced online content',
-    'Guided movement programming',
-    'Nutrition and lifestyle foundations',
-    'Accessible for adults 40+ starting from any fitness level',
+  community: [
+    'Two posts a week from Nicole on building and keeping strength',
+    'A simple at-home test to see where your strength stands',
+    'First to hear when the paid membership opens',
   ],
   strategy: [
     'Focused 30-minute planning call via Zoom',
@@ -55,7 +54,7 @@ export const offerBadge: Partial<Record<OfferId, string>> = {
 /** Modality + duration eyebrow per offer. */
 export const offerModality: Record<OfferId, string> = {
   cle: 'In person · Carlsbad · 75 minutes',
-  vibrant40: 'Online · 8-day self-paced',
+  community: 'Online · Free community',
   strategy: 'Zoom · 30 minutes',
   'three-month': 'In person · Carlsbad',
   'everyday-training': 'In person · Carlsbad',
@@ -70,7 +69,7 @@ export const offerModality: Record<OfferId, string> = {
  */
 export const HERO_ID: OfferId = 'cle';
 export const CONTINUE_IDS: OfferId[] = ['everyday-training', 'three-month'];
-export const GENTLE_IDS: OfferId[] = ['strategy', 'vibrant40'];
+export const GENTLE_IDS: OfferId[] = ['strategy', 'community'];
 
 /**
  * Offers whose price is NOT shown on the card. Personalized Training is for existing
@@ -108,9 +107,9 @@ export const offerImage: Partial<Record<OfferId, { src: string; alt: string }>> 
     src: '/images/personalized-training-movement-coaching-carlsbad.jpg',
     alt: 'Nicole Hansult coaching a client through a movement session in Carlsbad, CA',
   },
-  vibrant40: {
+  community: {
     src: '/images/vibrant40-jumpstart-online-program-over-40.jpg',
-    alt: 'Nicole Hansult guiding a client on nutrition during the Vibrant40 Jumpstart',
+    alt: 'Nicole Hansult talking with a client about staying strong as you age',
   },
   'three-month': {
     src: '/images/nicole-portrait-living-room.jpg',
