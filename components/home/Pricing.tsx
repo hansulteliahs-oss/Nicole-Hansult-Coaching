@@ -6,7 +6,7 @@
  * Beneath it, the remaining offers are arranged as a top-to-bottom funnel:
  *   "Coaching that continues" → Personalized Training + 3-Month Program (the revenue)
  *   "Prefer to start gently?" → Strategy Session + Keep Your Muscle (free Skool community)
- *   Free Guide → secondary banner (not a tier).
+ *   Free Guide → secondary banner (not a tier), links to the free Skool group.
  *
  * CRITICAL: no inline price strings — all prices come from offers.ts priceLabel.
  * Presentation copy (features, badges, modality, grouping) comes from
@@ -15,6 +15,7 @@
 import { OfferLadderCard } from '@/components/offers/OfferLadderCard';
 import { Label } from '@/components/ui/Label';
 import { Pill } from '@/components/ui/Pill';
+import { site } from '@/lib/content/site';
 import {
   HERO_ID,
   CONTINUE_IDS,
@@ -62,11 +63,17 @@ export function Pricing() {
               Not ready to book? Start with a free guide.
             </p>
             <p className="text-inkSoft text-sm">
-              Download the free guide: How to Look and Feel Good Naked Over 40.
+              How to Look and Feel Good Naked Over 40 is free inside Nicole&rsquo;s free community.
             </p>
           </div>
-          <Pill href="/look-and-feel-good-naked" variant="orchid" size="md">
-            Download Free Guide
+          <Pill
+            href={site.freeCommunity.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="orchid"
+            size="md"
+          >
+            Get the Free Guide
           </Pill>
         </div>
       </div>

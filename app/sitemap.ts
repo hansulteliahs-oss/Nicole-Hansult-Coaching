@@ -23,7 +23,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     { url: `${BASE_URL}/booking-appointment`, changeFrequency: 'monthly', priority: 0.9 },
     { url: `${BASE_URL}/contact`, priority: 0.6 },
-    { url: `${BASE_URL}/look-and-feel-good-naked`, priority: 0.7 },
     { url: `${BASE_URL}/medical-disclaimer`, priority: 0.3 },
     { url: `${BASE_URL}/privacy-policy`, priority: 0.2 },
     { url: `${BASE_URL}/terms-conditions`, priority: 0.2 },

@@ -41,7 +41,7 @@ export async function applicationAction(
   }
 
   // 2. Rate limit by IP — 5 submissions per 60s. Namespaced key prevents
-  //    collisions with /contact or /look-and-feel-good-naked rate windows.
+  //    collisions with the /contact rate window.
   const headersList = await headers();
   const forwarded = headersList.get('x-forwarded-for');
   const ip = forwarded ? forwarded.split(',')[0].trim() : '127.0.0.1';

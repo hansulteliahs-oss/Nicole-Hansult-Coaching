@@ -11,6 +11,7 @@ One row per durable call. Keep them small, dated, and with a one-line "why" so f
 | 2026-05-25 | **Remove `/start-here` from nav** (primary + footer). | Page 404s on live site; `/services` already serves the "where do I start" job via the "Not Sure Where to Start?" section. One less page to maintain. | This session |
 | 2026-05-25 | **Contact form + lead-magnet form both send to `nicole@nicolehansultcoaching.com`**. Wire via Resend API route in Next.js. | Status quo; Privacy + Terms already reference this address. No new mailbox to set up. | This session |
 | 2026-05-28 | **CLE price $299.99 → $295.** Supersedes the 2026-05-25 row above. | Rounder, easier to say, $4.99 of friction not worth the cents. CLE is booked (not Stripe checkout) so no price-object to sync. | Nicole, this session |
+| 2026-09-30 | **Free guide moves into the free Skool community.** `/look-and-feel-good-naked`, its form and the Resend/Mailchimp opt-in are removed; every guide CTA links to `site.freeCommunity`, and the old URL 307s there. The guide sits in the free group's Classroom → Free Downloads as pages 1-8 (page 9 sold Vibrant40, now off sale). | Free material lives behind the free community so visitors join the group that sells the paid one. Trade-off: the form was the site's only Mailchimp opt-in, so the list no longer grows from the site. | Eliahs, this session |
 
 ## Open items (info/files to gather — not decisions)
 

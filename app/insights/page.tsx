@@ -12,6 +12,7 @@ import { Footer } from '@/components/layout/Footer';
 import { JournalCard } from '@/components/ui/JournalCard';
 import { Pill } from '@/components/ui/Pill';
 import { getPublishedPosts, formatPostDate } from '@/lib/content/posts';
+import { site } from '@/lib/content/site';
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nicole-hansult-coaching.vercel.app';
@@ -67,10 +68,16 @@ export default async function InsightsPage() {
         {/* CTA */}
         <section className="mx-auto max-w-3xl px-6 py-16 text-center">
           <p className="text-inkSoft mb-6 text-base">
-            Want practical longevity tips delivered to your inbox?
+            Want Nicole&rsquo;s free guide and more tips like these?
           </p>
-          <Pill href="/look-and-feel-good-naked" variant="orchid" size="md">
-            Download the Free Guide
+          <Pill
+            href={site.freeCommunity.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="orchid"
+            size="md"
+          >
+            Join the Free Community
           </Pill>
         </section>
       </main>

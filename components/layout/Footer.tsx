@@ -4,7 +4,7 @@
  * 4 link groups:
  *   1. Home / About / Testimonials / Insights / Contact
  *   2. Services / Clinical Longevity Assessment / Skool community (external)
- *   3. Download Guide / Book a Session
+ *   3. Free Guide (free Skool group, external) / Book a Session
  *   4. Privacy Policy / Terms & Conditions
  *
  * Reads NAP + contact email from lib/content/site.ts.
@@ -37,7 +37,7 @@ const FOOTER_GROUPS: { label: string; links: FooterLink[] }[] = [
   {
     label: 'Resources',
     links: [
-      { label: 'Download Guide', href: '/look-and-feel-good-naked' },
+      { label: 'Free Guide', href: site.freeCommunity.url, external: true },
       { label: 'Book a Session', href: '/booking-appointment' },
     ],
   },
