@@ -40,7 +40,10 @@ export const offers: ReadonlyArray<Offer> = [
     priceLabel: 'Free',
     modality: 'online-community',
     kind: 'product',
-    blurb: "Nicole's free online group for staying strong as you age. No cost, no commitment.",
+    // GLP-1 wording is the approved claim (client-nicole/agent/claim-rules.md).
+    // The disclaimer is covered by the site-wide DisclaimerBand in the root layout.
+    blurb:
+      "On a GLP-1, up to 40% of the weight lost can be muscle. Your doctor manages the medication; Nicole's free group shows you what to do alongside it.",
     ctaLabel: 'Join free',
     ctaHref: site.community.url,
     external: true,
