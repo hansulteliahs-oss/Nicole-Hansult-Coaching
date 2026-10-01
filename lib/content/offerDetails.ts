@@ -66,6 +66,7 @@ export const offerModality: Record<OfferId, string> = {
  *     → "Coaching that continues" (the in-person paid coaching — the revenue)
  *     → "Prefer to start gently?"  (lower-commitment entry points)
  * The Free Guide is rendered separately as a secondary banner, not a tier.
+ * It links to the free Skool group, where the guide lives.
  */
 export const HERO_ID: OfferId = 'cle';
 export const CONTINUE_IDS: OfferId[] = ['everyday-training', 'three-month'];

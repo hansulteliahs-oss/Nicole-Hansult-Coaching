@@ -124,11 +124,17 @@ export default function ServicesPage() {
                 Not ready to book? Start with a free guide.
               </p>
               <p className="text-inkSoft text-sm">
-                Download the free guide: How to Look and Feel Good Naked Over 40.
+                How to Look and Feel Good Naked Over 40 is free inside Nicole&rsquo;s free community.
               </p>
             </div>
-            <Pill href="/look-and-feel-good-naked" variant="orchid" size="md">
-              Download Free Guide
+            <Pill
+              href={site.freeCommunity.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="orchid"
+              size="md"
+            >
+              Get the Free Guide
             </Pill>
           </div>
 

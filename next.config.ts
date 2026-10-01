@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { site } from './lib/content/site';
 
 const nextConfig: NextConfig = {
   turbopack: {
@@ -17,6 +18,10 @@ const nextConfig: NextConfig = {
       { source: '/services/clinical-longevity-evaluation',     destination: '/services',                    permanent: true },
       // Additional old Squarespace paths discovered via crawl
       { source: '/cart',                                        destination: '/',                            permanent: true },
+      // Free guide moved into the free Skool group's Classroom 2026-09-30. Temporary (307):
+      // the Skool URL can change if the group is renamed, and a 308 would stick in browsers.
+      { source: '/look-and-feel-good-naked',        destination: site.freeCommunity.url, permanent: false },
+      { source: '/look-and-feel-good-naked/:path*', destination: site.freeCommunity.url, permanent: false },
       // Squarespace posts, bodies not recovered (SEO audit 2026-09-30). Each points at the
       // closest live page. Delete the line if a post is republished at its old slug.
       { source: '/insights/the-fascia-factor-what-it-is-and-why-it-could-be-the-reason-you-feel-stiff', destination: '/insights/the-fascia-factor-why-you-feel-stiff-after-40', permanent: true },

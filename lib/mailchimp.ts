@@ -1,12 +1,13 @@
 /**
  * Mailchimp Marketing API helper — adds a contact to the newsletter audience.
  *
- * Used by:
- *   - lib/actions/lead-magnet.ts   (free-guide opt-in sync)
+ * No callers since 2026-09-30: the free-guide form (lib/actions/lead-magnet.ts)
+ * was its only one, and the guide moved into the free Skool group. Kept for
+ * the next site opt-in.
  *
  * Fail-soft by design: if the env vars are missing the helper no-ops with a
  * logged warning rather than throwing, so a misconfiguration can never break
- * the lead-magnet form. Callers wrap addSubscriber() in try/catch and treat a
+ * the form that calls it. Callers wrap addSubscriber() in try/catch and treat a
  * failure as non-blocking (mirrors the Resend / Supabase backup pattern).
  */
 import crypto from 'crypto';

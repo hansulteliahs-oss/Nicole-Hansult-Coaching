@@ -24,6 +24,15 @@ export interface SiteConfig {
     name: string;
     url: string;
   };
+  /**
+   * The free Skool group, always. It never follows the cart: the free guide
+   * lives in its Classroom (Free Downloads) since 2026-09-30, so every
+   * free-guide link on the site points here.
+   */
+  freeCommunity: {
+    name: string;
+    url: string;
+  };
 }
 
 export const site: SiteConfig = {
@@ -44,6 +53,10 @@ export const site: SiteConfig = {
     linkedin: 'https://www.linkedin.com/in/nicole-hansult-coaching/',
   },
   community: {
+    name: 'Keep Your Muscle (Free)',
+    url: 'https://www.skool.com/nicoles-free-community-7461/about',
+  },
+  freeCommunity: {
     name: 'Keep Your Muscle (Free)',
     url: 'https://www.skool.com/nicoles-free-community-7461/about',
   },
