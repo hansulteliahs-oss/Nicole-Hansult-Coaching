@@ -29,7 +29,6 @@ export const offerFeatures: Record<OfferId, string[]> = {
     'Focused 30-minute planning call via Zoom',
     'Personalized strategy for your goals and schedule',
     'Accountability and direction',
-    '$88 credits toward the 3-Month Program if booked after',
   ],
   'three-month': [
     'Twelve weeks of in-person coaching in Carlsbad, CA',

@@ -20,7 +20,6 @@ export const metadata: Metadata = {
 };
 
 const threeMonth = offers.find((o) => o.id === 'three-month')!;
-const strategySession = offers.find((o) => o.id === 'strategy')!;
 const everydayTraining = offers.find((o) => o.id === 'everyday-training')!;
 
 export default function ThreeMonthCoachingPage() {
@@ -69,16 +68,6 @@ export default function ThreeMonthCoachingPage() {
               <p className="text-inkSoft">
                 This is not a good fit for someone who prefers self-paced or is still exploring
                 options. Start with the Clinical Longevity Assessment or a Strategy Session if you&apos;re not sure.
-              </p>
-            </div>
-
-            {/* The $88 credit */}
-            <div className="space-y-3">
-              <h2 className="text-2xl font-light text-ink">The {strategySession.priceLabel} credit</h2>
-              <p className="text-inkSoft">
-                If you&apos;ve already had a Strategy Session, the {strategySession.priceLabel} fee
-                credits toward the {threeMonth.priceLabel} program cost. No extra step needed — just
-                mention it in your application.
               </p>
             </div>
 
