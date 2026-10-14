@@ -178,13 +178,12 @@ export default async function ComponentStyleguide({
           <div className="grid md:grid-cols-2 gap-6">
             <PricingCard
               name="Strategy Session"
-              priceLabel="$88"
+              priceLabel="Free"
               modality="30-min Zoom"
-              blurb="A focused planning call — credits toward 3-Month."
+              blurb="A free planning call to map out your next step."
               features={[
                 '30-minute Zoom',
                 'Recap email',
-                '$88 credit if you continue',
               ]}
               ctaLabel="Book a Strategy Session"
               ctaHref="#"

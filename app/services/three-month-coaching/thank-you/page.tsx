@@ -3,7 +3,7 @@
  *
  * Server Component shown after a visitor successfully submits the FORM-03
  * application. Not indexed — this is a post-submission destination. Plan B
- * CTA pitches the Strategy Session ($88) as the immediate warm option for
+ * CTA pitches the free Strategy Session as the immediate warm option for
  * applicants who want to talk sooner than the 48-hour application turnaround.
  */
 import type { Metadata } from 'next';
@@ -45,9 +45,8 @@ export default function ThreeMonthApplicationThankYouPage() {
           </h2>
 
           <p className="text-inkSoft text-base leading-relaxed max-w-prose mx-auto mb-8">
-            A 30-minute Strategy Session ($88) gives you a clear next step on
-            its own and credits toward the 3-Month Program if we move forward
-            together.
+            A free 30-minute Strategy Session gives you a clear next step
+            while Nicole reviews your application.
           </p>
 
           <Pill href="/booking-appointment" variant="orchid" size="md">
