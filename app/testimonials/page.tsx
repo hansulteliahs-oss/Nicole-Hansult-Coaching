@@ -1,8 +1,7 @@
 /**
  * /testimonials — Client Results page
  *
- * Server Component. Maps testimonialVideos for embed / placeholder.
- * Greg R.'s Squarespace-MP4 source renders as a placeholder (no CDN URL).
+ * Server Component. Maps testimonialVideos to YouTube embeds.
  * Social proof badges rendered as text chips — no external image URLs.
  */
 import type { Metadata } from 'next';
@@ -34,6 +33,7 @@ const SOCIAL_PROOF_BADGES = [
 // Google: canonical Maps listing via CID (resolves to "Nicole Hansult Coaching - Google Maps").
 const GOOGLE_REVIEWS_URL = 'https://www.google.com/maps?cid=2333186323496371205';
 const YELP_REVIEWS_URL = 'https://www.yelp.com/biz/nicole-hansult-coaching-encinitas';
+const SD_VOYAGER_URL = 'https://sdvoyager.com/interview/meet-nicole-hansult-of-carlsbad/';
 
 export default function TestimonialsPage() {
   return (
@@ -85,22 +85,15 @@ export default function TestimonialsPage() {
           <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
             {testimonialVideos.map((video) => (
               <div key={video.slug} className="flex flex-col gap-3">
-                {video.source.kind === 'youtube' ? (
-                  <div className="aspect-video w-full rounded-2xl overflow-hidden">
-                    <iframe
-                      src={`https://www.youtube.com/embed/${video.source.youtubeId}`}
-                      title={video.title}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="w-full h-full border-0"
-                    />
-                  </div>
-                ) : (
-                  /* Greg R. — Squarespace MP4 placeholder (CDN dies when Squarespace is cancelled) */
-                  <div className="aspect-video w-full rounded-2xl overflow-hidden bg-inkFaint flex items-center justify-center">
-                    <p className="text-sm text-inkSoft">Greg R. video — re-hosting in progress</p>
-                  </div>
-                )}
+                <div className="aspect-video w-full rounded-2xl overflow-hidden">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${video.source.youtubeId}`}
+                    title={video.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full border-0"
+                  />
+                </div>
                 <p className="text-ink font-medium text-sm">
                   {video.name}
                   {video.location && (
@@ -232,6 +225,19 @@ export default function TestimonialsPage() {
               className="h-28 w-28 md:h-32 md:w-32 object-contain"
             />
           </div>
+
+          {/* Press feature */}
+          <p className="mt-8 text-sm text-inkSoft">
+            As featured in{' '}
+            <a
+              href={SD_VOYAGER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-ink underline underline-offset-4 transition-opacity hover:opacity-80"
+            >
+              SD Voyager: Meet Nicole Hansult of Carlsbad
+            </a>
+          </p>
 
           {/* 5-star strip */}
           <a
